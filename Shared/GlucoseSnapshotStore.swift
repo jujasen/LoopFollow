@@ -2,9 +2,11 @@
 // GlucoseSnapshotStore.swift
 
 import Foundation
+import WidgetKit
 
 /// Persists the latest GlucoseSnapshot into the App Group container so that:
 /// - the Live Activity extension can read it
+/// - the lock screen widget can read it
 /// - future Watch + CarPlay surfaces can reuse it
 ///
 /// Uses an atomic JSON file write to avoid partial/corrupt reads across processes.
@@ -14,6 +16,11 @@ final class GlucoseSnapshotStore {
 
     private let fileName = "glucose_snapshot.json"
     private let queue = DispatchQueue(label: "com.loopfollow.glucoseSnapshotStore", qos: .utility)
+
+    /// Payload of the most recent widget reload, used to avoid spending WidgetKit's
+    /// reload budget on saves that would render identically. Only ever touched on
+    /// `queue`.
+    private var lastReloadedData: Data?
 
     // MARK: - Public API
 
@@ -25,6 +32,13 @@ final class GlucoseSnapshotStore {
                 encoder.dateEncodingStrategy = .iso8601
                 let data = try encoder.encode(snapshot)
                 try data.write(to: url, options: [.atomic])
+
+                // The widget cannot fetch on its own, so this is the only thing that
+                // brings a new reading to the lock screen.
+                if data != self.lastReloadedData {
+                    self.lastReloadedData = data
+                    WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.lockScreen)
+                }
             } catch {
                 // Intentionally silent (extension-safe, no dependencies).
             }

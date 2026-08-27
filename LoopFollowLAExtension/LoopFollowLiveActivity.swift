@@ -580,7 +580,7 @@ private struct DynamicIslandMinimalView: View {
 
 // MARK: - Formatting
 
-private enum LAFormat {
+enum LAFormat {
     private static let mgdlFormatter: NumberFormatter = {
         let nf = NumberFormatter()
         nf.numberStyle = .decimal
