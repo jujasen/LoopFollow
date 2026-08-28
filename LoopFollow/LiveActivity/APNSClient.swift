@@ -229,7 +229,14 @@ class APNSClient {
         return try? JSONSerialization.data(withJSONObject: payload)
     }
 
-    private func contentStateDictionary(state: GlucoseLiveActivityAttributes.ContentState) -> [String: Any]? {
+    /// Builds the APNs `content-state` by hand rather than via Codable, because the
+    /// payload has to be a JSONSerialization-compatible dictionary.
+    ///
+    /// That hand-building is a standing hazard: a field added to GlucoseSnapshot is
+    /// silently dropped from every background push unless it is added here too.
+    /// `APNSPayloadTests` compares this dictionary against the Codable encoding to
+    /// catch exactly that. Internal rather than private so those tests can reach it.
+    func contentStateDictionary(state: GlucoseLiveActivityAttributes.ContentState) -> [String: Any]? {
         let snapshot = state.snapshot
 
         var snapshotDict: [String: Any] = [
@@ -267,6 +274,19 @@ class APNSClient {
         if snapshot.iageInsertTime > 0 { snapshotDict["iageInsertTime"] = snapshot.iageInsertTime }
         if let minBgMgdl = snapshot.minBgMgdl { snapshotDict["minBgMgdl"] = minBgMgdl }
         if let maxBgMgdl = snapshot.maxBgMgdl { snapshotDict["maxBgMgdl"] = maxBgMgdl }
+
+        // Keys must match GlucoseChartSeries.CodingKeys — this dictionary is decoded
+        // by the extension as a GlucoseChartSeries. Without it every background push
+        // would arrive chartless and the card would drop back to the grid layout.
+        if let chart = snapshot.chart, !chart.isEmpty {
+            snapshotDict["chart"] = [
+                "b": chart.baseDate.timeIntervalSince1970,
+                "hm": chart.historyMinutes,
+                "hv": chart.historyMgdl,
+                "pm": chart.predictionMinutes,
+                "pv": chart.predictionMgdl,
+            ]
+        }
 
         return [
             "snapshot": snapshotDict,
