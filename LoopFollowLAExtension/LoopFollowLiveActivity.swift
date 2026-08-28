@@ -82,6 +82,12 @@ private struct LockScreenFamilyAdaptiveView: View {
         if activityFamily == .small {
             SmallFamilyView(snapshot: state.snapshot)
                 .activityBackgroundTint(Color.black.opacity(0.25))
+        } else if LAAppGroupSettings.layout() == .chart, let series = state.snapshot.chart, !series.isEmpty {
+            // Falls through to the grid whenever the series is missing — right after
+            // switching layouts the running activity still carries a chartless
+            // snapshot, and an empty plot is worse than the layout it replaced.
+            ChartLockScreenView(state: state, series: series)
+                .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
         } else {
             LockScreenLiveActivityView(state: state)
                 .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
@@ -249,36 +255,124 @@ private struct LockScreenLiveActivityView: View {
         .padding(.horizontal, 14)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.20), lineWidth: 1)
-        )
-        .overlay(
-            Group {
-                if state.snapshot.isNotLooping {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(uiColor: UIColor.systemRed).opacity(0.85))
+        .modifier(LockScreenCardOverlays(snapshot: state.snapshot))
+    }
+}
 
-                        Text("Not Looping")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .tracking(1.5)
+// MARK: - Shared card chrome
+
+/// Border plus the two full-card overlays every lock screen layout needs: the
+/// "Not Looping" alert and the renewal prompt. Extracted so the grid and chart
+/// layouts cannot drift apart on the two states that matter most for safety.
+private struct LockScreenCardOverlays: ViewModifier {
+    let snapshot: GlucoseSnapshot
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.white.opacity(0.20), lineWidth: 1)
+            )
+            .overlay(
+                Group {
+                    if snapshot.isNotLooping {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(uiColor: UIColor.systemRed).opacity(0.85))
+
+                            Text("Not Looping")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .tracking(1.5)
+                        }
                     }
                 }
-            }
-        )
-        .overlay(
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.gray.opacity(0.9))
+            )
+            .overlay(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.gray.opacity(0.9))
 
-                Text("Tap to update")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.white)
+                    Text("Tap to update")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .opacity(snapshot.showRenewalOverlay ? 1 : 0)
+            )
+    }
+}
+
+// MARK: - Chart layout ("Plot and Row")
+
+/// Glucose plot above a compact readout row, mirroring Loop's large Live Activity.
+///
+/// Falls back to the grid layout upstream when no chart series is present, so this
+/// view can assume it has something to draw.
+private struct ChartLockScreenView: View {
+    let state: GlucoseLiveActivityAttributes.ContentState
+    let series: GlucoseChartSeries
+
+    var body: some View {
+        let s = state.snapshot
+
+        VStack(spacing: 4) {
+            LoopFollowChartView(series: series, unit: s.unit)
+                .frame(maxWidth: .infinity)
+                .frame(height: 96)
+
+            HStack(alignment: .center, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(LAFormat.glucose(s))
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    Text(LAFormat.trendArrow(s))
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+                .foregroundStyle(.white)
+
+                Divider().overlay(Color.white.opacity(0.25))
+
+                ChartRowMetric(label: "IOB", value: LAFormat.iob(s))
+
+                Divider().overlay(Color.white.opacity(0.25))
+
+                ChartRowMetric(label: "at", value: LAFormat.updated(s))
             }
-            .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
-        )
+            .frame(height: 34)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .modifier(LockScreenCardOverlays(snapshot: s))
+    }
+}
+
+/// One labelled value in the chart layout's bottom row.
+private struct ChartRowMetric: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(value)
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Text(label)
+                .font(.system(size: 10, weight: .regular, design: .rounded))
+                .foregroundStyle(.white.opacity(0.65))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

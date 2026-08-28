@@ -153,4 +153,23 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
             return Storage.shared.laRenewalFailed.value
         #endif
     }
+
+    // MARK: - Chart
+
+    /// Built only for the chart layout: the series costs a few hundred bytes of the
+    /// Live Activity's 4 KB ContentState budget, and nothing renders it otherwise.
+    ///
+    /// The readings live on MainViewController rather than in Storage or Observable
+    /// — the same place the in-app chart reads them from — so this is the one
+    /// property in this file that looks outside those two layers.
+    var chartSeries: GlucoseChartSeries? {
+        guard LAAppGroupSettings.layout() == .chart else { return nil }
+        guard let vc = MainViewController.shared, let baseDate = updatedAt else { return nil }
+
+        return GlucoseChartSeries.build(
+            history: vc.bgData.map { (date: $0.date, mgdl: Double($0.sgv)) },
+            prediction: vc.predictionData.map { (date: $0.date, mgdl: Double($0.sgv)) },
+            baseDate: baseDate,
+        )
+    }
 }

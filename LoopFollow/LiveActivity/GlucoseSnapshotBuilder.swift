@@ -105,6 +105,12 @@ protocol CurrentGlucoseStateProviding {
 
     /// True when the Live Activity is within renewalWarning seconds of its deadline.
     var showRenewalOverlay: Bool { get }
+
+    // MARK: - Chart
+
+    /// Recent and predicted glucose for the chart layout, or nil when that layout
+    /// is not selected or no series is available.
+    var chartSeries: GlucoseChartSeries? { get }
 }
 
 // MARK: - Builder
@@ -174,6 +180,7 @@ enum GlucoseSnapshotBuilder {
             unit: preferredUnit,
             isNotLooping: provider.isNotLooping,
             showRenewalOverlay: provider.showRenewalOverlay,
+            chart: provider.chartSeries,
         )
     }
 

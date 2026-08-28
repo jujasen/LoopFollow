@@ -124,6 +124,29 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Lock screen layout
+
+/// How the Live Activity lock screen card is drawn.
+///
+/// Mirrors Loop's own `LiveActivityMode`, which offers the same choice between a
+/// plot and a plain readout. `.grid` stays the default so existing users' cards do
+/// not change appearance on update.
+enum LiveActivityLayout: String, CaseIterable, Codable {
+    /// Large glucose readout with the configurable 2×2 metric grid.
+    case grid
+
+    /// Glucose chart with recent readings and the prediction, over a compact
+    /// bottom row — the layout Loop calls "Plot and Row".
+    case chart
+
+    var displayName: String {
+        switch self {
+        case .grid: "Value and Grid"
+        case .chart: "Plot and Row"
+        }
+    }
+}
+
 // MARK: - Default slot assignments
 
 enum LiveActivitySlotDefaults {
@@ -157,6 +180,7 @@ enum LAAppGroupSettings {
         static let smallWidgetSlot = "la.smallWidgetSlot"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
+        static let layout = "la.layout"
     }
 
     private static var defaults: UserDefaults? {
@@ -216,6 +240,17 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.smallWidgetSlot
         }
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
+    }
+
+    // MARK: - Lock screen layout
+
+    static func setLayout(_ layout: LiveActivityLayout) {
+        defaults?.set(layout.rawValue, forKey: Keys.layout)
+    }
+
+    static func layout() -> LiveActivityLayout {
+        guard let raw = defaults?.string(forKey: Keys.layout) else { return .grid }
+        return LiveActivityLayout(rawValue: raw) ?? .grid
     }
 
     // MARK: - Display Name

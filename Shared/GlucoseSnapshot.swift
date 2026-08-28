@@ -134,6 +134,13 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// The extension renders a "Tap to update" overlay so the user knows renewal is imminent.
     let showRenewalOverlay: Bool
 
+    // MARK: - Chart
+
+    /// Recent and predicted glucose for the chart Live Activity layout.
+    /// Nil when the user is on the grid layout, or when no series is available —
+    /// the payload is only built when something will actually draw it.
+    let chart: GlucoseChartSeries?
+
     // MARK: - Init
 
     init(
@@ -169,6 +176,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         unit: Unit,
         isNotLooping: Bool,
         showRenewalOverlay: Bool = false,
+        chart: GlucoseChartSeries? = nil,
     ) {
         self.glucose = glucose
         self.delta = delta
@@ -202,6 +210,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.unit = unit
         self.isNotLooping = isNotLooping
         self.showRenewalOverlay = showRenewalOverlay
+        self.chart = chart
     }
 
     // MARK: - Derived Convenience
@@ -248,6 +257,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             unit: unit,
             isNotLooping: isNotLooping,
             showRenewalOverlay: value,
+            chart: chart,
         )
     }
 
@@ -287,6 +297,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encode(unit, forKey: .unit)
         try container.encode(isNotLooping, forKey: .isNotLooping)
         try container.encode(showRenewalOverlay, forKey: .showRenewalOverlay)
+        try container.encodeIfPresent(chart, forKey: .chart)
     }
 
     init(from decoder: Decoder) throws {
@@ -323,6 +334,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         unit = try container.decode(Unit.self, forKey: .unit)
         isNotLooping = try container.decodeIfPresent(Bool.self, forKey: .isNotLooping) ?? false
         showRenewalOverlay = try container.decodeIfPresent(Bool.self, forKey: .showRenewalOverlay) ?? false
+        chart = try container.decodeIfPresent(GlucoseChartSeries.self, forKey: .chart)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -333,6 +345,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
         case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
         case unit, isNotLooping, showRenewalOverlay
+        case chart
     }
 }
 

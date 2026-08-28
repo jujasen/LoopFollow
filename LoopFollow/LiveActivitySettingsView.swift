@@ -10,6 +10,7 @@
         @State private var restartConfirmed = false
         @State private var slots: [LiveActivitySlotOption] = LAAppGroupSettings.slots()
         @State private var smallWidgetSlot: LiveActivitySlotOption = LAAppGroupSettings.smallWidgetSlot()
+        @State private var layout: LiveActivityLayout = LAAppGroupSettings.layout()
         @State private var keyId: String = Storage.shared.lfKeyId.value
         @State private var apnsKey: String = Storage.shared.lfApnsKey.value
 
@@ -50,6 +51,27 @@
                             }
                         }
                         .disabled(restartConfirmed)
+                    }
+                }
+
+                Section(
+                    header: Text("Lock Screen Layout"),
+                    footer: Text("\"Plot and Row\" shows a glucose chart with the prediction over a compact readout. \"Value and Grid\" shows the large reading with the metric grid below.")
+                ) {
+                    Picker("Layout", selection: Binding(
+                        get: { layout },
+                        set: { newValue in
+                            layout = newValue
+                            LAAppGroupSettings.setLayout(newValue)
+                            // The chart series is only built while this layout is
+                            // selected, so the running activity needs a fresh
+                            // snapshot before it has anything to plot.
+                            LiveActivityManager.shared.refreshFromCurrentState(reason: "layout changed")
+                        }
+                    )) {
+                        ForEach(LiveActivityLayout.allCases, id: \.self) { option in
+                            Text(option.displayName).tag(option)
+                        }
                     }
                 }
 
