@@ -9,6 +9,7 @@ struct LoopAPNSCarbsView: View {
 
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
+    @ObservedObject private var favoriteFoods = Storage.shared.favoriteFoods
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
     @State private var absorptionMinutes = 0
@@ -22,6 +23,10 @@ struct LoopAPNSCarbsView: View {
     @State private var alertType: AlertType = .success
     @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
+    @State private var selectedFavoriteFoodID: String?
+    @State private var selectedPortionID: String?
+    @State private var showFavoriteFoodPicker = false
+    @State private var showAddFavoriteFood = false
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
@@ -103,6 +108,8 @@ struct LoopAPNSCarbsView: View {
         NavigationView {
             VStack {
                 Form {
+                    favoriteFoodsSection
+
                     if !quickPickMeals.quickPickMeals.isEmpty {
                         Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -401,6 +408,33 @@ struct LoopAPNSCarbsView: View {
                     normalizeAbsorptionTime()
                 }
             }
+            .sheet(isPresented: $showFavoriteFoodPicker) {
+                FavoriteFoodPickerView(selectedFood: selectedFavoriteFood) { food, portion in
+                    if let food {
+                        applyFavorite(food, portion: portion)
+                    } else {
+                        clearFavoriteSelection()
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddFavoriteFood) {
+                NavigationStack {
+                    AddEditFavoriteFoodView(
+                        carbs: carbsAmount.doubleValue(for: .gram()),
+                        foodType: foodType,
+                        absorptionTime: absorptionTimeValue * 3600
+                    )
+                }
+            }
+            .onChange(of: carbsAmount) { _, newValue in
+                // A hand-edited amount is no longer the favorite that was picked.
+                if let portion = selectedFavoriteFood?.portion(withID: selectedPortionID),
+                   abs(portion.carbs - newValue.doubleValue(for: .gram())) > 0.01
+                {
+                    selectedFavoriteFoodID = nil
+                    selectedPortionID = nil
+                }
+            }
             .onAppear {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
@@ -623,6 +657,116 @@ struct LoopAPNSCarbsView: View {
 
     private func clampedConsumedDate(_ date: Date) -> Date {
         min(max(date, oldestAcceptedDate), latestAcceptedDate)
+    }
+}
+
+// MARK: - Favorite foods
+
+extension LoopAPNSCarbsView {
+    /// The favorite currently applied to the entry, if it still exists.
+    private var selectedFavoriteFood: StoredFavoriteFood? {
+        guard let selectedFavoriteFoodID else { return nil }
+        return favoriteFoods.value.first(where: { $0.id == selectedFavoriteFoodID })
+    }
+
+    /// Saved meals: one tap fills in carbs, food type and absorption time. Nothing is sent
+    /// until the entry is reviewed and confirmed, exactly as with a typed entry.
+    private var favoriteFoodsSection: some View {
+        Section(header: Text("Favorite Foods")) {
+            if !favoriteFoods.value.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(favoriteFoods.value) { food in
+                            favoriteFoodControl(for: food)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                Button {
+                    showFavoriteFoodPicker = true
+                } label: {
+                    Label("Browse all favorites", systemImage: "list.bullet")
+                }
+            }
+
+            Button {
+                showAddFavoriteFood = true
+            } label: {
+                Label("Save as favorite food", systemImage: "star")
+            }
+            .disabled(carbsAmount.doubleValue(for: .gram()) <= 0)
+
+            NavigationLink {
+                FavoriteFoodsView()
+            } label: {
+                Label(favoriteFoods.value.isEmpty ? "Add favorite foods" : "Edit favorites", systemImage: "square.and.pencil")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func favoriteFoodControl(for food: StoredFavoriteFood) -> some View {
+        let isSelected = selectedFavoriteFoodID == food.id
+        let selectedPortion = isSelected ? food.portion(withID: selectedPortionID) : nil
+
+        if food.hasMultiplePortions {
+            Menu {
+                ForEach(food.portions) { portion in
+                    Button(portion.summary) {
+                        toggleFavoriteFood(food, portion: portion)
+                    }
+                }
+
+                if isSelected {
+                    Button(role: .destructive) {
+                        clearFavoriteSelection()
+                    } label: {
+                        Label("Clear selection", systemImage: "xmark.circle")
+                    }
+                }
+            } label: {
+                FavoriteFoodChip(food: food, selectedPortion: selectedPortion, isSelected: isSelected)
+            }
+        } else {
+            Button {
+                toggleFavoriteFood(food)
+            } label: {
+                FavoriteFoodChip(food: food, selectedPortion: selectedPortion, isSelected: isSelected)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    /// Tapping the food and amount that is already applied clears it, so one control both
+    /// applies and undoes. Picking a different amount of the same food just switches amount.
+    private func toggleFavoriteFood(_ food: StoredFavoriteFood, portion: FavoriteFoodPortion? = nil) {
+        let portion = portion ?? food.defaultPortion
+        if selectedFavoriteFoodID == food.id, selectedPortionID == portion.id {
+            clearFavoriteSelection()
+        } else {
+            applyFavorite(food, portion: portion)
+        }
+    }
+
+    private func applyFavorite(_ food: StoredFavoriteFood, portion: FavoriteFoodPortion?) {
+        let portion = portion ?? food.defaultPortion
+        carbsFieldIsFocused = false
+        carbsAmount = HKQuantity(unit: .gram(), doubleValue: portion.carbs)
+        foodType = food.foodType
+        let components = FavoriteFoodAbsorption.components(food.absorptionTime)
+        setAbsorptionTime(hours: components.hours, minutes: components.minutes)
+        selectedFavoriteFoodID = food.id
+        selectedPortionID = portion.id
+    }
+
+    private func clearFavoriteSelection() {
+        selectedFavoriteFoodID = nil
+        selectedPortionID = nil
+        carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0)
+        foodType = ""
+        let components = FavoriteFoodAbsorption.components(FavoriteFoodAbsorption.default)
+        setAbsorptionTime(hours: components.hours, minutes: components.minutes)
     }
 }
 

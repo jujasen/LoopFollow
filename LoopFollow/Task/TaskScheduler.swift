@@ -13,6 +13,7 @@ enum TaskID: CaseIterable {
     case alarmCheck
     case telemetry
     case dbSize
+    case favoriteFoodSync
 }
 
 struct ScheduledTask {

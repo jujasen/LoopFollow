@@ -13,5 +13,6 @@ extension MainViewController {
         scheduleCalendarTask()
         scheduleAlarmTask()
         scheduleDBSizeTask()
+        scheduleFavoriteFoodSyncTask()
     }
 }

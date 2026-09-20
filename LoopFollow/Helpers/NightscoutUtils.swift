@@ -485,7 +485,112 @@ class NightscoutUtils {
         }
     }
 
-    private static func fetchProvisionedToken(baseURL: URL, secretHash: String) async throws -> String? {
+    /// Subject and role LoopFollow provisions for sharing favorite foods with Loop.
+    static let foodSyncSubjectName = "LoopFollowFoods"
+    static let foodSyncRoleName = "loopfollow-foods"
+
+    /// Everything the favorite-food sync needs on Nightscout's food collection, and nothing else.
+    static let foodSyncPermissions = [
+        "api:food:read",
+        "api:food:create",
+        "api:food:update",
+        "api:food:delete",
+    ]
+
+    private struct AuthRole: Decodable {
+        let id: String?
+        let name: String?
+        let permissions: [String]?
+
+        enum CodingKeys: String, CodingKey {
+            case id = "_id"
+            case name, permissions
+        }
+    }
+
+    /// Creates (or reuses) a Nightscout access token that may read and write the food
+    /// collection, so favorite foods can be shared with Loop. As with the read-only token, the
+    /// API secret only authorizes these calls and is never persisted.
+    ///
+    /// None of Nightscout's built-in roles can write food — `readable` is read-only and
+    /// `careportal` only creates treatments — so this provisions a role of its own, scoped to
+    /// the food collection, and a subject holding that role plus `readable`.
+    static func provisionFoodSyncToken(url: String, secret: String) async throws -> String {
+        let trimmedURL = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedURL.isEmpty else { throw NightscoutError.emptyAddress }
+        guard let baseURL = URL(string: trimmedURL),
+              trimmedURL.hasPrefix("http://") || trimmedURL.hasPrefix("https://")
+        else { throw NightscoutError.invalidURL }
+
+        let secretHash = sha1Hex(secret)
+
+        try await ensureFoodSyncRole(baseURL: baseURL, secretHash: secretHash)
+
+        if let existing = try await fetchProvisionedToken(baseURL: baseURL, secretHash: secretHash, subjectName: foodSyncSubjectName) {
+            return existing
+        }
+
+        let id = try await createSubject(
+            baseURL: baseURL,
+            secretHash: secretHash,
+            name: foodSyncSubjectName,
+            roles: [foodSyncRoleName, "readable"]
+        )
+        return accessToken(forName: foodSyncSubjectName, id: id, secretHash: secretHash)
+    }
+
+    /// Creates the food role when the site doesn't have it yet, and widens an older copy of it
+    /// that is missing a permission.
+    private static func ensureFoodSyncRole(baseURL: URL, secretHash: String) async throws {
+        let rolesURL = baseURL.appendingPathComponent("api/v2/authorization/roles")
+
+        var listRequest = URLRequest(url: rolesURL)
+        listRequest.httpMethod = "GET"
+        listRequest.setValue(secretHash, forHTTPHeaderField: "api-secret")
+        listRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+        listRequest.cachePolicy = .reloadIgnoringLocalCacheData
+
+        let (data, response) = try await URLSession.shared.data(for: listRequest)
+        try validateProvisioningResponse(response)
+
+        let roles = (try? JSONDecoder().decode([AuthRole].self, from: data)) ?? []
+
+        guard let existing = roles.first(where: { $0.name == foodSyncRoleName }) else {
+            var createRequest = URLRequest(url: rolesURL)
+            createRequest.httpMethod = "POST"
+            createRequest.setValue(secretHash, forHTTPHeaderField: "api-secret")
+            createRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            createRequest.httpBody = try JSONSerialization.data(withJSONObject: [
+                "name": foodSyncRoleName,
+                "permissions": foodSyncPermissions,
+            ])
+
+            let (_, createResponse) = try await URLSession.shared.data(for: createRequest)
+            try validateProvisioningResponse(createResponse)
+            return
+        }
+
+        let granted = Set(existing.permissions ?? [])
+        // A role that already covers everything, or is simply "*", is left alone.
+        if granted.contains("*") || foodSyncPermissions.allSatisfy(granted.contains) {
+            return
+        }
+
+        var updateRequest = URLRequest(url: rolesURL)
+        updateRequest.httpMethod = "PUT"
+        updateRequest.setValue(secretHash, forHTTPHeaderField: "api-secret")
+        updateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        updateRequest.httpBody = try JSONSerialization.data(withJSONObject: [
+            "_id": existing.id ?? "",
+            "name": foodSyncRoleName,
+            "permissions": Array(granted.union(foodSyncPermissions)),
+        ])
+
+        let (_, updateResponse) = try await URLSession.shared.data(for: updateRequest)
+        try validateProvisioningResponse(updateResponse)
+    }
+
+    private static func fetchProvisionedToken(baseURL: URL, secretHash: String, subjectName: String = provisionedSubjectName) async throws -> String? {
         let url = baseURL.appendingPathComponent("api/v2/authorization/subjects")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -497,19 +602,23 @@ class NightscoutUtils {
         try validateProvisioningResponse(response)
 
         let subjects = try JSONDecoder().decode([AuthSubject].self, from: data)
-        return subjects.first(where: { $0.name == provisionedSubjectName })?.accessToken
+        return subjects.first(where: { $0.name == subjectName })?.accessToken
     }
 
     /// Creates the subject and returns its `_id`.
     private static func createReadOnlySubject(baseURL: URL, secretHash: String) async throws -> String {
+        try await createSubject(baseURL: baseURL, secretHash: secretHash, name: provisionedSubjectName, roles: ["readable"])
+    }
+
+    private static func createSubject(baseURL: URL, secretHash: String, name: String, roles: [String]) async throws -> String {
         let url = baseURL.appendingPathComponent("api/v2/authorization/subjects")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(secretHash, forHTTPHeaderField: "api-secret")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: [
-            "name": provisionedSubjectName,
-            "roles": ["readable"],
+            "name": name,
+            "roles": roles,
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)

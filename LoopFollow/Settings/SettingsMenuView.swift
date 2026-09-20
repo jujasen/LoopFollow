@@ -216,6 +216,7 @@ enum SettingsRoute: Hashable, Identifiable {
         case .remote: return [
                 SettingsLeaf("Loop Remote Control"),
                 SettingsLeaf("Trio Remote Control", ["trc"]),
+                SettingsLeaf("Favorite Foods", ["favorites", "meals", "food"]),
                 SettingsLeaf("Meal with Bolus"),
                 SettingsLeaf("Meal with Fat/Protein"),
                 SettingsLeaf("Guardrails", ["max bolus", "max carbs", "max fat", "max protein"]),

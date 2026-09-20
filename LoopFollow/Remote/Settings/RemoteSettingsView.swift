@@ -77,6 +77,22 @@ struct RemoteSettingsView: View {
                 }
             }
 
+            // MARK: - Favorite Foods Section (Loop remote carb entry)
+
+            if viewModel.remoteType == .loopAPNS {
+                Section {
+                    NavigationLink(destination: FavoriteFoodsView()) {
+                        HStack {
+                            Image(systemName: "star")
+                                .foregroundColor(.blue)
+                            Text("Favorite Foods")
+                        }
+                    }
+                } footer: {
+                    Text("Meals you save here can be sent from the carb screen with one tap.")
+                }
+            }
+
             // MARK: - Meal Section (for TRC only)
 
             if viewModel.remoteType == .trc {

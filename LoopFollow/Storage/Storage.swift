@@ -244,6 +244,20 @@ class Storage {
 
     var remoteBolusHistory = StorageValue<[RemoteBolusHistoryEntry]>(key: "remoteBolusHistory", defaultValue: [])
     var remoteMealHistory = StorageValue<[RemoteMealHistoryEntry]>(key: "remoteMealHistory", defaultValue: [])
+
+    // Meals the user saved by hand, and the optional folders they are filed into.
+    var favoriteFoods = StorageValue<[StoredFavoriteFood]>(key: "favoriteFoods", defaultValue: [])
+    var favoriteFoodFolders = StorageValue<[FavoriteFoodFolder]>(key: "favoriteFoodFolders", defaultValue: [])
+    /// Favorites deleted here, kept until the deletion has reached Nightscout.
+    var favoriteFoodTombstones = StorageValue<[FavoriteFoodTombstone]>(key: "favoriteFoodTombstones", defaultValue: [])
+
+    // Sharing favorites with Loop through Nightscout's food collection.
+    var favoriteFoodSyncEnabled = StorageValue<Bool>(key: "favoriteFoodSyncEnabled", defaultValue: false)
+    /// Nightscout token that may write the food collection. Provisioned from the API secret,
+    /// which is never stored; see NightscoutUtils.provisionFoodSyncToken.
+    var favoriteFoodSyncToken = StorageValue<String>(key: "favoriteFoodSyncToken", defaultValue: "")
+    var favoriteFoodLastSync = StorageValue<Date?>(key: "favoriteFoodLastSync", defaultValue: nil)
+
     // Statistics display preferences
     var showGMI = StorageValue<Bool>(key: "showGMI", defaultValue: true)
     var showStdDev = StorageValue<Bool>(key: "showStdDev", defaultValue: true)
