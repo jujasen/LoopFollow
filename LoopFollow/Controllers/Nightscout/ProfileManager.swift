@@ -21,6 +21,8 @@ final class ProfileManager {
     var units: HKUnit
     var timezone: TimeZone
     var defaultProfile: String
+    /// When the schedules above were last read from Nightscout.
+    var loadedAt: Date?
 
     // MARK: - Nested Structures
 
@@ -68,6 +70,7 @@ final class ProfileManager {
 
         units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         defaultProfile = profileData.defaultProfile
+        loadedAt = Date()
 
         timezone = getTimeZone(from: store.timezone)
 
@@ -207,5 +210,6 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
+        loadedAt = nil
     }
 }

@@ -255,6 +255,61 @@ class LoopAPNSService {
         )
     }
 
+    /// Sends replacement carb ratio and/or insulin sensitivity schedules via APNS push notification.
+    /// - Parameters:
+    ///   - therapySettings: The `therapy-settings` block from `TherapySchedule.payload`
+    ///   - otp: The current one-time password; Loop requires it, as for a bolus
+    ///   - completion: Completion handler with success status and error message
+    func sendTherapySettingsViaAPNS(therapySettings: [String: Any], otp: String, completion: @escaping (Bool, String?) -> Void) {
+        guard validateSetup() else {
+            let errorMessage = "Loop APNS Configuration not valid"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
+        let deviceToken = Storage.shared.deviceToken.value
+        let bundleIdentifier = Storage.shared.bundleId.value
+        let creds = effectiveCredentials()
+
+        let now = Date()
+        let expiration = Date(timeIntervalSinceNow: 5 * 60)
+
+        var changed = [String]()
+        if therapySettings["carb-ratio"] != nil { changed.append("Carb Ratios") }
+        if therapySettings["insulin-sensitivity"] != nil { changed.append("Insulin Sensitivities") }
+
+        var finalPayload = [
+            "therapy-settings": therapySettings,
+            "otp": otp,
+            "remote-address": "LoopFollow",
+            "entered-by": "LoopFollow",
+            "sent-at": formatDateForAPNS(now),
+            "expiration": formatDateForAPNS(expiration),
+            "alert": "Remote Change: \(changed.joined(separator: " and "))",
+        ] as [String: Any]
+
+        if let returnInfo = createReturnNotificationInfo(),
+           let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
+        {
+            finalPayload["encrypted_return_notification"] = encryptedReturnInfo
+        } else {
+            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for therapy settings command")
+        }
+
+        LogManager.shared.log(category: .apns, message: "Sending therapy settings: \(changed.joined(separator: ", "))")
+
+        sendAPNSNotification(
+            deviceToken: deviceToken,
+            bundleIdentifier: bundleIdentifier,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
+            payload: finalPayload,
+            completion: completion
+        )
+    }
+
     /// Validates APNS credentials similar to PushNotificationManager
     /// - Returns: Array of validation error messages, or nil if valid
     private func validateCredentials() -> [String]? {

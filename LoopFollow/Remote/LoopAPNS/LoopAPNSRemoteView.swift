@@ -22,6 +22,7 @@ struct LoopAPNSRemoteView: View {
                         CommandButtonView(command: "Meal", iconName: "fork.knife", destination: LoopAPNSCarbsView())
                         CommandButtonView(command: "Bolus", iconName: "syringe", destination: LoopAPNSBolusView())
                         CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView(), isActive: activeOverrideNote.value != nil)
+                        CommandButtonView(command: "Settings", iconName: "list.bullet.clipboard", destination: TherapySettingsView())
                     }
                     .padding(.horizontal)
                 } else {
