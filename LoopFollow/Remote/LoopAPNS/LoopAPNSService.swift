@@ -159,6 +159,11 @@ class LoopAPNSService {
             "start-time": formatDateForAPNS(startTime),
             "alert": "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
         ] as [String: Any]
+        // Loop stores this as the entry's food type, which is where the chart finds the emoji and
+        // the favorite's name.
+        if let foodType = payload.foodType {
+            finalPayload["food-type"] = foodType
+        }
 
         // Encrypt and include return notification info using OTP
         if let returnInfo = createReturnNotificationInfo() {

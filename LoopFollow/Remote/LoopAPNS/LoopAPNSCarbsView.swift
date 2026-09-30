@@ -589,7 +589,7 @@ struct LoopAPNSCarbsView: View {
             type: .carbs,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
             absorptionTime: selectedAbsorptionTime,
-            foodType: foodType.isEmpty ? nil : foodType,
+            foodType: CarbFoodLabel(emoji: foodType, name: selectedFavoriteFood?.name ?? "").foodType,
             consumedDate: adjustedConsumedDate,
             otp: otpCode
         )

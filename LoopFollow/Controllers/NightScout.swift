@@ -43,6 +43,8 @@ extension MainViewController {
         var date: TimeInterval
         var sgv: Int
         var absorptionTime: Int
+        /// Loop's emoji, plus the dish's name when one was given (see `CarbFoodLabel`).
+        var foodType: String? = nil
     }
 
     func clearOldTempBasal() {

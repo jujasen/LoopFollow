@@ -215,6 +215,13 @@ final class BGChartModel: ObservableObject {
     /// the human-readable message ("Error text {\"bolus-entry\": 1.5, ...}").
     /// Returns the message plus a compact summary of the payload, or nil when
     /// the note contains no JSON.
+    /// "Carbs 🍕", then the dish's name when a favorite food or a meal estimate gave one, then
+    /// grams and time — one line each, so a stacked pill still reads "Carbs 🍕 Pizza 30g 12:30".
+    static func carbPillText(food: CarbFoodLabel, grams: Int, time: String) -> String {
+        let heading = food.emoji.isEmpty ? "Carbs" : "Carbs \(food.emoji)"
+        return [heading, food.name, "\(grams)g", time].filter { !$0.isEmpty }.joined(separator: "\n")
+    }
+
     private static func extractMessage(from note: String) -> String? {
         guard let jsonStartIndex = note.range(of: "{\"")?.lowerBound else {
             return nil
@@ -465,7 +472,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
-                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: Self.carbPillText(food: CarbFoodLabel(foodType: $0.foodType), grams: grams, time: pillTimeString(for: Date(timeIntervalSince1970: $0.date)))
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
         let smbPoints = (showBolus ? vc.smbData : []).map {
