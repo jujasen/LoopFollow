@@ -260,7 +260,7 @@ class LoopAPNSService {
         )
     }
 
-    /// Sends replacement carb ratio and/or insulin sensitivity schedules via APNS push notification.
+    /// Sends changed Loop therapy settings (schedules, limits, presets, dosing) via APNS push notification.
     /// - Parameters:
     ///   - therapySettings: The `therapy-settings` block from `TherapySchedule.payload`
     ///   - otp: The current one-time password; Loop requires it, as for a bolus
@@ -280,9 +280,10 @@ class LoopAPNSService {
         let now = Date()
         let expiration = Date(timeIntervalSinceNow: 5 * 60)
 
-        var changed = [String]()
-        if therapySettings["carb-ratio"] != nil { changed.append("Carb Ratios") }
-        if therapySettings["insulin-sensitivity"] != nil { changed.append("Insulin Sensitivities") }
+        let changed = TherapySettingsDraft.changedTitles(in: therapySettings)
+        let alertTitle = changed.count <= 2
+            ? changed.joined(separator: " and ")
+            : changed.dropLast().joined(separator: ", ") + " and " + (changed.last ?? "")
 
         var finalPayload = [
             "therapy-settings": therapySettings,
@@ -291,7 +292,7 @@ class LoopAPNSService {
             "entered-by": "LoopFollow",
             "sent-at": formatDateForAPNS(now),
             "expiration": formatDateForAPNS(expiration),
-            "alert": "Remote Change: \(changed.joined(separator: " and "))",
+            "alert": "Remote Change: \(alertTitle)",
         ] as [String: Any]
 
         if let returnInfo = createReturnNotificationInfo(),

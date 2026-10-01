@@ -76,6 +76,13 @@ struct NSProfile: Decodable {
         let dosingStrategy: String?
         let overridePresets: [LoopOverridePreset]?
         let dosingEnabled: Bool?
+        /// `[low, high]` in the profile's glucose unit.
+        let preMealTargetRange: [Double]?
+        // Not uploaded by Loop's NightscoutService yet; read when a later version adds them.
+        let workoutTargetRange: [Double]?
+        let insulinModel: String?
+        let glucoseBasedApplicationFactorEnabled: Bool?
+        let integralRetrospectiveCorrectionEnabled: Bool?
 
         struct ScheduleOverride: Decodable {
             let symbol: String?

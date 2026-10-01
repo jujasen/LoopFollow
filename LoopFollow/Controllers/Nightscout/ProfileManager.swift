@@ -23,6 +23,8 @@ final class ProfileManager {
     var defaultProfile: String
     /// When the schedules above were last read from Nightscout.
     var loadedAt: Date?
+    /// Loop's other therapy settings from the profile's `loopSettings`; nil where Loop did not upload one.
+    var loopTherapySettings: LoopTherapySettings
 
     // MARK: - Nested Structures
 
@@ -37,6 +39,64 @@ final class ProfileManager {
         let duration: Int?
         let insulinNeedsScaleFactor: Double
         let symbol: String
+    }
+
+    /// Glucose values are in `units`. Every value is optional: Loop only uploads some of them, and an
+    /// older Loop none.
+    struct LoopTherapySettings: Equatable {
+        var suspendThreshold: Double?
+        var preMealTargetRange: ClosedRange<Double>?
+        var workoutTargetRange: ClosedRange<Double>?
+        var maximumBasalRatePerHour: Double?
+        var maximumBolus: Double?
+        var dosingEnabled: Bool?
+        var dosingStrategy: String?
+        var insulinModel: String?
+        var glucoseBasedApplicationFactorEnabled: Bool?
+        var integralRetrospectiveCorrectionEnabled: Bool?
+        /// False when the profile had no `loopSettings` at all, so the override presets are unknown
+        /// rather than an empty list.
+        var hasOverridePresets: Bool
+
+        static let unknown = LoopTherapySettings(hasOverridePresets: false)
+
+        init(suspendThreshold: Double? = nil, preMealTargetRange: ClosedRange<Double>? = nil, workoutTargetRange: ClosedRange<Double>? = nil,
+             maximumBasalRatePerHour: Double? = nil, maximumBolus: Double? = nil, dosingEnabled: Bool? = nil, dosingStrategy: String? = nil,
+             insulinModel: String? = nil, glucoseBasedApplicationFactorEnabled: Bool? = nil, integralRetrospectiveCorrectionEnabled: Bool? = nil,
+             hasOverridePresets: Bool)
+        {
+            self.suspendThreshold = suspendThreshold
+            self.preMealTargetRange = preMealTargetRange
+            self.workoutTargetRange = workoutTargetRange
+            self.maximumBasalRatePerHour = maximumBasalRatePerHour
+            self.maximumBolus = maximumBolus
+            self.dosingEnabled = dosingEnabled
+            self.dosingStrategy = dosingStrategy
+            self.insulinModel = insulinModel
+            self.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactorEnabled
+            self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrectionEnabled
+            self.hasOverridePresets = hasOverridePresets
+        }
+
+        init(_ settings: NSProfile.LoopSettings?) {
+            func range(_ values: [Double]?) -> ClosedRange<Double>? {
+                guard let values, values.count == 2, values[0] <= values[1] else { return nil }
+                return values[0] ... values[1]
+            }
+            self.init(
+                suspendThreshold: settings?.minimumBGGuard,
+                preMealTargetRange: range(settings?.preMealTargetRange),
+                workoutTargetRange: range(settings?.workoutTargetRange),
+                maximumBasalRatePerHour: settings?.maximumBasalRatePerHour,
+                maximumBolus: settings?.maximumBolus,
+                dosingEnabled: settings?.dosingEnabled,
+                dosingStrategy: settings?.dosingStrategy,
+                insulinModel: settings?.insulinModel,
+                glucoseBasedApplicationFactorEnabled: settings?.glucoseBasedApplicationFactorEnabled,
+                integralRetrospectiveCorrectionEnabled: settings?.integralRetrospectiveCorrectionEnabled,
+                hasOverridePresets: settings?.overridePresets != nil
+            )
+        }
     }
 
     struct TrioOverride {
@@ -59,6 +119,7 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
+        loopTherapySettings = .unknown
     }
 
     // MARK: - Methods
@@ -96,6 +157,8 @@ final class ProfileManager {
         } else {
             loopOverrides = []
         }
+
+        loopTherapySettings = LoopTherapySettings(profileData.loopSettings)
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in
@@ -211,5 +274,6 @@ final class ProfileManager {
         timezone = TimeZone.current
         defaultProfile = ""
         loadedAt = nil
+        loopTherapySettings = .unknown
     }
 }
