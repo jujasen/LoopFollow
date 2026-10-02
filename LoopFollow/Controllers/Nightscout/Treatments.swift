@@ -46,6 +46,7 @@ extension MainViewController {
         var bolus: [[String: AnyObject]] = []
         var smb: [[String: AnyObject]] = []
         var carbs: [[String: AnyObject]] = []
+        var plannedCarbs: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
@@ -77,6 +78,9 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
+            case PlannedCarb.eventType:
+                // Not carbs yet: kept apart so it never counts toward today's carbs or COB.
+                plannedCarbs.append(entry)
             case "Temporary Override", "Exercise":
                 temporaryOverride.append(entry)
             case "Temporary Target":
@@ -136,6 +140,13 @@ extension MainViewController {
         } else {
             if carbData.count > 0 {
                 clearOldCarb()
+            }
+        }
+        if plannedCarbs.count > 0 {
+            processNSPlannedCarbs(entries: plannedCarbs)
+        } else {
+            if plannedCarbData.count > 0 {
+                clearOldPlannedCarbs()
             }
         }
         if bgCheck.count > 0 {

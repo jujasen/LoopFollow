@@ -47,6 +47,12 @@ extension MainViewController {
         var foodType: String? = nil
     }
 
+    // A waiting "later carbs" plan, at the carb lane's height
+    struct plannedCarbGraphStruct {
+        var plan: PlannedCarb
+        var sgv: Int
+    }
+
     func clearOldTempBasal() {
         basalData.removeAll()
         updateBasalGraph()
@@ -64,6 +70,11 @@ extension MainViewController {
 
     func clearOldCarb() {
         carbData.removeAll()
+        updateCarbGraph()
+    }
+
+    func clearOldPlannedCarbs() {
+        plannedCarbData.removeAll()
         updateCarbGraph()
     }
 

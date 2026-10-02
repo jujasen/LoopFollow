@@ -650,6 +650,9 @@ private struct MainBGChart: View {
                 body(t.drawnDate, t.sgv, t.pillText)
             }
         }
+        for plan in model.plannedCarbs {
+            body(plan.date, plan.sgv, plan.pillText)
+        }
     }
 
     /// Pill entry for a BG reading. Shared by the scrub lookup and the tap hit test.
@@ -1345,6 +1348,39 @@ private struct BGChartCanvas: View, Equatable {
             }
         }
 
+        // Later-carbs plans: a hollow ring at the due time (not counted yet), a dashed line to
+        // the expiry and a tick where Loop gives up on it.
+        ForEach(model.plannedCarbs.filter { $0.expiresAt >= windowStart && $0.date <= windowEnd }) { plan in
+            RuleMark(
+                xStart: .value("time", plan.date),
+                xEnd: .value("time", plan.expiresAt),
+                y: .value("sgv", plan.sgv)
+            )
+            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            .foregroundStyle(Color.orange.opacity(0.6))
+
+            PointMark(
+                x: .value("time", plan.expiresAt),
+                y: .value("sgv", plan.sgv)
+            )
+            .symbol(VerticalTick())
+            .symbolSize(isSmall ? 24 : 64)
+            .foregroundStyle(Color.orange.opacity(0.6))
+
+            PointMark(
+                x: .value("time", plan.date),
+                y: .value("sgv", plan.sgv)
+            )
+            .symbol(.circle.strokeBorder(lineWidth: isSmall ? 1 : 2))
+            .symbolSize(isSmall ? 24 : 64)
+            .foregroundStyle(Color.orange.opacity(0.9))
+            .annotation(position: .top, alignment: .center) {
+                if !isSmall, Storage.shared.showValues.value {
+                    Text(plan.label).font(.caption2).foregroundColor(.primary)
+                }
+            }
+        }
+
         ForEach(windowed(model.smbs) { $0.drawnDate }) { pt in
             PointMark(
                 x: .value("time", pt.drawnDate),
@@ -1558,6 +1594,15 @@ private struct DownwardTriangle: ChartSymbolShape {
         p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
         p.closeSubpath()
         return p
+    }
+}
+
+/// A short upright stroke: the end of a later-carbs plan's window.
+private struct VerticalTick: ChartSymbolShape {
+    var perceptualUnitRect: CGRect { CGRect(x: 0, y: 0, width: 1, height: 1) }
+
+    func path(in rect: CGRect) -> Path {
+        Path(CGRect(x: rect.midX - 0.75, y: rect.minY, width: 1.5, height: rect.height))
     }
 }
 

@@ -77,6 +77,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var bolusData: [bolusGraphStruct] = []
     var smbData: [bolusGraphStruct] = []
     var carbData: [carbGraphStruct] = []
+    var plannedCarbData: [plannedCarbGraphStruct] = []
 
     // Stats-specific data storage (can hold up to 30 days)
     var statsBGData: [ShareGlucoseData] = []

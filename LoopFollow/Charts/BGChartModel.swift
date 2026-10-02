@@ -65,6 +65,17 @@ final class BGChartModel: ObservableObject {
         }
     }
 
+    /// A waiting "later carbs" plan: a hollow ring at the due time and a dashed line out to the
+    /// expiry, at the carb lane's height. Not a carb entry, so it lives apart from `carbs`.
+    struct PlannedCarbPoint: Identifiable {
+        let date: Date
+        let expiresAt: Date
+        let sgv: Double
+        let label: String
+        let pillText: String
+        var id: Double { date.timeIntervalSince1970 }
+    }
+
     struct BasalStep: Identifiable {
         let start: Date
         let end: Date
@@ -128,6 +139,7 @@ final class BGChartModel: ObservableObject {
 
     @Published var boluses: [TreatmentPoint] = []
     @Published var carbs: [TreatmentPoint] = []
+    @Published var plannedCarbs: [PlannedCarbPoint] = []
     @Published var smbs: [TreatmentPoint] = []
     @Published var bgChecks: [TreatmentPoint] = []
     @Published var suspends: [TreatmentPoint] = []
@@ -220,6 +232,13 @@ final class BGChartModel: ObservableObject {
     static func carbPillText(food: CarbFoodLabel, grams: Int, time: String) -> String {
         let heading = food.emoji.isEmpty ? "Carbs" : "Carbs \(food.emoji)"
         return [heading, food.name, "\(grams)g", time].filter { !$0.isEmpty }.joined(separator: "\n")
+    }
+
+    /// "Later carbs 🥛", the dish's name, grams, then the window Loop may add it in
+    /// ("21:30–23:00"). Mirrors `carbPillText`.
+    static func plannedCarbPillText(food: CarbFoodLabel, grams: Int, window: (due: String, expires: String)) -> String {
+        let heading = food.emoji.isEmpty ? "Later carbs" : "Later carbs \(food.emoji)"
+        return [heading, food.name, "\(grams)g", "\(window.due)–\(window.expires)"].filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
     private static func extractMessage(from note: String) -> String? {
@@ -475,6 +494,26 @@ final class BGChartModel: ObservableObject {
                 pillText: Self.carbPillText(food: CarbFoodLabel(foodType: $0.foodType), grams: grams, time: pillTimeString(for: Date(timeIntervalSince1970: $0.date)))
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
+        // "6?": the grams, with a question mark because Loop hasn't added them yet.
+        let nowInterval = dateTimeUtils.getNowTimeIntervalUTC()
+        plannedCarbs = (showCarbs ? vc.plannedCarbData : [])
+            .filter { $0.plan.expiresAt > nowInterval }
+            .map {
+                let grams = Int($0.plan.grams.rounded())
+                let due = Date(timeIntervalSince1970: $0.plan.dueDate)
+                let expires = Date(timeIntervalSince1970: $0.plan.expiresAt)
+                return PlannedCarbPoint(
+                    date: due,
+                    expiresAt: expires,
+                    sgv: Double($0.sgv),
+                    label: "\(grams)?",
+                    pillText: Self.plannedCarbPillText(
+                        food: CarbFoodLabel(foodType: $0.plan.foodType),
+                        grams: grams,
+                        window: (pillTimeString(for: due), pillTimeString(for: expires))
+                    )
+                )
+            }
         let smbPoints = (showBolus ? vc.smbData : []).map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
@@ -576,6 +615,12 @@ final class BGChartModel: ObservableObject {
         // the floor Overrides.swift uses for future bands).
         let hoursForward = max(Storage.shared.predictionToLoad.value, 0.25) * 3600
         domainEnd = currentNow.addingTimeInterval(hoursForward)
+        // A later-carbs plan can be due past the prediction horizon; stretch the domain far
+        // enough to reach its ring, but no more than four hours ahead.
+        if let latestDue = plannedCarbs.map(\.date).max() {
+            let planEnd = min(latestDue.addingTimeInterval(15 * 60), currentNow.addingTimeInterval(4 * 3600))
+            domainEnd = max(domainEnd, planEnd)
+        }
 
         // 30/90 min lookback markers
         thirtyMinMark = currentNow.addingTimeInterval(-1800)
