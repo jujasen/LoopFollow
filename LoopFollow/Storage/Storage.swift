@@ -72,6 +72,7 @@ class Storage {
     var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
     var useIFCC = StorageValue<Bool>(key: "useIFCC", defaultValue: false)
     var showSmallGraph = StorageValue<Bool>(key: "showSmallGraph", defaultValue: true)
+    var showDeviceStatus = StorageValue<Bool>(key: "showDeviceStatus", defaultValue: true)
     var screenlockSwitchState = StorageValue<Bool>(key: "screenlockSwitchState", defaultValue: true)
     var showDisplayName = StorageValue<Bool>(key: "showDisplayName", defaultValue: false)
     var snoozerEmoji = StorageValue<Bool>(key: "snoozerEmoji", defaultValue: false)
@@ -174,6 +175,9 @@ class Storage {
 
     var cageInsertTime = StorageValue<TimeInterval>(key: "cageInsertTime", defaultValue: 0)
     var sageInsertTime = StorageValue<TimeInterval>(key: "sageInsertTime", defaultValue: 0)
+    var sageSensorID = StorageValue<String?>(key: "sageSensorID", defaultValue: nil)
+    var cgmDeviceName = StorageValue<String?>(key: "cgmDeviceName", defaultValue: nil)
+    var pumpModel = StorageValue<String?>(key: "pumpModel", defaultValue: nil)
 
     // MARK: - Version-info ---------------------------
 

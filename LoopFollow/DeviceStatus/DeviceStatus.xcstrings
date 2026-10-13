@@ -1,0 +1,366 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ ago": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "for %@ siden"
+          }
+        }
+      }
+    },
+    "Activation": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivert"
+          }
+        }
+      }
+    },
+    "Basal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basal"
+          }
+        }
+      }
+    },
+    "Change due in": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bytte om"
+          }
+        }
+      }
+    },
+    "Change overdue": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bytte på overtid"
+          }
+        }
+      }
+    },
+    "Changed": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byttet"
+          }
+        }
+      }
+    },
+    "Display Sensor and Pod": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis sensor og pod"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferdig"
+          }
+        }
+      }
+    },
+    "Expiration": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utløper"
+          }
+        }
+      }
+    },
+    "Expired": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utløpt"
+          }
+        }
+      }
+    },
+    "Glucose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glukose"
+          }
+        }
+      }
+    },
+    "Grace Period End": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekstratid slutter"
+          }
+        }
+      }
+    },
+    "Grace period remaining": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekstratid igjen"
+          }
+        }
+      }
+    },
+    "Infusion set": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Infusjonssett"
+          }
+        }
+      }
+    },
+    "Insulin Remaining": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulin igjen"
+          }
+        }
+      }
+    },
+    "Last Reading": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste måling"
+          }
+        }
+      }
+    },
+    "Nightscout has no pod change yet.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nightscout har ikke registrert noe pod-bytte ennå."
+          }
+        }
+      }
+    },
+    "Nightscout has no sensor start yet.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nightscout har ikke registrert noen sensorstart ennå."
+          }
+        }
+      }
+    },
+    "No Delivery": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slutter å gi insulin"
+          }
+        }
+      }
+    },
+    "Pod": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod"
+          }
+        }
+      }
+    },
+    "Pod expired": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poden er utløpt"
+          }
+        }
+      }
+    },
+    "Pod expired, delivery stops in": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utløpt – stopper om"
+          }
+        }
+      }
+    },
+    "Pod expires in": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poden utløper om"
+          }
+        }
+      }
+    },
+    "Pump": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pumpe"
+          }
+        }
+      }
+    },
+    "Sensor": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor"
+          }
+        }
+      }
+    },
+    "Sensor Expiration": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor utløper"
+          }
+        }
+      }
+    },
+    "Sensor ID": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor-ID"
+          }
+        }
+      }
+    },
+    "Sensor Start": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensorstart"
+          }
+        }
+      }
+    },
+    "Sensor expired": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensoren er utløpt"
+          }
+        }
+      }
+    },
+    "Sensor expires in": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensoren utløper om"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tid"
+          }
+        }
+      }
+    },
+    "U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E"
+          }
+        }
+      }
+    },
+    "U/hr": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E/t"
+          }
+        }
+      }
+    },
+    "Warmup completes in": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppvarming ferdig om"
+          }
+        }
+      }
+    },
+    "Worked out from the pod changes Loop uploads to Nightscout. Loop records a change when the cannula is in, so times can be a few minutes later than in Loop.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beregnet fra pod-byttene Loop laster opp til Nightscout. Loop registrerer byttet når kanylen er satt inn, så tidene kan ligge noen minutter etter det Loop viser."
+          }
+        }
+      }
+    },
+    "Worked out from the sensor start Loop uploads to Nightscout.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beregnet fra sensorstarten Loop laster opp til Nightscout."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

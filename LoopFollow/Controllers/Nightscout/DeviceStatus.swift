@@ -93,6 +93,7 @@ extension MainViewController {
         Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
 
         if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+            Storage.shared.pumpModel.value = lastPumpRecord["model"] as? String
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
                 Storage.shared.bolusIncrementDetected.value = true

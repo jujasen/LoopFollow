@@ -14,6 +14,7 @@ struct MainHomeView: View {
     @ObservedObject var showSmallGraph = Storage.shared.showSmallGraph
     @ObservedObject var showStats = Storage.shared.showStats
     @ObservedObject var hideInfoTable = Storage.shared.hideInfoTable
+    @ObservedObject var showDeviceStatus = Storage.shared.showDeviceStatus
     @ObservedObject var smallGraphHeight = Storage.shared.smallGraphHeight
     @ObservedObject var url = Storage.shared.url
     @ObservedObject var graphTimeZoneEnabled = Storage.shared.graphTimeZoneEnabled
@@ -52,6 +53,12 @@ struct MainHomeView: View {
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
+
+            // Sensor and pod: time left and insulin remaining
+            if isNightscoutEnabled && showDeviceStatus.value {
+                DeviceStatusStrip(infoManager: infoManager)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            }
 
             // Main chart (fills remaining space)
             BGChartView(model: chartModel, config: .main)

@@ -8,6 +8,8 @@ public struct ShareGlucoseData: Decodable {
     var sgv: Int
     var date: TimeInterval
     var direction: String?
+    /// Nightscout's name for the CGM ("Dexcom G7 DXCMKW"); Dexcom Share has none.
+    var device: String?
 
     enum CodingKeys: String, CodingKey {
         case sgv // Sensor Blood Glucose
@@ -15,6 +17,7 @@ public struct ShareGlucoseData: Decodable {
         case glucose // Other type of entry
         case date
         case direction
+        case device
     }
 
     // Decoder initializer for handling JSON data
@@ -34,6 +37,7 @@ public struct ShareGlucoseData: Decodable {
         // Decode the date and optional direction
         date = try container.decode(TimeInterval.self, forKey: .date)
         direction = try container.decodeIfPresent(String.self, forKey: .direction)
+        device = try? container.decodeIfPresent(String.self, forKey: .device)
     }
 
     public init(sgv: Int, date: TimeInterval, direction: String?) {

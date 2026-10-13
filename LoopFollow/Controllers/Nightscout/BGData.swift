@@ -152,6 +152,9 @@ extension MainViewController {
 
         let latestReading = data[0]
         let sensorTimestamp = latestReading.date
+        if let device = latestReading.device {
+            Storage.shared.cgmDeviceName.value = device
+        }
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         // secondsAgo is how old the newest reading is
         let secondsAgo = now - sensorTimestamp

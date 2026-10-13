@@ -9,6 +9,7 @@ struct GeneralSettingsView: View {
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
     @ObservedObject var showSmallGraph = Storage.shared.showSmallGraph
+    @ObservedObject var showDeviceStatus = Storage.shared.showDeviceStatus
     @ObservedObject var screenlockSwitchState = Storage.shared.screenlockSwitchState
     @ObservedObject var showDisplayName = Storage.shared.showDisplayName
     @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
@@ -46,6 +47,7 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Display Stats", isOn: $showStats.value)
                 Toggle("Display Small Graph", isOn: $showSmallGraph.value)
+                Toggle(String(localized: "Display Sensor and Pod", table: "DeviceStatus", comment: "Setting: show the sensor and pod tiles on the home screen"), isOn: $showDeviceStatus.value)
                 Toggle("Color BG Text", isOn: $colorBGText.value)
                 Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)
                 Toggle("Show Display Name", isOn: $showDisplayName.value)

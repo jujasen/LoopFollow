@@ -7,10 +7,12 @@ extension MainViewController {
     // NS Cage Struct
     struct cageData: Codable {
         var created_at: String
+        var notes: String? = nil
     }
 
     struct sageData: Codable {
         var created_at: String
+        var notes: String? = nil
     }
 
     struct iageData: Codable {

@@ -37,6 +37,7 @@ extension MainViewController {
         }
         currentSage = data[0]
         var lastSageString = data[0].created_at
+        Storage.shared.sageSensorID.value = SensorKind.sensorID(fromNotes: data[0].notes)
 
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate,
