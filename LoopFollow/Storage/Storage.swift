@@ -240,6 +240,9 @@ class Storage {
     var remotePosition = StorageValue<TabPosition>(key: "remotePosition", defaultValue: .menu)
     var statisticsPosition = StorageValue<TabPosition>(key: "statisticsPosition", defaultValue: .menu)
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
+    var insightPosition = StorageValue<TabPosition>(key: "insightPosition", defaultValue: .menu)
+    /// Set once the insight tab has been given a free place in the tab bar.
+    var insightTabPlaced = StorageValue<Bool>(key: "insightTabPlaced", defaultValue: false)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 
@@ -283,6 +286,7 @@ class Storage {
         case .snoozer: snoozerPosition.value
         case .stats: statisticsPosition.value
         case .treatments: treatmentsPosition.value
+        case .insight: insightPosition.value
         }
     }
 
@@ -296,6 +300,7 @@ class Storage {
         case .snoozer: snoozerPosition.value = position
         case .stats: statisticsPosition.value = position
         case .treatments: treatmentsPosition.value = position
+        case .insight: insightPosition.value = position
         }
     }
 

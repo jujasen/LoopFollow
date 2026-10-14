@@ -62,6 +62,7 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
     case snoozer
     case treatments
     case stats
+    case insight
 
     var id: String { rawValue }
 
@@ -74,6 +75,7 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
         case .snoozer: return "Snoozer"
         case .treatments: return "Treatments"
         case .stats: return "Statistics"
+        case .insight: return String(localized: "Insight", table: "LoopInsight", comment: "Name of the insight tab")
         }
     }
 
@@ -86,12 +88,13 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
         case .snoozer: return "zzz"
         case .treatments: return "cross.case"
         case .stats: return "chart.bar.xaxis"
+        case .insight: return "sparkles"
         }
     }
 
     /// Canonical feature order used by menus and customization screens.
     static var featureOrder: [TabItem] {
-        [.home, .alarms, .nightscout, .remote, .snoozer, .stats, .treatments]
+        [.home, .alarms, .nightscout, .remote, .snoozer, .stats, .treatments, .insight]
     }
 
     /// Items that can be moved between tab bar and menu (all except settings which doesn't exist as a tab)

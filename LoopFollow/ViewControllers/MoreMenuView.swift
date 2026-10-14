@@ -406,6 +406,7 @@ enum MenuRoute: Hashable {
     case snoozer
     case treatments
     case stats
+    case insight
     case log
 
     init(_ item: TabItem) {
@@ -417,6 +418,7 @@ enum MenuRoute: Hashable {
         case .snoozer: self = .snoozer
         case .treatments: self = .treatments
         case .stats: self = .stats
+        case .insight: self = .insight
         }
     }
 
@@ -430,6 +432,7 @@ enum MenuRoute: Hashable {
         case .snoozer: SnoozerView()
         case .treatments: TreatmentsView()
         case .stats: AggregatedStatsContentView(mainViewController: MainViewController.shared)
+        case .insight: LoopInsightView(embedsInNavigationStack: false)
         case .log: LogView()
         }
     }

@@ -138,6 +138,8 @@ struct MainTabView: View {
             NavigationStack {
                 AggregatedStatsContentView(mainViewController: MainViewController.shared)
             }
+        case .insight:
+            LoopInsightView()
         }
     }
 }

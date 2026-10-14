@@ -668,6 +668,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.migrateStep10()
             Storage.shared.migrationStep.value = 10
         }
+
+        // Not a numbered step, so it can't collide with upstream's numbering.
+        Storage.shared.placeInsightTabOnce()
     }
 
     @objc func appDidBecomeActive() {

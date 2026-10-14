@@ -1,0 +1,457 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%1$d %% in range · %2$@ mean · %3$d lows": {
+      "comment": "Insight: a period's summary (1: percent in range)(2: mean mmol/L)(3: low episodes)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d %% i mål · snitt %2$@ · %3$d følinger"
+          }
+        }
+      }
+    },
+    "%1$d %% · 30 d %2$d %%": {
+      "comment": "Insight: time in range last 7 and 30 days (1: 7 days)(2: 30 days)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d %% · 30 d %2$d %%"
+          }
+        }
+      }
+    },
+    "%d meals": {
+      "comment": "Insight: clean meals in a part of the day",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d måltider"
+          }
+        }
+      }
+    },
+    "09–15 weekday / weekend": {
+      "comment": "Insight: daytime on weekdays against weekends",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "09–15 hverdag / helg"
+          }
+        }
+      }
+    },
+    ">10 at 3 h %d %%": {
+      "comment": "Insight: share of meals above 10 three hours on",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ">10 etter 3 t %d %%"
+          }
+        }
+      }
+    },
+    "AI Dose Advice is off in Loop, so only the numbers are shown.": {
+      "comment": "Insight: AI is off in Loop",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-doseråd er av i Loop, så bare tallene vises."
+          }
+        }
+      }
+    },
+    "AI Doses": {
+      "comment": "Header of the AI dose outcomes in the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-doser"
+          }
+        }
+      }
+    },
+    "AI in Loop today: %1$@ calls, about $%2$@ (about %3$@ kr).": {
+      "comment": "Insight: OpenAI use today in Loop (1: calls)(2: dollars)(3: kroner)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI i Loop i dag: %1$@ kall, ca. %2$@ $ (ca. %3$@ kr)."
+          }
+        }
+      }
+    },
+    "Couldn't read Nightscout.": {
+      "comment": "Insight tab error: the request failed",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke lese Nightscout."
+          }
+        }
+      }
+    },
+    "Days 8–%d": {
+      "comment": "Insight: the days before the last seven (1: days kept)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dag 8–%d"
+          }
+        }
+      }
+    },
+    "From Loop %@.": {
+      "comment": "Insight: when Loop last uploaded it (1: time)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fra Loop kl. %@."
+          }
+        }
+      }
+    },
+    "Insight": {
+      "comment": "Title of the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Innsikt"
+          }
+        }
+      }
+    },
+    "Last 7 days": {
+      "comment": "Insight: last seven days",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste 7 dager"
+          }
+        }
+      }
+    },
+    "Loop 2 h: how far glucose ended above (+) or below (−) Loop's forecast two hours on. Meals: only those without extra carbs, corrections or treated lows.": {
+      "comment": "Footer explaining the parts of the day in the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop 2 t: hvor mye blodsukkeret endte over (+) eller under (−) Loops prognose to timer fram. Måltider: bare de uten ekstra karbo, korreksjon eller behandlet føling."
+          }
+        }
+      }
+    },
+    "Loop hasn't put an insight in Nightscout yet.": {
+      "comment": "Insight tab: no document in Nightscout",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop har ikke lagt innsikt i Nightscout ennå."
+          }
+        }
+      }
+    },
+    "Loop is forecasting %@ mmol/L higher than usual today: less insulin is needed than usual.": {
+      "comment": "Insight: today's forecast deviation, less insulin needed (1: mmol/L)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop spår %@ mmol/L for høyt i dag sammenlignet med vanlig: det trengs mindre insulin enn vanlig."
+          }
+        }
+      }
+    },
+    "Loop is forecasting %@ mmol/L lower than usual today: more insulin is needed than usual.": {
+      "comment": "Insight: today's forecast deviation, more insulin needed (1: mmol/L)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop spår %@ mmol/L for lavt i dag sammenlignet med vanlig: det trengs mer insulin enn vanlig."
+          }
+        }
+      }
+    },
+    "Loop's forecast is about as usual today (%@ mmol/L).": {
+      "comment": "Insight: today's forecast deviation is small (1: signed mmol/L)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loops prognose treffer omtrent som vanlig i dag (%@ mmol/L)."
+          }
+        }
+      }
+    },
+    "Low after a used AI dose": {
+      "comment": "Insight: lows within four hours of a used AI dose",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Føling etter brukt AI-dose"
+          }
+        }
+      }
+    },
+    "Nightscout is not set up.": {
+      "comment": "Insight tab error: no Nightscout address",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nightscout er ikke satt opp."
+          }
+        }
+      }
+    },
+    "Nothing from Loop yet. Loop puts the insight in Nightscout, and it is read from there.": {
+      "comment": "Insight tab before anything was read",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingenting fra Loop ennå. Loop legger innsikten i Nightscout, og den hentes derfra."
+          }
+        }
+      }
+    },
+    "Numbers from Nightscout %@.": {
+      "comment": "Insight: when Loop read the numbers (1: time)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tall fra Nightscout kl. %@."
+          }
+        }
+      }
+    },
+    "Parts of the Day": {
+      "comment": "Header of the parts of the day in the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tider på døgnet"
+          }
+        }
+      }
+    },
+    "Shown / used": {
+      "comment": "Insight: AI doses shown and used",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vist / brukt"
+          }
+        }
+      }
+    },
+    "The AI writes about the weeks behind each night after 04:00.": {
+      "comment": "Shown before the AI has written about the weeks behind",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI skriver om de siste ukene hver natt etter kl. 04."
+          }
+        }
+      }
+    },
+    "The AI writes about today from 06:00, and again when a meal is over or after a low.": {
+      "comment": "Shown before the AI has written about today",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI skriver om dagen fra kl. 06, og på nytt når et måltid er over eller etter en føling."
+          }
+        }
+      }
+    },
+    "The Weeks Behind": {
+      "comment": "Header of the long-term section in the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste uker"
+          }
+        }
+      }
+    },
+    "Today": {
+      "comment": "Header of today's section in the insight tab",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I dag"
+          }
+        }
+      }
+    },
+    "U": {
+      "comment": "Symbol for insulin units",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E"
+          }
+        }
+      }
+    },
+    "Update Now": {
+      "comment": "Button reading the insight from Nightscout again",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdater nå"
+          }
+        }
+      }
+    },
+    "correction": {
+      "comment": "Insight meal flag",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "korreksjon"
+          }
+        }
+      }
+    },
+    "extra carbs": {
+      "comment": "Insight meal flag",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ekstra karbo"
+          }
+        }
+      }
+    },
+    "h": {
+      "comment": "Symbol for hours",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "t"
+          }
+        }
+      }
+    },
+    "in range": {
+      "comment": "Insight: time in range label",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i mål"
+          }
+        }
+      }
+    },
+    "low after %d %%": {
+      "comment": "Insight: share of meals followed by a low",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lavt etter %d %%"
+          }
+        }
+      }
+    },
+    "lows": {
+      "comment": "Insight: low episodes label",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "følinger"
+          }
+        }
+      }
+    },
+    "mean": {
+      "comment": "Insight: mean glucose label",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "snitt"
+          }
+        }
+      }
+    },
+    "over 10": {
+      "comment": "Insight: hours above 10 mmol/L label",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "over 10"
+          }
+        }
+      }
+    },
+    "started low": {
+      "comment": "Insight meal flag",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "startet lavt"
+          }
+        }
+      }
+    },
+    "still going": {
+      "comment": "Insight: a meal less than four hours ago",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pågår"
+          }
+        }
+      }
+    },
+    "treated low": {
+      "comment": "Insight meal flag",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "behandlet føling"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

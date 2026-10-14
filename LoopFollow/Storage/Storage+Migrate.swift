@@ -211,6 +211,23 @@ extension Storage {
         case .snoozer: return snoozerPosition.exists
         case .stats: return statisticsPosition.exists
         case .treatments: return treatmentsPosition.exists
+        case .insight: return insightPosition.exists
+        }
+    }
+
+    // MARK: - Insight tab
+
+    /// Gives the insight tab a place in the tab bar, once: the first free place, or else the
+    /// Nightscout tab's, which moves to the menu. Either can be moved back in the tab settings.
+    func placeInsightTabOnce() {
+        guard !insightTabPlaced.value else { return }
+        insightTabPlaced.value = true
+        guard !TabPosition.customizablePositions.contains(insightPosition.value.normalized) else { return }
+        if let free = TabPosition.customizablePositions.first(where: { tabItem(at: $0) == nil }) {
+            insightPosition.value = free
+        } else if TabPosition.customizablePositions.contains(nightscoutPosition.value.normalized) {
+            insightPosition.value = nightscoutPosition.value
+            nightscoutPosition.value = .menu
         }
     }
 }
