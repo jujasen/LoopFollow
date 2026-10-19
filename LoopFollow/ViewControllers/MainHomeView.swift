@@ -60,6 +60,12 @@ struct MainHomeView: View {
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             }
 
+            // The rest of a split bolus waiting on Loop's phone, with a button to give it
+            if isNightscoutEnabled {
+                SplitBolusRestCard()
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            }
+
             // Main chart (fills remaining space)
             BGChartView(model: chartModel, config: .main)
 

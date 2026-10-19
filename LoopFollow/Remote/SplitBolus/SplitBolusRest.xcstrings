@@ -1,0 +1,216 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "✂️ Rest of the bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✂️ Resten av bolusen"
+          }
+        }
+      }
+    },
+    "✂️ Rest of %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✂️ Resten av %@"
+          }
+        }
+      }
+    },
+    "%1$@ · about %2$@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · ca. %2$@"
+          }
+        }
+      }
+    },
+    "Sent %@ – waiting for Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt %@ – venter på Loop"
+          }
+        }
+      }
+    },
+    "Due since %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skal gis nå (fra %@)"
+          }
+        }
+      }
+    },
+    "Glucose low or falling – checked again %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BS lav eller fallende – sjekkes igjen %@"
+          }
+        }
+      }
+    },
+    "Due about %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gis ca. %@"
+          }
+        }
+      }
+    },
+    "Sends %1$@ g as “%2$@” with %3$@ h absorption. Loop doses for it like other remote carbs.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sender %1$@ g som «%2$@» med %3$@ t absorpsjon. Loop doserer for det som for annen fjernkarbo."
+          }
+        }
+      }
+    },
+    "Loop held it back: glucose was low or falling.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop holdt den tilbake: BS var lav eller fallende."
+          }
+        }
+      }
+    },
+    "It is not due until %@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den skal ikke gis før %@."
+          }
+        }
+      }
+    },
+    "Give the rest now?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gi resten nå?"
+          }
+        }
+      }
+    },
+    "Send": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avbryt"
+          }
+        }
+      }
+    },
+    "Sent": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt"
+          }
+        }
+      }
+    },
+    "Send again": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send på nytt"
+          }
+        }
+      }
+    },
+    "Give the rest": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gi resten"
+          }
+        }
+      }
+    },
+    "The rest (%1$@ g) is more than the maximum carbs allowed (%2$@ g).": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resten (%1$@ g) er mer enn maks tillatt karbo (%2$@ g)."
+          }
+        }
+      }
+    },
+    "Loop APNS setup is incomplete. Please configure all required fields in settings.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop APNS er ikke ferdig satt opp. Fyll ut alle feltene i innstillingene."
+          }
+        }
+      }
+    },
+    "This one-time code was just used. Try again in a few seconds.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engangskoden ble nettopp brukt. Prøv igjen om noen sekunder."
+          }
+        }
+      }
+    },
+    "Invalid QR code URL. Please re-scan the QR code in settings.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ugyldig QR-kode. Skann QR-koden på nytt i innstillingene."
+          }
+        }
+      }
+    },
+    "Failed to send carbs. Check your Loop APNS configuration.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke sende karbo. Sjekk Loop APNS-oppsettet."
+          }
+        }
+      }
+    }
+  }
+}

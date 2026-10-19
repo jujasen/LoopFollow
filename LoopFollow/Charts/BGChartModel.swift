@@ -241,6 +241,14 @@ final class BGChartModel: ObservableObject {
         return [heading, food.name, "\(grams)g", "\(window.due)–\(window.expires)"].filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
+    /// "Rest ✂️ 🥛🍼", the dish's name, grams with rough insulin, then the window Loop offers it
+    /// in ("21:30–23:30"). Mirrors `plannedCarbPillText`.
+    static func splitBolusRestPillText(food: CarbFoodLabel, grams: Int, units: String?, window: (due: String, expires: String)) -> String {
+        let heading = food.emoji.isEmpty ? "Rest ✂️" : "Rest ✂️ \(food.emoji)"
+        let amount = units.map { "\(grams)g ≈\($0)U" } ?? "\(grams)g"
+        return [heading, food.name, amount, "\(window.due)–\(window.expires)"].filter { !$0.isEmpty }.joined(separator: "\n")
+    }
+
     private static func extractMessage(from note: String) -> String? {
         guard let jsonStartIndex = note.range(of: "{\"")?.lowerBound else {
             return nil
@@ -510,6 +518,26 @@ final class BGChartModel: ObservableObject {
                     pillText: Self.plannedCarbPillText(
                         food: CarbFoodLabel(foodType: $0.plan.foodType),
                         grams: grams,
+                        window: (pillTimeString(for: due), pillTimeString(for: expires))
+                    )
+                )
+            }
+        // A split bolus's waiting rest: drawn the same way, since it is not carbs yet either.
+        plannedCarbs += (showCarbs ? vc.splitBolusRestData : [])
+            .filter { $0.rest.expiresAt > nowInterval }
+            .map {
+                let grams = Int($0.rest.grams.rounded())
+                let due = Date(timeIntervalSince1970: $0.rest.dueDate)
+                let expires = Date(timeIntervalSince1970: $0.rest.expiresAt)
+                return PlannedCarbPoint(
+                    date: due,
+                    expiresAt: expires,
+                    sgv: Double($0.sgv),
+                    label: "\(grams)?",
+                    pillText: Self.splitBolusRestPillText(
+                        food: CarbFoodLabel(foodType: $0.rest.foodType),
+                        grams: grams,
+                        units: $0.rest.units.map { self.formatDose($0) },
                         window: (pillTimeString(for: due), pillTimeString(for: expires))
                     )
                 )
