@@ -84,6 +84,7 @@ struct AlarmEditor: View {
         case .missedBolus: MissedBolusAlarmEditor(alarm: $alarm)
         case .futureCarbs: FutureCarbsAlarmEditor(alarm: $alarm)
         case .dbSize: DBSizeAlarmEditor(alarm: $alarm)
+        case .pumpFailure: PumpFailureAlarmEditor(alarm: $alarm)
         }
     }
 }

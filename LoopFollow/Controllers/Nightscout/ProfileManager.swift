@@ -25,6 +25,8 @@ final class ProfileManager {
     var loadedAt: Date?
     /// Loop's other therapy settings from the profile's `loopSettings`; nil where Loop did not upload one.
     var loopTherapySettings: LoopTherapySettings
+    /// The insulin curve Loop doses with, from `loopSettings`, else its preset for `insulinModel`.
+    var insulinCurve = PumpDeliveryCheck.InsulinCurve(model: nil)
 
     // MARK: - Nested Structures
 
@@ -159,6 +161,7 @@ final class ProfileManager {
         }
 
         loopTherapySettings = LoopTherapySettings(profileData.loopSettings)
+        insulinCurve = Self.insulinCurve(profileData.loopSettings)
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in

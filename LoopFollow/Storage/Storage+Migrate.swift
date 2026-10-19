@@ -231,3 +231,17 @@ extension Storage {
         }
     }
 }
+
+extension Storage {
+    // MARK: - Pump-delivery alert
+
+    /// Adds the pump-delivery alert, switched on, once. Deleting it afterwards sticks.
+    func addPumpFailureAlarmOnce() {
+        guard !pumpFailureAlarmAdded.value else { return }
+        pumpFailureAlarmAdded.value = true
+        guard !alarms.value.contains(where: { $0.type == .pumpFailure }) else { return }
+        var alarm = Alarm(type: .pumpFailure)
+        alarm.name = String(localized: "Pump Delivery Alert", table: "PumpFailure", comment: "Name of the pump-delivery alert in the alarm list")
+        alarms.value.append(alarm)
+    }
+}

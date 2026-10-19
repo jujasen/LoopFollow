@@ -25,4 +25,6 @@ struct AlarmData: Codable {
     let batteryHistory: [DataStructs.batteryStruct]
     let recentCarbs: [CarbSample]
     let dbSizePercentage: Double?
+    /// Glucose, insulin and carbs for `PumpFailureCondition`; nil without a profile.
+    var pumpDelivery: PumpDeliveryCheck? = nil
 }

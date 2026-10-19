@@ -243,6 +243,8 @@ class Storage {
     var insightPosition = StorageValue<TabPosition>(key: "insightPosition", defaultValue: .menu)
     /// Set once the insight tab has been given a free place in the tab bar.
     var insightTabPlaced = StorageValue<Bool>(key: "insightTabPlaced", defaultValue: false)
+    /// Set once the pump-delivery alert has been added to the alarm list.
+    var pumpFailureAlarmAdded = StorageValue<Bool>(key: "pumpFailureAlarmAdded", defaultValue: false)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 

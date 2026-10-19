@@ -277,7 +277,11 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
+        AlarmManager.shared.sendNotification(
+            title: type == .pumpFailure ? PumpFailureText.title : type.rawValue,
+            body: type == .pumpFailure ? PumpFailureText.body(Observable.shared.pumpFailureAssessment.value) : nil,
+            actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze"
+        )
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)
@@ -365,6 +369,15 @@ struct Alarm: Identifiable, Codable, Equatable {
         case .recBolus:
             soundFile = .dholShuffleloop
             threshold = 1
+        case .pumpFailure:
+            /// Tuned on 60 days of a child's Loop data: caught both pod failures
+            /// 0.6–1.4 h before the pod was changed, and fired five other times.
+            soundFile = .emergencyAlarm
+            aboveBG = 288
+            delta = 144
+            threshold = 180
+            persistentMinutes = 30
+            snoozeDuration = 60
         case .overrideStart:
             soundFile = .endingReached
             repeatSoundOption = .never
@@ -407,7 +420,7 @@ extension AlarmType {
         switch self {
         case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
-        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus:
+        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus, .pumpFailure:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpBattery, .pumpChange,
              .sensorChange, .notLooping, .buildExpire, .dbSize:
@@ -427,6 +440,7 @@ extension AlarmType {
         case .iob: return "syringe"
         case .cob: return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
+        case .pumpFailure: return "drop.triangle"
         case .futureCarbs: return "clock.arrow.circlepath"
         case .recBolus: return "bolt.horizontal"
         case .battery: return "battery.25"
@@ -456,6 +470,7 @@ extension AlarmType {
         case .iob: return "High insulin-on-board."
         case .cob: return "High carbs-on-board."
         case .missedBolus: return "Carbs without bolus."
+        case .pumpFailure: return "Insulin given but glucose keeps rising."
         case .futureCarbs: return "Reminder when future carbs are due."
         case .recBolus: return "Recommended bolus issued."
         case .battery: return "Phone battery low."

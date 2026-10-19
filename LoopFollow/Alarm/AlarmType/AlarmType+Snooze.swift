@@ -10,7 +10,7 @@ extension AlarmType {
         case .buildExpire, .dbSize:
             return .day
         case .low, .high, .fastDrop, .fastRise,
-             .missedReading, .notLooping, .missedBolus,
+             .missedReading, .notLooping, .missedBolus, .pumpFailure,
              .futureCarbs, .recBolus,
              .overrideStart, .overrideEnd, .tempTargetStart,
              .tempTargetEnd:

@@ -1,0 +1,186 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "Pump may not be delivering insulin": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mulig at poden ikke gir insulin"
+          }
+        }
+      }
+    },
+    "Check the pod and cannula, measure ketones, and consider insulin by pen and a new pod.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sjekk pod og kanyle, mål ketoner, og vurder insulin med penn og ny pod."
+          }
+        }
+      }
+    },
+    "Glucose %1$@ and not falling. The insulin from the last 90 minutes should have lowered it by %2$@, yet it is %3$@ higher than insulin and carbs explain.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BS %1$@ og faller ikke. Insulinet fra de siste 90 minuttene skulle ha senket den med %2$@, men den er %3$@ høyere enn insulin og karbo forklarer."
+          }
+        }
+      }
+    },
+    "Alerts when glucose stays high and is not falling although the insulin given should have brought it down — the pod may not be delivering, for example a kinked cannula or a leak the pod does not alarm for. Insulin and carbs over the last 90 minutes are weighed with the profile's ISF and carb ratio.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varsler når BS holder seg høy og ikke faller selv om insulinet som er gitt skulle ha fått den ned — da gir poden kanskje ikke insulin, for eksempel ved en knekt kanyle eller lekkasje poden ikke varsler om. Insulin og karbo de siste 90 minuttene regnes med profilens ISF og karbofaktor."
+          }
+        }
+      }
+    },
+    "High Glucose Limit": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Høy BS-grense"
+          }
+        }
+      }
+    },
+    "Only alert at or above this glucose.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varsle bare når BS er minst dette."
+          }
+        }
+      }
+    },
+    "BG": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BS"
+          }
+        }
+      }
+    },
+    "Unexplained Rise": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uforklart stigning"
+          }
+        }
+      }
+    },
+    "How much higher glucose must be after 90 minutes than the insulin and carbs given explain.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvor mye høyere BS må være etter 90 minutter enn insulinet og karboen som er gitt forklarer."
+          }
+        }
+      }
+    },
+    "At least": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minst"
+          }
+        }
+      }
+    },
+    "Insulin Given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulin gitt"
+          }
+        }
+      }
+    },
+    "How far the insulin acting over the last 90 minutes should have lowered glucose. Keeps the alert quiet when too little insulin was given for its absence to show.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvor mye insulinet som har virket de siste 90 minuttene skulle ha senket BS. Holder varselet stille når det er gitt for lite insulin til at det merkes om det mangler."
+          }
+        }
+      }
+    },
+    "Should lower by": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skulle senke med"
+          }
+        }
+      }
+    },
+    "Persistent": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vedvarende"
+          }
+        }
+      }
+    },
+    "Every reading over this long must meet the limits above.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle målinger så lenge må oppfylle grensene over."
+          }
+        }
+      }
+    },
+    "For": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I"
+          }
+        }
+      }
+    },
+    "Pump Delivery Alert": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mulig pumpesvikt"
+          }
+        }
+      }
+    },
+    "Insulin given but glucose keeps rising.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulin gitt, men BS stiger likevel."
+          }
+        }
+      }
+    }
+  }
+}

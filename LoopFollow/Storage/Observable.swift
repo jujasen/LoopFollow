@@ -49,6 +49,8 @@ class Observable {
     var deviceBatteryIsCharging = ObservableValue<Bool?>(default: nil)
     var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
     var dbSizePercentage = ObservableValue<Double?>(default: nil)
+    /// What `PumpFailureCondition` saw when it last fired, for the notification text.
+    var pumpFailureAssessment = ObservableValue<PumpDeliveryCheck.Assessment?>(default: nil)
     var enactedOrSuggested = ObservableValue<TimeInterval?>(default: nil)
 
     var lastSentTOTP = ObservableValue<String?>(default: nil)

@@ -241,6 +241,8 @@ struct AlarmSelectionRow: View {
             return "Looping app expiration"
         case .dbSize:
             return "Nightscout Database Size"
+        case .pumpFailure:
+            return "Pump Delivery Alert"
         }
     }
 }

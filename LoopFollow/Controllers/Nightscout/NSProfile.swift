@@ -83,6 +83,15 @@ struct NSProfile: Decodable {
         let insulinModel: String?
         let glucoseBasedApplicationFactorEnabled: Bool?
         let integralRetrospectiveCorrectionEnabled: Bool?
+        /// The insulin curve Loop doses with; uploaded by the jujasen fork of Loop.
+        let insulin: Insulin?
+
+        struct Insulin: Decodable {
+            let effectiveModel: String?
+            let peakMinutes: Double?
+            let durationHours: Double?
+            let delayMinutes: Double?
+        }
 
         struct ScheduleOverride: Decodable {
             let symbol: String?

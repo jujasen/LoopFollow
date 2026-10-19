@@ -29,7 +29,7 @@ extension MainViewController {
             let latestPumpBattery = Observable.shared.pumpBatteryLevel.value
             let recentCarbs: [CarbSample] = self.carbData.map { CarbSample(grams: $0.value, date: Date(timeIntervalSince1970: $0.date)) }
 
-            let alarmData = AlarmData(
+            var alarmData = AlarmData(
                 bgReadings: self.bgData
                     .suffix(24)
                     .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }, /// These are oldest .. newest
@@ -54,6 +54,7 @@ extension MainViewController {
                 recentCarbs: recentCarbs,
                 dbSizePercentage: Observable.shared.dbSizePercentage.value
             )
+            alarmData.pumpDelivery = self.pumpDeliveryCheck()
 
             let finalAlarmData: AlarmData
             if Observable.shared.debug.value {

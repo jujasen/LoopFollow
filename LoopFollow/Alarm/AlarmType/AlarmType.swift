@@ -10,6 +10,7 @@ enum AlarmType: String, CaseIterable, Codable {
     case iob = "IOB Alert"
     case cob = "COB Alert"
     case low = "Low BG Alert"
+    case pumpFailure = "Pump Delivery Alert"
     case high = "High BG Alert"
     case fastDrop = "Fast Drop Alert"
     case fastRise = "Fast Rise Alert"
