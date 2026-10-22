@@ -316,6 +316,58 @@ class LoopAPNSService {
         )
     }
 
+    /// Changes or deletes a carb entry Loop already has, via APNS push notification.
+    /// - Parameters:
+    ///   - carbsEdit: The `carbs-edit` block from `CarbEditDraft`
+    ///   - alert: What Loop's phone shows for the push
+    ///   - otp: The current one-time password; Loop requires it, as for new carbs
+    ///   - completion: Completion handler with success status and error message
+    func sendCarbEditViaAPNS(carbsEdit: [String: Any], alert: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        guard validateSetup() else {
+            let errorMessage = "Loop APNS Configuration not valid"
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+
+        let deviceToken = Storage.shared.deviceToken.value
+        let bundleIdentifier = Storage.shared.bundleId.value
+        let creds = effectiveCredentials()
+
+        let now = Date()
+        let expiration = Date(timeIntervalSinceNow: 5 * 60)
+
+        var finalPayload = [
+            "carbs-edit": carbsEdit,
+            "otp": otp,
+            "remote-address": "LoopFollow",
+            "entered-by": "LoopFollow",
+            "sent-at": formatDateForAPNS(now),
+            "expiration": formatDateForAPNS(expiration),
+            "alert": alert,
+        ] as [String: Any]
+
+        if let returnInfo = createReturnNotificationInfo(),
+           let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
+        {
+            finalPayload["encrypted_return_notification"] = encryptedReturnInfo
+        } else {
+            LogManager.shared.log(category: .apns, message: "Failed to create return notification info for carb edit command")
+        }
+
+        LogManager.shared.log(category: .apns, message: "Sending carb edit: \(carbsEdit.keys.sorted().joined(separator: ", "))")
+
+        sendAPNSNotification(
+            deviceToken: deviceToken,
+            bundleIdentifier: bundleIdentifier,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
+            payload: finalPayload,
+            completion: completion
+        )
+    }
+
     /// Validates APNS credentials similar to PushNotificationManager
     /// - Returns: Array of validation error messages, or nil if valid
     private func validateCredentials() -> [String]? {

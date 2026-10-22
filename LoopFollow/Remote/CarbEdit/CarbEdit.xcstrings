@@ -1,0 +1,296 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "%1$@ (%2$@ at %3$@) is removed from Loop, and Loop stops counting these carbs.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (%2$@ kl. %3$@) fjernes fra Loop, og Loop slutter å regne med disse karbohydratene."
+          }
+        }
+      }
+    },
+    "%@ h": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ t"
+          }
+        }
+      }
+    },
+    "Absorption Time": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Absorpsjonstid"
+          }
+        }
+      }
+    },
+    "Carbs": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbohydrater"
+          }
+        }
+      }
+    },
+    "Carbs Amount": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbohydrater"
+          }
+        }
+      }
+    },
+    "Change Meal?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endre måltid?"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slett"
+          }
+        }
+      }
+    },
+    "Delete Meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slett måltid"
+          }
+        }
+      }
+    },
+    "Delete Meal?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slette måltid?"
+          }
+        }
+      }
+    },
+    "Error": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feil"
+          }
+        }
+      }
+    },
+    "Failed to send the change. Check your Loop APNS configuration.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke sende endringen. Sjekk Loop APNS-oppsettet."
+          }
+        }
+      }
+    },
+    "Food Type": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mattype"
+          }
+        }
+      }
+    },
+    "Invalid QR code URL. Please re-scan the QR code in settings.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ugyldig QR-kode. Skann QR-koden på nytt i innstillingene."
+          }
+        }
+      }
+    },
+    "Logged Meals": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrerte måltider"
+          }
+        }
+      }
+    },
+    "Loop APNS setup is incomplete. Please configure all required fields in settings.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop APNS-oppsettet er ikke ferdig. Fyll ut alle feltene i innstillingene."
+          }
+        }
+      }
+    },
+    "Loop makes the change and shows a notification. The chart updates once Loop has uploaded it to Nightscout.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop gjør endringen og viser et varsel. Grafen oppdateres når Loop har lastet den opp til Nightscout."
+          }
+        }
+      }
+    },
+    "Name (optional)": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navn (valgfritt)"
+          }
+        }
+      }
+    },
+    "No meals from Loop in the last 24 hours.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen måltider fra Loop det siste døgnet."
+          }
+        }
+      }
+    },
+    "Only meals logged in Loop – also those sent from here – can be changed. Loop makes the change and uploads it to Nightscout; the chart follows shortly after.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare måltider registrert i Loop – også de som er sendt herfra – kan endres. Loop gjør endringen og laster den opp til Nightscout; grafen følger etter litt etter."
+          }
+        }
+      }
+    },
+    "Remote Carbs Changed: %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbohydrater endret eksternt: %@"
+          }
+        }
+      }
+    },
+    "Remote Carbs Deleted": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbohydrater slettet eksternt"
+          }
+        }
+      }
+    },
+    "Save Changes": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagre endringer"
+          }
+        }
+      }
+    },
+    "Send": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        }
+      }
+    },
+    "Sending...": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sender …"
+          }
+        }
+      }
+    },
+    "Sent": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt"
+          }
+        }
+      }
+    },
+    "Sent %@ – waiting for Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt %@ – venter på Loop"
+          }
+        }
+      }
+    },
+    "The meal is more than 12 hours old, so Loop will not move it. Carbs, absorption and food can still be changed.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måltidet er mer enn 12 timer gammelt, så Loop flytter det ikke. Karbohydrater, absorpsjon og mat kan fortsatt endres."
+          }
+        }
+      }
+    },
+    "This one-time code was just used. Try again in a few seconds.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne engangskoden ble nettopp brukt. Prøv igjen om noen sekunder."
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tid"
+          }
+        }
+      }
+    }
+  }
+}

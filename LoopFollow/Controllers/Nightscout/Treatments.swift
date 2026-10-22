@@ -139,6 +139,7 @@ extension MainViewController {
             }
         }
         updateTodaysCarbsFromEntries(entries: carbs)
+        LoggedCarbsStore.shared.update(carbEntries: carbs)
         if carbs.count > 0 {
             processNSCarbs(entries: carbs)
         } else {
