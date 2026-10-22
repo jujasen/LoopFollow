@@ -136,6 +136,9 @@ private struct MainBGChart: View {
     /// space, taps another mark, or starts a pan/zoom/inspect.
     @State private var tapped: SelectionAnchor?
 
+    /// The meal opened from the Edit button under a tapped carb pill.
+    @State private var editingCarbs: LoggedCarbEntry?
+
     /// True once a held press has engaged inspect; from then on finger
     /// movement scrubs the selection instead of panning, until the finger lifts.
     @State private var isInspectLatched = false
@@ -216,8 +219,8 @@ private struct MainBGChart: View {
                 .frame(width: viewportWidth, height: viewport.height)
                 .allowsHitTesting(false)
 
+            // Hit-testable only for the Edit button under a tapped carb pill.
             selectionOverlay(viewportWidth: viewportWidth)
-                .allowsHitTesting(false)
 
             overrideBandLabelsOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
@@ -247,6 +250,18 @@ private struct MainBGChart: View {
         )
         .onPreferenceChange(PlotFramePreferenceKey.self) { plotFrame = $0 }
         .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
+        .sheet(item: $editingCarbs) { entry in
+            NavigationStack {
+                CarbEditView(entry: entry)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(String(localized: "Cancel", table: "CarbEdit", comment: "Closes the meal editor opened from the chart")) {
+                                editingCarbs = nil
+                            }
+                        }
+                    }
+            }
+        }
         .onChange(of: interaction.scrollPosition) { _, _ in
             updateRenderWindow()
             updateFollowState()
@@ -638,21 +653,30 @@ private struct MainBGChart: View {
         let value: Double
         /// One pill entry per item under the selector (see PillLabel).
         let texts: [String]
+        /// Set when a tap landed on a carb entry Loop can change from here.
+        var editableCarbs: LoggedCarbEntry? = nil
     }
 
-    /// Feeds every treatment mark to `body` as (drawnDate, value, pillText).
+    /// Feeds every treatment mark to `body` as (drawnDate, value, pillText, carb sync id).
     /// Single source for both the scrub lookup and the tap hit test.
-    private func forEachTreatmentAnchor(_ body: (Date, Double, String) -> Void) {
+    private func forEachTreatmentAnchor(_ body: (Date, Double, String, String?) -> Void) {
         for group in [model.boluses, model.carbs, model.smbs, model.bgChecks,
                       model.notes, model.suspends, model.resumes, model.sensorStarts]
         {
             for t in group {
-                body(t.drawnDate, t.sgv, t.pillText)
+                body(t.drawnDate, t.sgv, t.pillText, t.syncIdentifier)
             }
         }
         for plan in model.plannedCarbs {
-            body(plan.date, plan.sgv, plan.pillText)
+            body(plan.date, plan.sgv, plan.pillText, nil)
         }
+    }
+
+    /// The meal behind a carb mark, when Loop remote control is set up and the entry is recent
+    /// enough for Loop to find it.
+    private func editableCarbs(syncIdentifier: String?) -> LoggedCarbEntry? {
+        guard let syncIdentifier, Storage.shared.remoteType.value == .loopAPNS else { return nil }
+        return LoggedCarbsStore.shared.entries.first { $0.syncIdentifier == syncIdentifier }
     }
 
     /// Pill entry for a BG reading. Shared by the scrub lookup and the tap hit test.
@@ -719,7 +743,7 @@ private struct MainBGChart: View {
 
         var captured: [Item] = []
         var nearestTreatment: Item?
-        forEachTreatmentAnchor { date, value, text in
+        forEachTreatmentAnchor { date, value, text, _ in
             let item = Item(date: date, value: value, text: text, distance: abs(date.timeIntervalSince(selected)))
             if item.distance <= captureWindow {
                 captured.append(item)
@@ -774,20 +798,20 @@ private struct MainBGChart: View {
         var best: SelectionAnchor?
         var bestDistance2 = radius * radius
 
-        func consider(_ date: Date, _ value: Double, _ text: String) {
+        func consider(_ date: Date, _ value: Double, _ text: String, _ syncIdentifier: String?) {
             let dx = xPosition(for: date, viewportWidth: viewportWidth) - location.x
             let dy = yPosition(forValue: value) - location.y
             let d2 = dx * dx + dy * dy
             if d2 <= bestDistance2 {
                 bestDistance2 = d2
-                best = SelectionAnchor(date: date, value: value, texts: [text])
+                best = SelectionAnchor(date: date, value: value, texts: [text], editableCarbs: editableCarbs(syncIdentifier: syncIdentifier))
             }
         }
 
         forEachTreatmentAnchor(consider)
         if best == nil {
             for p in model.bg {
-                consider(p.date, p.value, bgPillText(for: p))
+                consider(p.date, p.value, bgPillText(for: p), nil)
             }
         }
         if best == nil {
@@ -798,7 +822,7 @@ private struct MainBGChart: View {
         }
         if let best {
             let texts = best.texts + bandPillTexts(at: best.date)
-            return SelectionAnchor(date: best.date, value: best.value, texts: texts)
+            return SelectionAnchor(date: best.date, value: best.value, texts: texts, editableCarbs: best.editableCarbs)
         }
         return nil
     }
@@ -886,6 +910,7 @@ private struct MainBGChart: View {
                     .fill(Color.primary.opacity(0.5))
                     .frame(width: 1, height: plotFrame.height)
                     .position(x: x, y: plotFrame.midY)
+                    .allowsHitTesting(false)
 
                 // Measured size lags the text by one frame; fall back to a
                 // small nominal size until the first measurement lands.
@@ -898,6 +923,30 @@ private struct MainBGChart: View {
                 let labelY = fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4)
                 PillLabel(texts: anchor.texts, maxWidth: min(300, viewportWidth - 16))
                     .position(x: labelX, y: labelY)
+                    .allowsHitTesting(false)
+
+                // A tapped meal Loop can change: the button sits beside the pill, on
+                // whichever side of it has room.
+                if let entry = anchor.editableCarbs {
+                    let besidePill = labelX + pillW / 2 + 40 <= viewportWidth - 4
+                        ? labelX + pillW / 2 + 38
+                        : labelX - pillW / 2 - 38
+                    let buttonX = min(max(besidePill, 40), viewportWidth - 40)
+                    Button {
+                        tapped = nil
+                        editingCarbs = entry
+                    } label: {
+                        Label(String(localized: "Edit", table: "CarbEdit", comment: "Button beside a tapped carb pill in the chart that opens the meal for editing"), systemImage: "pencil")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(Color.accentColor))
+                            .foregroundColor(.white)
+                    }
+                    .buttonStyle(.plain)
+                    .fixedSize()
+                    .position(x: buttonX, y: labelY)
+                }
             }
         }
     }

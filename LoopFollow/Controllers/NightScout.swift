@@ -47,6 +47,8 @@ extension MainViewController {
         var absorptionTime: Int
         /// Loop's emoji, plus the dish's name when one was given (see `CarbFoodLabel`).
         var foodType: String? = nil
+        /// Loop's id for the entry, which the chart uses to open it for editing.
+        var syncIdentifier: String? = nil
     }
 
     // A waiting "later carbs" plan, at the carb lane's height

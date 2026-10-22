@@ -53,6 +53,8 @@ final class BGChartModel: ObservableObject {
         /// Where the symbol is drawn. Equals `date` unless `spread` nudged it
         /// left to keep a crowded run of treatments from stacking up.
         var drawnDate: Date
+        /// A carb entry's Loop id, so a tap on it can open it for editing.
+        var syncIdentifier: String?
         var id: Double { date.timeIntervalSince1970 }
 
         init(date: Date, value: Double, sgv: Double, label: String, pillText: String) {
@@ -494,13 +496,15 @@ final class BGChartModel: ObservableObject {
             if $0.absorptionTime > 0, Storage.shared.showAbsorption.value {
                 label += " \($0.absorptionTime / 60)h"
             }
-            return TreatmentPoint(
+            var point = TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
                 pillText: Self.carbPillText(food: CarbFoodLabel(foodType: $0.foodType), grams: grams, time: pillTimeString(for: Date(timeIntervalSince1970: $0.date)))
             )
+            point.syncIdentifier = $0.syncIdentifier
+            return point
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
         // "6?": the grams, with a question mark because Loop hasn't added them yet.
         let nowInterval = dateTimeUtils.getNowTimeIntervalUTC()

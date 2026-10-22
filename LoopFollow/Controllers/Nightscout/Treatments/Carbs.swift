@@ -24,6 +24,7 @@ extension MainViewController {
 
             let absorptionTime = currentEntry["absorptionTime"] as? Int ?? 0
             let foodType = currentEntry["foodType"] as? String
+            let syncIdentifier = currentEntry["syncIdentifier"] as? String
 
             guard let parsedDate = NightscoutUtils.parseDate(carbDate),
                   let carbs = currentEntry["carbs"] as? Double else { continue }
@@ -45,7 +46,7 @@ extension MainViewController {
 
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (3600 * Storage.shared.predictionToLoad.value)) {
                 // Make the dot
-                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv + Double(offset)), absorptionTime: absorptionTime, foodType: foodType)
+                let dot = carbGraphStruct(value: Double(carbs), date: Double(dateTimeStamp), sgv: Int(sgv.sgv + Double(offset)), absorptionTime: absorptionTime, foodType: foodType, syncIdentifier: syncIdentifier)
                 carbData.append(dot)
             }
         }
