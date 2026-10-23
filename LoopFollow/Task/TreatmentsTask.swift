@@ -25,6 +25,10 @@ extension MainViewController {
         if NightscoutSocketManager.shared.connectionState == .authenticated {
             interval = 10 * 60
         }
+        if RemoteCommandRejectionMonitor.shared.isWatching() {
+            // A command was just sent: catch Loop's note if it rejects it.
+            interval = 60
+        }
         TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date().addingTimeInterval(interval))
         TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(3))
     }

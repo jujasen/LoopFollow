@@ -607,7 +607,7 @@ struct LoopAPNSCarbsView: View {
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     let timeFormatter = DateFormatter()
                     timeFormatter.timeStyle = .short
-                    self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
+                    self.alertMessage = "Carbs for \(timeFormatter.string(from: adjustedConsumedDate)) sent to Loop. LoopFollow warns you if Loop rejects them."
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,

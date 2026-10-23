@@ -1,0 +1,26 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "Remote command": {
+      "localizations": {
+        "nb": { "stringUnit": { "state": "translated", "value": "Fjernkommando" } }
+      }
+    },
+    "⚠️ Rejected by Loop: %@": {
+      "localizations": {
+        "nb": { "stringUnit": { "state": "translated", "value": "⚠️ Avvist av Loop: %@" } }
+      }
+    },
+    "Nothing was given. The command took %@ to reach Loop's phone, so Loop rejected its password as expired. Check the graph before sending again.": {
+      "localizations": {
+        "nb": { "stringUnit": { "state": "translated", "value": "Ingenting ble gitt. Kommandoen brukte %@ fram til Loop-telefonen, så Loop avviste koden som utløpt. Sjekk grafen før du sender på nytt." } }
+      }
+    },
+    "Nothing was given. Loop said: %@": {
+      "localizations": {
+        "nb": { "stringUnit": { "state": "translated", "value": "Ingenting ble gitt. Loop sa: %@" } }
+      }
+    }
+  }
+}

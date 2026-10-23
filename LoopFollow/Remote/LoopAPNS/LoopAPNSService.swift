@@ -535,6 +535,7 @@ class LoopAPNSService {
                     switch httpResponse.statusCode {
                     case 200:
                         LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
+                        RemoteCommandRejectionMonitor.shared.commandSent()
                         completion(true, nil)
                     case 400:
                         let environmentGuidance = self.getEnvironmentGuidance()

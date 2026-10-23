@@ -63,6 +63,7 @@ class Storage {
     var lastRecBolusNotified = StorageValue<Double?>(key: "lastRecBolusNotified", defaultValue: nil)
     var lastCOBNotified = StorageValue<Double?>(key: "lastCOBNotified", defaultValue: nil)
     var lastMissedBolusNotified = StorageValue<Date?>(key: "lastMissedBolusNotified", defaultValue: nil)
+    var lastRemoteRejectionNotified = StorageValue<Date?>(key: "lastRemoteRejectionNotified", defaultValue: nil)
     var pendingFutureCarbs = StorageValue<[PendingFutureCarb]>(key: "pendingFutureCarbs", defaultValue: [])
 
     // General Settings [BEGIN]

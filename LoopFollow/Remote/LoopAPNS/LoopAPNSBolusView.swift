@@ -409,7 +409,7 @@ struct LoopAPNSBolusView: View {
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                    self.alertMessage = "Insulin sent successfully!"
+                    self.alertMessage = "Insulin sent to Loop. Loop confirms when it is given, and LoopFollow warns you if Loop rejects it."
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,

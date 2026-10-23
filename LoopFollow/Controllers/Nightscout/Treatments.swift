@@ -124,6 +124,7 @@ extension MainViewController {
                 clearOldTempBasal()
             }
         }
+        RemoteCommandRejectionMonitor.shared.check(notes: note)
         if bolus.count > 0 {
             processNSBolus(entries: bolus)
         } else {
