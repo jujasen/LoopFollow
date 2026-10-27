@@ -17,19 +17,19 @@ class NightscoutUtils {
         var errorDescription: String? {
             switch self {
             case .emptyAddress:
-                return "The address is empty."
+                return String(localized: "The address is empty.")
             case .invalidURL:
-                return "The URL is invalid."
+                return String(localized: "The URL is invalid.")
             case .networkError:
-                return "A network error occurred."
+                return String(localized: "A network error occurred.")
             case .siteNotFound:
-                return "The site was not found."
+                return String(localized: "The site was not found.")
             case .invalidToken:
-                return "The token is invalid."
+                return String(localized: "The token is invalid.")
             case .tokenRequired:
-                return "A token is required."
+                return String(localized: "A token is required.")
             case .unknown:
-                return "An unknown error occurred."
+                return String(localized: "An unknown error occurred.")
             }
         }
     }

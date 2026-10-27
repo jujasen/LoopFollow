@@ -37,8 +37,8 @@ struct DexcomConnectStepView: View {
             } header: {
                 OnboardingStepHeader(
                     systemImage: "sensor.tag.radiowaves.forward.fill",
-                    title: "Connect Dexcom Share",
-                    subtitle: "Sign in with the Dexcom Share account that shares glucose data."
+                    title: String(localized: "Connect Dexcom Share"),
+                    subtitle: String(localized: "Sign in with the Dexcom Share account that shares glucose data.")
                 )
                 .textCase(nil)
                 .padding(.bottom, 8)
@@ -59,7 +59,7 @@ struct DexcomConnectStepView: View {
                 HStack {
                     Text("Password")
                     TogglableSecureInput(
-                        placeholder: "Enter Password",
+                        placeholder: String(localized: "Enter Password"),
                         text: $viewModel.password,
                         style: .singleLine,
                         textContentType: .password

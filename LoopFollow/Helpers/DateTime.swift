@@ -109,7 +109,7 @@ class dateTimeUtils {
 
     static func formattedDate(from date: Date?) -> String {
         guard let date = date else {
-            return "Unknown"
+            return String(localized: "Unknown")
         }
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short

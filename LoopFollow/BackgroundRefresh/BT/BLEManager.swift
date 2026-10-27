@@ -294,17 +294,17 @@ extension BLEManager: BluetoothDeviceDelegate {
     /// durations) so BannerManager's dedupe keeps the banner from
     /// re-animating on every beat and user dismissal keeps working.
     private func heartbeatDropoutBannerText() -> String {
-        let name = activeDevice?.deviceName ?? "heartbeat device"
+        let name = activeDevice?.deviceName ?? String(localized: "heartbeat device")
         let cause: String
         switch Storage.shared.backgroundRefreshType.value {
         case .rileyLink:
-            cause = "a low RileyLink battery"
+            cause = String(localized: "a low RileyLink battery")
         case .omnipodDash:
-            cause = "a low pod battery"
+            cause = String(localized: "a low pod battery")
         default:
-            cause = "a low transmitter battery"
+            cause = String(localized: "a low transmitter battery")
         }
-        return "Heartbeat: repeated Bluetooth dropouts from \(name). This can be a sign of \(cause) or a weak Bluetooth connection."
+        return String(localized: "Heartbeat: repeated Bluetooth dropouts from \(name). This can be a sign of \(cause) or a weak Bluetooth connection.")
     }
 }
 
@@ -344,7 +344,7 @@ extension BLEManager {
         // If the heartbeat interval isn't a typical 60 or 300 seconds,
         // we simply return a string indicating that the delay is "up to" the heartbeat interval.
         if heartBeatInterval != 60, heartBeatInterval != 300 {
-            return "up to \(Int(heartBeatInterval)) sec"
+            return String(localized: "up to \(Int(heartBeatInterval)) sec")
         }
 
         let effectiveDelay = CycleHelper.computeDelay(sensorOffset: expectedOffset, heartbeatLast: heartbeatLast, heartbeatInterval: heartBeatInterval)

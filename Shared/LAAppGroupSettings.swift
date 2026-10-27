@@ -44,28 +44,28 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
     /// Human-readable label shown in the slot picker in Settings.
     var displayName: String {
         switch self {
-        case .none: "Empty"
-        case .delta: "Delta"
-        case .projectedBG: "Projected BG"
-        case .minMax: "Min/Max"
-        case .iob: "IOB"
-        case .cob: "COB"
-        case .recBolus: "Rec. Bolus"
-        case .autosens: "Autosens"
-        case .tdd: "TDD"
-        case .basal: "Basal"
-        case .pump: "Pump"
-        case .pumpBattery: "Pump Battery"
-        case .battery: "Battery"
-        case .target: "Target"
-        case .isf: "ISF"
-        case .carbRatio: "CR"
-        case .sage: "SAGE"
-        case .cage: "CAGE"
-        case .iage: "IAGE"
-        case .carbsToday: "Carbs today"
-        case .override: "Override"
-        case .profile: "Profile"
+        case .none: String(localized: "Empty")
+        case .delta: String(localized: "Delta")
+        case .projectedBG: String(localized: "Projected BG")
+        case .minMax: String(localized: "Min/Max")
+        case .iob: String(localized: "IOB")
+        case .cob: String(localized: "COB")
+        case .recBolus: String(localized: "Rec. Bolus")
+        case .autosens: String(localized: "Autosens")
+        case .tdd: String(localized: "TDD")
+        case .basal: String(localized: "Basal")
+        case .pump: String(localized: "Pump")
+        case .pumpBattery: String(localized: "Pump Battery")
+        case .battery: String(localized: "Battery")
+        case .target: String(localized: "Target")
+        case .isf: String(localized: "ISF")
+        case .carbRatio: String(localized: "CR")
+        case .sage: String(localized: "SAGE")
+        case .cage: String(localized: "CAGE")
+        case .iage: String(localized: "IAGE")
+        case .carbsToday: String(localized: "Carbs today")
+        case .override: String(localized: "Override")
+        case .profile: String(localized: "Profile")
         }
     }
 
@@ -73,27 +73,27 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
     var gridLabel: String {
         switch self {
         case .none: ""
-        case .delta: "Delta"
-        case .projectedBG: "Proj"
-        case .minMax: "Min/Max"
-        case .iob: "IOB"
-        case .cob: "COB"
-        case .recBolus: "Rec."
-        case .autosens: "Sens"
-        case .tdd: "TDD"
-        case .basal: "Basal"
-        case .pump: "Pump"
-        case .pumpBattery: "Pump%"
-        case .battery: "Bat."
-        case .target: "Target"
-        case .isf: "ISF"
-        case .carbRatio: "CR"
-        case .sage: "SAGE"
-        case .cage: "CAGE"
-        case .iage: "IAGE"
-        case .carbsToday: "Carbs"
-        case .override: "Ovrd"
-        case .profile: "Prof"
+        case .delta: String(localized: "Delta", comment: "Short Live Activity grid label")
+        case .projectedBG: String(localized: "Proj", comment: "Short Live Activity grid label")
+        case .minMax: String(localized: "Min/Max", comment: "Short Live Activity grid label")
+        case .iob: String(localized: "IOB", comment: "Short Live Activity grid label")
+        case .cob: String(localized: "COB", comment: "Short Live Activity grid label")
+        case .recBolus: String(localized: "Rec.", comment: "Short Live Activity grid label")
+        case .autosens: String(localized: "Sens", comment: "Short Live Activity grid label")
+        case .tdd: String(localized: "TDD", comment: "Short Live Activity grid label")
+        case .basal: String(localized: "Basal", comment: "Short Live Activity grid label")
+        case .pump: String(localized: "Pump", comment: "Short Live Activity grid label")
+        case .pumpBattery: String(localized: "Pump%", comment: "Short Live Activity grid label")
+        case .battery: String(localized: "Bat.", comment: "Short Live Activity grid label")
+        case .target: String(localized: "Target", comment: "Short Live Activity grid label")
+        case .isf: String(localized: "ISF", comment: "Short Live Activity grid label")
+        case .carbRatio: String(localized: "CR", comment: "Short Live Activity grid label")
+        case .sage: String(localized: "SAGE", comment: "Short Live Activity grid label")
+        case .cage: String(localized: "CAGE", comment: "Short Live Activity grid label")
+        case .iage: String(localized: "IAGE", comment: "Short Live Activity grid label")
+        case .carbsToday: String(localized: "Carbs", comment: "Short Live Activity grid label")
+        case .override: String(localized: "Ovrd", comment: "Short Live Activity grid label")
+        case .profile: String(localized: "Prof", comment: "Short Live Activity grid label")
         }
     }
 
@@ -141,8 +141,8 @@ enum LiveActivityLayout: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .grid: "Value and Grid"
-        case .chart: "Plot and Row"
+        case .grid: String(localized: "Value and Grid")
+        case .chart: String(localized: "Plot and Row")
         }
     }
 }

@@ -20,12 +20,12 @@ struct StatsDisplayView: View {
 
             VStack(spacing: 10) {
                 HStack {
-                    statColumn(title: "Low:", value: model.lowPercent)
-                    statColumn(title: "In Range:", value: model.inRangePercent)
-                    statColumn(title: "High:", value: model.highPercent)
+                    statColumn(title: String(localized: "Low:"), value: model.lowPercent)
+                    statColumn(title: String(localized: "In Range:"), value: model.inRangePercent)
+                    statColumn(title: String(localized: "High:"), value: model.highPercent)
                 }
                 HStack {
-                    statColumn(title: "Avg BG:", value: model.avgBG)
+                    statColumn(title: String(localized: "Avg BG:"), value: model.avgBG)
                     statColumn(title: model.estA1CTitle, value: model.estA1C)
                     statColumn(title: model.stdDevTitle, value: model.stdDev)
                 }

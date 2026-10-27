@@ -85,7 +85,7 @@ class SettingsMigrationManager {
     }
 
     static func getCompatibilityMessage(for version: String) -> String {
-        return "Settings from version \(version) may not be fully compatible with current version \(currentVersion). Some features may not work as expected."
+        return String(localized: "Settings from version \(version) may not be fully compatible with current version \(currentVersion). Some features may not work as expected.")
     }
 
     // MARK: - Error Handling

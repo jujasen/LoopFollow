@@ -19,6 +19,16 @@ enum TIRPeriod: String, CaseIterable {
     case evening = "Evening"
     case average = "Average"
 
+    var displayName: String {
+        switch self {
+        case .night: return String(localized: "Night", comment: "Time in range period: 00-06")
+        case .morning: return String(localized: "Morning", comment: "Time in range period: 06-12")
+        case .day: return String(localized: "Day", comment: "Time in range period: 12-18")
+        case .evening: return String(localized: "Evening", comment: "Time in range period: 18-24")
+        case .average: return String(localized: "Average", comment: "Time in range period: whole day")
+        }
+    }
+
     var hourRange: (start: Int, end: Int)? {
         switch self {
         case .night:

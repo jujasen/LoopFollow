@@ -22,7 +22,7 @@ struct APNSettingsView: View {
                     HStack {
                         Text("APNS Key ID")
                         TogglableSecureInput(
-                            placeholder: "Enter APNS Key ID",
+                            placeholder: String(localized: "Enter APNS Key ID"),
                             text: $keyId,
                             style: .singleLine
                         )
@@ -50,7 +50,7 @@ struct APNSettingsView: View {
                         }
                     }
                     TogglableSecureInput(
-                        placeholder: "Paste APNS Key",
+                        placeholder: String(localized: "Paste APNS Key"),
                         text: $apnsKey,
                         style: .multiLine
                     )

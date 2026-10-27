@@ -24,15 +24,15 @@ struct UnitsStepView: View {
                 case .units:
                     header(
                         systemImage: "ruler",
-                        title: "Units",
-                        subtitle: "Choose how glucose values are displayed. You can change this later in Settings."
+                        title: String(localized: "Units"),
+                        subtitle: String(localized: "Choose how glucose values are displayed. You can change this later in Settings.")
                     )
                     UnitsConfigurationView(sections: .units)
                 case .statistics:
                     header(
                         systemImage: "chart.bar.xaxis",
-                        title: "Statistics",
-                        subtitle: "Choose how LoopFollow's statistics are measured and displayed."
+                        title: String(localized: "Statistics"),
+                        subtitle: String(localized: "Choose how LoopFollow's statistics are measured and displayed.")
                     )
                     UnitsConfigurationView(sections: .statistics)
                 }

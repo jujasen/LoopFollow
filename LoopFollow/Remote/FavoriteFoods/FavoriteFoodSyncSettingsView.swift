@@ -73,7 +73,7 @@ struct FavoriteFoodSyncSettingsView: View {
                         ProgressView()
                             .padding(.trailing, 6)
                     }
-                    Text(isWorking ? "Setting up…" : "Turn on sharing")
+                    Text(isWorking ? String(localized: "Setting up…") : String(localized: "Turn on sharing"))
                 }
             }
             .disabled(apiSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isWorking)
@@ -101,7 +101,7 @@ struct FavoriteFoodSyncSettingsView: View {
                     isWorking = false
                 }
             } label: {
-                Label(isWorking ? "Syncing…" : "Sync now", systemImage: "arrow.triangle.2.circlepath")
+                Label(isWorking ? String(localized: "Syncing…") : String(localized: "Sync now"), systemImage: "arrow.triangle.2.circlepath")
             }
             .disabled(isWorking)
 

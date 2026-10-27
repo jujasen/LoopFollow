@@ -24,7 +24,7 @@ struct AGPView: View {
                 HStack(spacing: 16) {
                     LegendItem(color: .gray.opacity(0.6), label: "5th-95th")
                     LegendItem(color: .blue.opacity(0.7), label: "25th-75th")
-                    LegendItem(color: .blue, label: "Median")
+                    LegendItem(color: .blue, label: String(localized: "Median"))
                 }
                 .font(.caption2)
             }

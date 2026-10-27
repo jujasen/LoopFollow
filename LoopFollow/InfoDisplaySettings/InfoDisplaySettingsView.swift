@@ -62,7 +62,7 @@ struct InfoDisplaySettingsView: View {
                     .frame(width: 8, height: 8)
                     .accessibilityLabel("Coloring enabled")
             }
-            Text(item.isVisible ? "On" : "Off")
+            Text(item.isVisible ? String(localized: "On") : String(localized: "Off"))
                 .foregroundStyle(.secondary)
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))

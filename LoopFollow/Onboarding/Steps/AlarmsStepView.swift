@@ -103,32 +103,32 @@ struct AlarmsStepView: View {
     private func controls(for seed: Binding<OnboardingViewModel.SeedAlarm>) -> some View {
         switch seed.wrappedValue.type {
         case .low:
-            bgPicker(seed, title: "Alert below", range: 40 ... 150, keyPath: \.belowBG)
-            intStepper(seed, label: "Warn early by", range: 0 ... 30, step: 5, unit: "min", keyPath: \.predictiveMinutes)
+            bgPicker(seed, title: String(localized: "Alert below"), range: 40 ... 150, keyPath: \.belowBG)
+            intStepper(seed, label: String(localized: "Warn early by"), range: 0 ... 30, step: 5, unit: "min", keyPath: \.predictiveMinutes)
         case .high:
-            bgPicker(seed, title: "Alert above", range: 120 ... 350, keyPath: \.aboveBG)
-            intStepper(seed, label: "Only after high for", range: 0 ... 60, step: 5, unit: "min", keyPath: \.persistentMinutes)
+            bgPicker(seed, title: String(localized: "Alert above"), range: 120 ... 350, keyPath: \.aboveBG)
+            intStepper(seed, label: String(localized: "Only after high for"), range: 0 ... 60, step: 5, unit: "min", keyPath: \.persistentMinutes)
         case .fastDrop:
-            bgPicker(seed, title: "Drop per reading", range: 3 ... 54, keyPath: \.delta)
-            intStepper(seed, label: "Readings in a row", range: 1 ... 3, step: 1, unit: "", keyPath: \.monitoringWindow)
+            bgPicker(seed, title: String(localized: "Drop per reading"), range: 3 ... 54, keyPath: \.delta)
+            intStepper(seed, label: String(localized: "Readings in a row"), range: 1 ... 3, step: 1, unit: "", keyPath: \.monitoringWindow)
         case .missedReading:
-            doubleStepper(seed, label: "No reading for", range: 11 ... 121, step: 5, unit: "min", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "No reading for"), range: 11 ... 121, step: 5, unit: "min", keyPath: \.threshold)
         case .notLooping:
-            doubleStepper(seed, label: "No loop for", range: 16 ... 61, step: 5, unit: "min", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "No loop for"), range: 16 ... 61, step: 5, unit: "min", keyPath: \.threshold)
         case .battery:
-            doubleStepper(seed, label: "At or below", range: 0 ... 100, step: 5, unit: "%", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "At or below"), range: 0 ... 100, step: 5, unit: "%", keyPath: \.threshold)
         case .iob:
-            doubleStepper(seed, label: "Alert above", range: 0 ... 30, step: 1, unit: "U", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "Alert above"), range: 0 ... 30, step: 1, unit: "U", keyPath: \.threshold)
         case .cob:
-            doubleStepper(seed, label: "Alert above", range: 0 ... 200, step: 5, unit: "g", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "Alert above"), range: 0 ... 200, step: 5, unit: "g", keyPath: \.threshold)
         case .sensorChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 15, step: 1, unit: "days", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "Remind after"), range: 1 ... 15, step: 1, unit: String(localized: "days"), keyPath: \.threshold)
             activePicker(seed)
         case .pumpChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 7, step: 1, unit: "days", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "Remind after"), range: 1 ... 7, step: 1, unit: String(localized: "days"), keyPath: \.threshold)
             activePicker(seed)
         case .pump:
-            doubleStepper(seed, label: "Alert below", range: 0 ... 100, step: 5, unit: "U", keyPath: \.threshold)
+            doubleStepper(seed, label: String(localized: "Alert below"), range: 0 ... 100, step: 5, unit: "U", keyPath: \.threshold)
         default:
             EmptyView()
         }
@@ -188,11 +188,11 @@ struct AlarmsStepView: View {
             let perReading = Localizer.formatQuantity(delta)
 
             if window == 1 {
-                return "Warns when glucose falls by at least \(perReading) \(unit) between two readings."
+                return String(localized: "Warns when glucose falls by at least \(perReading) \(unit) between two readings.")
             }
             let total = Localizer.formatQuantity(delta * Double(window))
             let minutes = window * 5
-            return "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window) readings in a row — about \(total) \(unit) over roughly \(minutes) minutes."
+            return String(localized: "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window) readings in a row — about \(total) \(unit) over roughly \(minutes) minutes.")
         default:
             return nil
         }
@@ -205,7 +205,7 @@ struct AlarmsStepView: View {
             get: { seed.wrappedValue.alarm.activeOption },
             set: { seed.wrappedValue.alarm.activeOption = $0 }
         )
-        return AlarmEnumMenuPicker(title: "Active during", selection: binding)
+        return AlarmEnumMenuPicker(title: String(localized: "Active during"), selection: binding)
     }
 
     private func labelRow(_ label: String, value: String) -> some View {

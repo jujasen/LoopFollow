@@ -107,7 +107,7 @@ final class BannerManager {
                     self.report(
                         source: .nightscout,
                         severity: .error,
-                        text: "Nightscout: \(error.localizedDescription)"
+                        text: String(localized: "Nightscout: \(error.localizedDescription)")
                     )
                 } else {
                     // Server reachable and token accepted, yet the data fetch failed.
@@ -119,7 +119,7 @@ final class BannerManager {
                     self.report(
                         source: .nightscout,
                         severity: .warning,
-                        text: "Nightscout: data download failed, but the server is reachable. Retrying automatically."
+                        text: String(localized: "Nightscout: data download failed, but the server is reachable. Retrying automatically.")
                     )
                 }
             }
@@ -133,22 +133,22 @@ final class BannerManager {
             // Dexcom has returned both legacy "SSO_Authenticate…" codes and newer
             // ones like "AccountPasswordInvalid" — match on the common substrings.
             if errorCode.contains("AccountNotFound") {
-                text = "Dexcom Share: account not found — check your username."
+                text = String(localized: "Dexcom Share: account not found — check your username.")
             } else if errorCode.contains("PasswordInvalid") {
-                text = "Dexcom Share: incorrect username or password."
+                text = String(localized: "Dexcom Share: incorrect username or password.")
             } else if errorCode.contains("MaxAttempts") {
-                text = "Dexcom Share: too many failed login attempts — temporarily locked out."
+                text = String(localized: "Dexcom Share: too many failed login attempts — temporarily locked out.")
             } else {
-                text = "Dexcom Share: login failed (\(errorCode))."
+                text = String(localized: "Dexcom Share: login failed (\(errorCode)).")
             }
         case .httpError:
-            text = "Dexcom Share: network error while downloading."
+            text = String(localized: "Dexcom Share: network error while downloading.")
         case .fetchError, .dataError, .dateError:
-            text = "Dexcom Share: could not download readings."
+            text = String(localized: "Dexcom Share: could not download readings.")
         }
 
         if nightscoutFallback {
-            text += " Using Nightscout as backup."
+            text += String(localized: " Using Nightscout as backup.")
         }
         report(source: .dexcom, severity: nightscoutFallback ? .warning : .error, text: text)
     }

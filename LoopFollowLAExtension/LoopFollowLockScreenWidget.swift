@@ -210,12 +210,12 @@ private struct RectangularView: View {
     }
 
     private var metricsText: String {
-        guard let snapshot = entry.snapshot else { return "Open LoopFollow to sync" }
-        return "IOB \(LAFormat.iob(snapshot))   COB \(LAFormat.cob(snapshot))"
+        guard let snapshot = entry.snapshot else { return String(localized: "Open LoopFollow to sync") }
+        return String(localized: "IOB \(LAFormat.iob(snapshot))   COB \(LAFormat.cob(snapshot))")
     }
 
     private var ageText: String {
-        guard let snapshot = entry.snapshot else { return "No data" }
+        guard let snapshot = entry.snapshot else { return String(localized: "No data") }
         return WidgetFormat.age(of: snapshot.updatedAt, at: entry.date)
     }
 }
@@ -263,9 +263,9 @@ enum WidgetFormat {
     /// Age of a reading as seen from `referenceDate`, e.g. "3 min ago".
     static func age(of updatedAt: Date, at referenceDate: Date) -> String {
         let seconds = max(0, referenceDate.timeIntervalSince(updatedAt))
-        if seconds < 60 { return "just now" }
+        if seconds < 60 { return String(localized: "just now") }
         guard let formatted = ageFormatter.string(from: seconds) else { return "" }
-        return "\(formatted) ago"
+        return String(localized: "\(formatted) ago")
     }
 }
 

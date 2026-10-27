@@ -155,7 +155,7 @@ struct RemoteSettingsView: View {
                     HStack {
                         Text("Shared Secret")
                         TogglableSecureInput(
-                            placeholder: "Enter Shared Secret",
+                            placeholder: String(localized: "Enter Shared Secret"),
                             text: $viewModel.sharedSecret,
                             style: .singleLine
                         )
@@ -165,7 +165,7 @@ struct RemoteSettingsView: View {
                         HStack {
                             Text("APNS Key ID")
                             TogglableSecureInput(
-                                placeholder: "Enter APNS Key ID",
+                                placeholder: String(localized: "Enter APNS Key ID"),
                                 text: $viewModel.remoteKeyId,
                                 style: .singleLine
                             )
@@ -174,7 +174,7 @@ struct RemoteSettingsView: View {
                         VStack(alignment: .leading) {
                             Text("APNS Key")
                             TogglableSecureInput(
-                                placeholder: "Paste APNS Key",
+                                placeholder: String(localized: "Paste APNS Key"),
                                 text: $viewModel.remoteApnsKey,
                                 style: .multiLine
                             )
@@ -187,7 +187,7 @@ struct RemoteSettingsView: View {
 
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
-                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
+                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? String(localized: "Production") : String(localized: "Development"))")
                     Text("Team ID: \(Storage.shared.teamId.value ?? "")")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
                     if Storage.shared.bolusIncrementDetected.value {
@@ -205,7 +205,7 @@ struct RemoteSettingsView: View {
                     HStack {
                         Text("Developer Team ID")
                         TogglableSecureInput(
-                            placeholder: "Enter Team ID",
+                            placeholder: String(localized: "Enter Team ID"),
                             text: $viewModel.loopDeveloperTeamId,
                             style: .singleLine
                         )
@@ -215,7 +215,7 @@ struct RemoteSettingsView: View {
                         HStack {
                             Text("APNS Key ID")
                             TogglableSecureInput(
-                                placeholder: "Enter APNS Key ID",
+                                placeholder: String(localized: "Enter APNS Key ID"),
                                 text: $viewModel.remoteKeyId,
                                 style: .singleLine
                             )
@@ -224,7 +224,7 @@ struct RemoteSettingsView: View {
                         VStack(alignment: .leading) {
                             Text("APNS Key")
                             TogglableSecureInput(
-                                placeholder: "Paste APNS Key",
+                                placeholder: String(localized: "Paste APNS Key"),
                                 text: $viewModel.remoteApnsKey,
                                 style: .multiLine
                             )
@@ -286,7 +286,7 @@ struct RemoteSettingsView: View {
                                 .padding(.horizontal, 6)
                                 .background(Color.green.opacity(0.1))
                                 .cornerRadius(4)
-                            Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                            Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -307,7 +307,7 @@ struct RemoteSettingsView: View {
             case .validation:
                 return Alert(
                     title: Text("Validation Error"),
-                    message: Text(alertMessage ?? "Invalid input."),
+                    message: Text(alertMessage ?? String(localized: "Invalid input.")),
                     dismissButton: .default(Text("OK"))
                 )
             case .urlTokenValidation:
@@ -378,7 +378,7 @@ struct RemoteSettingsView: View {
 
     // MARK: - Custom Row for Remote Type Selection
 
-    private func remoteTypeRow(type: RemoteType, label: String, isEnabled: Bool) -> some View {
+    private func remoteTypeRow(type: RemoteType, label: LocalizedStringKey, isEnabled: Bool) -> some View {
         Button(action: {
             if isEnabled {
                 viewModel.remoteType = type
@@ -549,7 +549,7 @@ struct RemoteSettingsView: View {
         }
     }
 
-    private func diagnosticWarning(title: String, detail: String) -> some View {
+    private func diagnosticWarning(title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: "exclamationmark.triangle")

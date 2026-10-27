@@ -55,15 +55,15 @@ enum OnboardingStep: CaseIterable, Hashable {
     var phaseTitle: String {
         switch self {
         case .welcome, .completion: return ""
-        case .overview: return "Overview"
-        case .dataSource: return "Data source"
-        case .connect: return "Connect"
-        case .units: return "Units & metrics"
-        case .generalAlarms: return "Alarm basics"
-        case .alarms: return "Alarms"
-        case .tabOrder: return "Tabs"
-        case .notifications: return "Notifications"
-        case .telemetry: return "Privacy"
+        case .overview: return String(localized: "Overview")
+        case .dataSource: return String(localized: "Data source")
+        case .connect: return String(localized: "Connect")
+        case .units: return String(localized: "Units & metrics")
+        case .generalAlarms: return String(localized: "Alarm basics")
+        case .alarms: return String(localized: "Alarms")
+        case .tabOrder: return String(localized: "Tabs")
+        case .notifications: return String(localized: "Notifications")
+        case .telemetry: return String(localized: "Privacy")
         }
     }
 }

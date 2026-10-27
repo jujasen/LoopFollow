@@ -51,19 +51,19 @@ private struct QuickPickInfoSheet: View {
 }
 
 extension QuickPickSectionHeader {
-    static let bolusInfoText = """
+    static let bolusInfoText = String(localized: """
     These buttons show your most-used recent bolus amounts.
 
     They're based on what you've sent before at similar times on similar days — so if you usually give 4 units before breakfast on weekdays, that button will show up on weekday mornings.
 
     Tap a button to fill in the amount. Nothing is sent until you review and confirm.
-    """
+    """)
 
-    static let mealInfoText = """
+    static let mealInfoText = String(localized: """
     These buttons show your most-used recent meals.
 
     They're based on what you've sent before at similar times on similar days — so if you usually send the same breakfast on weekday mornings, it'll appear as an option.
 
     Tap a button to fill in the details. Nothing is sent until you review and confirm.
-    """
+    """)
 }

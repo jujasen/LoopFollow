@@ -199,11 +199,11 @@ extension TherapySettingsDraft {
         func checkGlucose(_ value: Double, label: String, bounds: TherapyBounds, lowerReason: String? = nil, upperReason: String? = nil) {
             let prefix = label.isEmpty ? "" : "\(label): "
             if value < bounds.absolute.lowerBound {
-                block("\(prefix)\(glucose(value)) is below " + (lowerReason ?? "what Loop allows") + " (\(glucose(bounds.absolute.lowerBound))).")
+                block(String(localized: "\(prefix)\(glucose(value)) is below \(lowerReason ?? String(localized: "what Loop allows")) (\(glucose(bounds.absolute.lowerBound)))."))
             } else if value > bounds.absolute.upperBound {
-                block("\(prefix)\(glucose(value)) is above " + (upperReason ?? "what Loop allows") + " (\(glucose(bounds.absolute.upperBound))).")
+                block(String(localized: "\(prefix)\(glucose(value)) is above \(upperReason ?? String(localized: "what Loop allows")) (\(glucose(bounds.absolute.upperBound)))."))
             } else if !bounds.recommended.contains(value) {
-                warn("\(prefix)\(glucose(value)) is outside Loop's recommended \(glucoseRange(bounds.recommended)).")
+                warn(String(localized: "\(prefix)\(glucose(value)) is outside Loop's recommended \(glucoseRange(bounds.recommended))."))
             }
         }
 
@@ -224,9 +224,9 @@ extension TherapySettingsDraft {
                 let time = TherapySchedule.timeString(entry.start)
                 let value = TherapySchedule.format(entry.value, digits: digits) + " " + unit
                 if kind == .basalRate, let maximumBasalRate, entry.value > maximumBasalRate + 1e-9 {
-                    block("\(time): \(value) is above the Maximum Basal Rate (\(insulin(maximumBasalRate, "U/h"))).")
+                    block(String(localized: "\(time): \(value) is above the Maximum Basal Rate (\(insulin(maximumBasalRate, "U/h")))."))
                 } else if !recommended.contains(entry.value) {
-                    warn("\(time): \(value) is outside Loop's recommended " + TherapySchedule.formatRange(recommended.lowerBound, recommended.upperBound, digits: digits) + " \(unit).")
+                    warn(String(localized: "\(time): \(value) is outside Loop's recommended \(TherapySchedule.formatRange(recommended.lowerBound, recommended.upperBound, digits: digits)) \(unit)."))
                 }
             }
 
@@ -242,11 +242,11 @@ extension TherapySettingsDraft {
             for entry in TherapySchedule.sorted(correctionRanges) {
                 let time = TherapySchedule.timeString(entry.start)
                 if entry.low > entry.high {
-                    block("\(time): the low value is above the high value.")
+                    block(String(localized: "\(time): the low value is above the high value."))
                     continue
                 }
-                checkGlucose(entry.low, label: time, bounds: bounds, lowerReason: raisedBySafetyLimit ? "the Glucose Safety Limit" : nil)
-                checkGlucose(entry.high, label: time, bounds: bounds, lowerReason: raisedBySafetyLimit ? "the Glucose Safety Limit" : nil)
+                checkGlucose(entry.low, label: time, bounds: bounds, lowerReason: raisedBySafetyLimit ? String(localized: "the Glucose Safety Limit") : nil)
+                checkGlucose(entry.high, label: time, bounds: bounds, lowerReason: raisedBySafetyLimit ? String(localized: "the Glucose Safety Limit") : nil)
             }
 
         case .glucoseSafetyLimit:
@@ -254,86 +254,86 @@ extension TherapySettingsDraft {
             let bounds = bounds(for: .glucoseSafetyLimit)!
             let absoluteUpper = TherapySchedule.roundedInward(TherapyGuardrails.convert(TherapyGuardrails.suspendThresholdAbsolute, to: glucoseUnit), digits: g).upperBound
             checkGlucose(suspendThreshold, label: "", bounds: bounds,
-                         upperReason: bounds.absolute.upperBound < absoluteUpper ? "the lowest Correction Range, Pre-Meal or Workout value" : nil)
+                         upperReason: bounds.absolute.upperBound < absoluteUpper ? String(localized: "the lowest Correction Range, Pre-Meal or Workout value") : nil)
             if workoutRange == nil, let previous = original.suspendThreshold, suspendThreshold > previous {
-                warn("Nightscout doesn't show Loop's Workout Range. Loop rejects the change if the new limit is above the workout low.")
+                warn(String(localized: "Nightscout doesn't show Loop's Workout Range. Loop rejects the change if the new limit is above the workout low."))
             }
 
         case .preMealRange, .workoutRange:
             guard let range = setting == .preMealRange ? preMealRange : workoutRange else { return issues }
             let bounds = bounds(for: setting)!
-            let reason = suspendThreshold != nil ? "the Glucose Safety Limit" : nil
-            checkGlucose(range.lowerBound, label: "Low", bounds: bounds, lowerReason: reason)
-            checkGlucose(range.upperBound, label: "High", bounds: bounds, lowerReason: reason)
+            let reason = suspendThreshold != nil ? String(localized: "the Glucose Safety Limit") : nil
+            checkGlucose(range.lowerBound, label: String(localized: "Low", comment: "Correction range low value"), bounds: bounds, lowerReason: reason)
+            checkGlucose(range.upperBound, label: String(localized: "High", comment: "Correction range high value"), bounds: bounds, lowerReason: reason)
 
         case .maximumBasalRate:
             guard let maximumBasalRate else { return issues }
             let bounds = bounds(for: .maximumBasalRate)!
             if !TherapyGuardrails.isMultiple(maximumBasalRate, of: TherapyGuardrails.pumpIncrement) {
-                block("\(insulin(maximumBasalRate, "U/h")) is not a step of 0.05 U/h the pump can deliver.")
+                block(String(localized: "\(insulin(maximumBasalRate, "U/h")) is not a step of 0.05 U/h the pump can deliver."))
             } else if maximumBasalRate < bounds.absolute.lowerBound - 1e-9 {
-                block("\(insulin(maximumBasalRate, "U/h")) is below the highest basal rate (\(insulin(bounds.absolute.lowerBound, "U/h"))).")
+                block(String(localized: "\(insulin(maximumBasalRate, "U/h")) is below the highest basal rate (\(insulin(bounds.absolute.lowerBound, "U/h")))."))
             } else if maximumBasalRate > bounds.absolute.upperBound + 1e-9 {
-                block("\(insulin(maximumBasalRate, "U/h")) is above what Loop allows with these basal rates and carb ratios (\(insulin(bounds.absolute.upperBound, "U/h"))).")
+                block(String(localized: "\(insulin(maximumBasalRate, "U/h")) is above what Loop allows with these basal rates and carb ratios (\(insulin(bounds.absolute.upperBound, "U/h")))."))
             } else if !bounds.recommended.contains(maximumBasalRate) {
-                warn("\(insulin(maximumBasalRate, "U/h")) is outside Loop's recommended \(insulinRange(bounds.recommended, "U/h")).")
+                warn(String(localized: "\(insulin(maximumBasalRate, "U/h")) is outside Loop's recommended \(insulinRange(bounds.recommended, "U/h"))."))
             }
 
         case .maximumBolus:
             guard let maximumBolus else { return issues }
             let bounds = TherapyGuardrails.maximumBolus
             if !TherapyGuardrails.isMultiple(maximumBolus, of: TherapyGuardrails.pumpIncrement) {
-                block("\(insulin(maximumBolus, "U")) is not a step of 0.05 U the pump can deliver.")
+                block(String(localized: "\(insulin(maximumBolus, "U")) is not a step of 0.05 U the pump can deliver."))
             } else if !bounds.absolute.contains(maximumBolus) {
-                block("\(insulin(maximumBolus, "U")) is outside what Loop allows (\(insulinRange(bounds.absolute, "U"))).")
+                block(String(localized: "\(insulin(maximumBolus, "U")) is outside what Loop allows (\(insulinRange(bounds.absolute, "U")))."))
             } else if !bounds.recommended.contains(maximumBolus) {
-                warn("\(insulin(maximumBolus, "U")) is outside Loop's recommended \(insulinRange(bounds.recommended, "U")).")
+                warn(String(localized: "\(insulin(maximumBolus, "U")) is outside Loop's recommended \(insulinRange(bounds.recommended, "U"))."))
             }
 
         case .insulinModel:
             if let insulinModel, InsulinModelOption(rawValue: insulinModel) == nil {
-                block("\(insulinModel) is not an insulin model Loop knows.")
+                block(String(localized: "\(insulinModel) is not an insulin model Loop knows."))
             }
 
         case .dosingStrategy:
             if let dosingStrategy, DosingStrategyOption(rawValue: dosingStrategy) == nil {
-                block("\(dosingStrategy) is not a dosing strategy Loop knows.")
+                block(String(localized: "\(dosingStrategy) is not a dosing strategy Loop knows."))
             }
 
         case .overridePresets:
             var names = Set<String>()
             for preset in overridePresets ?? [] {
                 let name = preset.name.trimmingCharacters(in: .whitespacesAndNewlines)
-                let label = name.isEmpty ? "A preset" : "\(preset.symbol) \(name)"
+                let label = name.isEmpty ? String(localized: "A preset") : "\(preset.symbol) \(name)"
                 if name.isEmpty {
-                    block("Every preset needs a name.")
+                    block(String(localized: "Every preset needs a name."))
                 } else if !names.insert(name).inserted {
-                    block("\(name) is used by more than one preset.")
+                    block(String(localized: "\(name) is used by more than one preset."))
                 }
                 if preset.symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    block("\(label) needs a symbol.")
+                    block(String(localized: "\(label) needs a symbol."))
                 }
                 if !TherapyGuardrails.insulinNeedsScaleFactors.contains(preset.insulinNeedsScaleFactor) {
-                    block("\(label): overall insulin needs must be 10–200%.")
+                    block(String(localized: "\(label): overall insulin needs must be 10–200%."))
                 }
                 if preset.duration < 0 || preset.duration > TherapyGuardrails.maximumOverrideDuration {
-                    block("\(label): the duration must be indefinite or at most 24 hours.")
+                    block(String(localized: "\(label): the duration must be indefinite or at most 24 hours."))
                 }
                 if let target = preset.targetRange {
                     let limits = TherapyGuardrails.overrideTargetLimits(unit: glucoseUnit)
                     if !limits.contains(target.lowerBound) || !limits.contains(target.upperBound) {
-                        block("\(label): the target \(glucoseRange(target)) is outside what Loop allows (\(glucoseRange(limits))).")
+                        block(String(localized: "\(label): the target \(glucoseRange(target)) is outside what Loop allows (\(glucoseRange(limits)))."))
                     } else if let suspendThreshold, target.lowerBound < suspendThreshold {
-                        warn("\(label): the target low \(glucose(target.lowerBound)) is below the Glucose Safety Limit (\(glucose(suspendThreshold))).")
+                        warn(String(localized: "\(label): the target low \(glucose(target.lowerBound)) is below the Glucose Safety Limit (\(glucose(suspendThreshold)))."))
                     } else {
                         let usual = TherapyGuardrails.convert(TherapyGuardrails.correctionRangeAbsolute, to: glucoseUnit)
                         if !usual.contains(target.lowerBound) || !usual.contains(target.upperBound) {
-                            warn("\(label): the target \(glucoseRange(target)) is outside the range Loop allows for the Correction Range.")
+                            warn(String(localized: "\(label): the target \(glucoseRange(target)) is outside the range Loop allows for the Correction Range."))
                         }
                     }
                 } else if preset.insulinNeedsPercent == 100 {
                     // Loop's own editor can't save a preset that changes nothing.
-                    block("\(label) changes nothing: set a target or overall insulin needs other than 100%.")
+                    block(String(localized: "\(label) changes nothing: set a target or overall insulin needs other than 100%."))
                 }
             }
 

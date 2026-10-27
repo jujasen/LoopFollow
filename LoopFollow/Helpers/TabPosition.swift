@@ -12,11 +12,11 @@ enum TabPosition: String, CaseIterable, Codable, Comparable {
 
     var displayName: String {
         switch self {
-        case .position1: return "Tab 1"
-        case .position2: return "Tab 2"
-        case .position3: return "Tab 3"
-        case .position4: return "Tab 4"
-        case .menu, .more, .disabled: return "Menu"
+        case .position1: return String(localized: "Tab 1")
+        case .position2: return String(localized: "Tab 2")
+        case .position3: return String(localized: "Tab 3")
+        case .position4: return String(localized: "Tab 4")
+        case .menu, .more, .disabled: return String(localized: "Menu")
         }
     }
 
@@ -68,13 +68,13 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .home: return "Home"
-        case .alarms: return "Alarms"
-        case .remote: return "Remote"
+        case .home: return String(localized: "Home")
+        case .alarms: return String(localized: "Alarms")
+        case .remote: return String(localized: "Remote")
         case .nightscout: return "Nightscout"
-        case .snoozer: return "Snoozer"
-        case .treatments: return "Treatments"
-        case .stats: return "Statistics"
+        case .snoozer: return String(localized: "Snoozer")
+        case .treatments: return String(localized: "Treatments")
+        case .stats: return String(localized: "Statistics")
         case .insight: return String(localized: "Insight", table: "LoopInsight", comment: "Name of the insight tab")
         }
     }

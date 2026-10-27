@@ -147,7 +147,7 @@ class PushNotificationManager {
         let scheduledTimeInterval: TimeInterval? = scheduledTime?.timeIntervalSince1970
         let bolusAmountValue = convertToOptionalDecimal(bolusAmount)
         guard carbsValue != nil || proteinValue != nil || fatValue != nil else {
-            completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
+            completion(false, String(localized: "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0."))
             return
         }
         let payload = CommandPayload(
@@ -168,21 +168,21 @@ class PushNotificationManager {
         var errors = [String]()
         let keyIdPattern = "^[A-Z0-9]{10}$"
         if !matchesRegex(keyId, pattern: keyIdPattern) {
-            errors.append("APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters.")
+            errors.append(String(localized: "APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters."))
         }
         let teamIdPattern = "^[A-Z0-9]{10}$"
         if !matchesRegex(teamId, pattern: teamIdPattern) {
-            errors.append("Team ID (\(teamId)) must be 10 uppercase alphanumeric characters.")
+            errors.append(String(localized: "Team ID (\(teamId)) must be 10 uppercase alphanumeric characters."))
         }
         if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
-            errors.append("APNS Key must be a valid PEM-formatted private key.")
+            errors.append(String(localized: "APNS Key must be a valid PEM-formatted private key."))
         } else {
             if let keyData = extractKeyData(from: apnsKey) {
                 if Data(base64Encoded: keyData) == nil {
-                    errors.append("APNS Key contains invalid Base64 key data.")
+                    errors.append(String(localized: "APNS Key contains invalid Base64 key data."))
                 }
             } else {
-                errors.append("APNS Key has invalid formatting.")
+                errors.append(String(localized: "APNS Key has invalid formatting."))
             }
         }
         return errors.isEmpty ? nil : errors
@@ -217,28 +217,28 @@ class PushNotificationManager {
         if teamId.isEmpty { missingFields.append("teamId") }
 
         if !missingFields.isEmpty {
-            let errorMessage = "Missing required fields for command: \(missingFields.joined(separator: ", "))"
+            let errorMessage = String(localized: "Missing required fields for command: \(missingFields.joined(separator: ", "))")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         if let validationErrors = validateCredentials() {
-            let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
+            let errorMessage = String(localized: "Credential validation failed: \(validationErrors.joined(separator: ", "))")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let url = constructAPNsURL() else {
-            let errorMessage = "Failed to construct APNs URL"
+            let errorMessage = String(localized: "Failed to construct APNs URL")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
-            let errorMessage = "Failed to generate JWT, please check that the token is correct."
+            let errorMessage = String(localized: "Failed to generate JWT, please check that the token is correct.")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -246,7 +246,7 @@ class PushNotificationManager {
 
         do {
             guard let messenger = SecureMessenger(sharedSecret: sharedSecret) else {
-                let errorMessage = "Failed to initialize security module. Check shared secret."
+                let errorMessage = String(localized: "Failed to initialize security module. Check shared secret.")
                 LogManager.shared.log(category: .apns, message: errorMessage)
                 completion(false, errorMessage)
                 return
@@ -269,7 +269,7 @@ class PushNotificationManager {
 
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
+                    let errorMessage = String(localized: "Failed to send push notification: \(error.localizedDescription)")
                     LogManager.shared.log(category: .apns, message: errorMessage)
                     completion(false, errorMessage)
                     return
@@ -292,35 +292,35 @@ class PushNotificationManager {
                     case 200:
                         completion(true, nil)
                     case 400:
-                        completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)")
+                        completion(false, String(localized: "Bad request. The request was invalid or malformed. \(responseBodyMessage)"))
                     case 403:
                         JWTManager.shared.invalidateCache()
-                        completion(false, "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
+                        completion(false, String(localized: "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"))
                     case 404:
-                        completion(false, "Invalid request: The :path value was incorrect. \(responseBodyMessage)")
+                        completion(false, String(localized: "Invalid request: The :path value was incorrect. \(responseBodyMessage)"))
                     case 405:
-                        completion(false, "Invalid request: Only POST requests are supported. \(responseBodyMessage)")
+                        completion(false, String(localized: "Invalid request: Only POST requests are supported. \(responseBodyMessage)"))
                     case 410:
-                        completion(false, "The device token is no longer active for the topic. \(responseBodyMessage)")
+                        completion(false, String(localized: "The device token is no longer active for the topic. \(responseBodyMessage)"))
                     case 413:
-                        completion(false, "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)")
+                        completion(false, String(localized: "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)"))
                     case 429:
-                        completion(false, "Too many requests. \(responseBodyMessage)")
+                        completion(false, String(localized: "Too many requests. \(responseBodyMessage)"))
                     case 500:
-                        completion(false, "Internal server error at APNs. \(responseBodyMessage)")
+                        completion(false, String(localized: "Internal server error at APNs. \(responseBodyMessage)"))
                     case 503:
-                        completion(false, "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)")
+                        completion(false, String(localized: "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)"))
                     default:
-                        completion(false, "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)")
+                        completion(false, String(localized: "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)"))
                     }
                 } else {
-                    completion(false, "Failed to get a valid HTTP response.")
+                    completion(false, String(localized: "Failed to get a valid HTTP response."))
                 }
             }
             task.resume()
 
         } catch {
-            let errorMessage = "Failed to encode or encrypt push message: \(error.localizedDescription)"
+            let errorMessage = String(localized: "Failed to encode or encrypt push message: \(error.localizedDescription)")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
         }

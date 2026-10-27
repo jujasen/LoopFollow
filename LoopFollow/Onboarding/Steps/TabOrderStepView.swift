@@ -11,8 +11,8 @@ struct TabOrderStepView: View {
         VStack(spacing: 0) {
             OnboardingStepHeader(
                 systemImage: "square.grid.2x2",
-                title: "Arrange your tabs",
-                subtitle: "Pick which features sit in the tab bar. You can always reach everything through the Menu."
+                title: String(localized: "Arrange your tabs"),
+                subtitle: String(localized: "Pick which features sit in the tab bar. You can always reach everything through the Menu.")
             )
             .padding(.horizontal)
             .padding(.top, 8)

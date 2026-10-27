@@ -23,23 +23,23 @@ struct OverviewStepView: View {
         var result: [Item] = []
         if steps.contains(.connect) {
             result.append(Item(icon: "antenna.radiowaves.left.and.right",
-                               title: "Connect your data",
-                               detail: "Link a Nightscout site or a Dexcom Share account."))
+                               title: String(localized: "Connect your data"),
+                               detail: String(localized: "Link a Nightscout site or a Dexcom Share account.")))
         }
         if steps.contains(.units) {
             result.append(Item(icon: "ruler",
-                               title: "Units & metrics",
-                               detail: "Choose how glucose and statistics are shown."))
+                               title: String(localized: "Units & metrics"),
+                               detail: String(localized: "Choose how glucose and statistics are shown.")))
         }
         if steps.contains(.alarms) {
             result.append(Item(icon: "bell.badge.fill",
-                               title: "Recommended alarms",
-                               detail: "Turn on a few useful alarms with sensible defaults."))
+                               title: String(localized: "Recommended alarms"),
+                               detail: String(localized: "Turn on a few useful alarms with sensible defaults.")))
         }
         if steps.contains(.tabOrder) {
             result.append(Item(icon: "square.grid.2x2",
-                               title: "Finish up",
-                               detail: "Arrange your tabs and set notification preferences."))
+                               title: String(localized: "Finish up"),
+                               detail: String(localized: "Arrange your tabs and set notification preferences.")))
         }
         return result
     }
@@ -62,8 +62,8 @@ struct OverviewStepView: View {
             VStack(alignment: .leading, spacing: 24) {
                 OnboardingStepHeader(
                     systemImage: "list.bullet.rectangle",
-                    title: "Here's what we'll do",
-                    subtitle: "A quick, straightforward setup — about 5 minutes. You can change anything later in Settings."
+                    title: String(localized: "Here's what we'll do"),
+                    subtitle: String(localized: "A quick, straightforward setup — about 5 minutes. You can change anything later in Settings.")
                 )
                 .padding(.horizontal)
 
@@ -104,8 +104,8 @@ struct OverviewStepView: View {
         ScrollView {
             OnboardingStepHeader(
                 systemImage: "checkmark.circle",
-                title: "You're all set",
-                subtitle: "Your data source is connected and your alarms are in place — there's nothing to set up here. You can fine-tune anything later in Settings."
+                title: String(localized: "You're all set"),
+                subtitle: String(localized: "Your data source is connected and your alarms are in place — there's nothing to set up here. You can fine-tune anything later in Settings.")
             )
             .padding(.horizontal)
             .padding(.top, 24)
@@ -116,7 +116,7 @@ struct OverviewStepView: View {
 
     private var footer: some View {
         OnboardingNavFooter(
-            continueTitle: onboarding.hasNothingToSetUp ? "Done" : "Continue",
+            continueTitle: onboarding.hasNothingToSetUp ? String(localized: "Done") : String(localized: "Continue"),
             continueEnabled: true,
             showBack: onboarding.canGoBack,
             onBack: { onboarding.goBack() },

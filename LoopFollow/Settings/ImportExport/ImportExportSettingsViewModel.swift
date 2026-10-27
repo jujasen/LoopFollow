@@ -19,7 +19,12 @@ class ImportExportSettingsViewModel: ObservableObject {
     @Published var isShowingQRCodeScanner = false
     @Published var isShowingQRCodeDisplay = false
     @Published var isShowingAlarmSelection = false
-    @Published var qrCodeErrorMessage = ""
+    @Published var qrCodeErrorMessage = "" {
+        didSet { qrCodeMessageIsSuccess = false }
+    }
+
+    /// True when `qrCodeErrorMessage` holds the import success message.
+    @Published var qrCodeMessageIsSuccess = false
     @Published var qrCodeString = ""
     @Published var exportType: ExportType = .nightscout
     @Published var exportedAlarmIds: Set<UUID> = []
@@ -54,11 +59,11 @@ class ImportExportSettingsViewModel: ObservableObject {
 
         var importDescription: String {
             switch self {
-            case .nightscout: return "Nightscout Settings"
-            case .dexcom: return "Dexcom Share Settings"
-            case .remote: return "Remote Settings"
-            case .alarms: return "Alarm Settings"
-            case .apns: return "APNS Settings"
+            case .nightscout: return String(localized: "Nightscout Settings")
+            case .dexcom: return String(localized: "Dexcom Share Settings")
+            case .remote: return String(localized: "Remote Settings")
+            case .alarms: return String(localized: "Alarm Settings")
+            case .apns: return String(localized: "APNS Settings")
             }
         }
     }
@@ -71,7 +76,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             case let .success(jsonString):
                 self.processImportedSettings(jsonString)
             case let .failure(error):
-                self.qrCodeErrorMessage = "Scanning failed: \(error.localizedDescription)"
+                self.qrCodeErrorMessage = String(localized: "Scanning failed: \(error.localizedDescription)")
             }
             self.isShowingQRCodeScanner = false
         }
@@ -82,7 +87,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             LogManager.shared.log(category: .general, message: "Processing QR code data: \(LogRedactor.fingerprint(jsonString))")
 
             guard let data = jsonString.data(using: .utf8) else {
-                qrCodeErrorMessage = "Invalid QR code data"
+                qrCodeErrorMessage = String(localized: "Invalid QR code data")
                 return
             }
 
@@ -100,7 +105,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             // Use migration manager to handle version compatibility
             guard let settings = SettingsMigrationManager.migrateSettings(data) else {
                 LogManager.shared.log(category: .general, message: "SettingsMigrationManager.migrateSettings returned nil")
-                qrCodeErrorMessage = "Failed to decode or migrate settings from QR code"
+                qrCodeErrorMessage = String(localized: "Failed to decode or migrate settings from QR code")
                 return
             }
 
@@ -115,12 +120,12 @@ class ImportExportSettingsViewModel: ObservableObject {
 
             // Store settings and create preview for confirmation
             pendingImportSettings = settings
-            pendingImportSource = "QR code"
+            pendingImportSource = String(localized: "QR code")
             createImportPreview(from: settings)
 
         } catch {
             let currentVersion = AppVersionManager().version()
-            qrCodeErrorMessage = "Import failed. This might be due to a version change (current: \(currentVersion)). Please try exporting settings from the source device again."
+            qrCodeErrorMessage = String(localized: "Import failed. This might be due to a version change (current: \(currentVersion)). Please try exporting settings from the source device again.")
             LogManager.shared.log(category: .general, message: "QR code import failed: \(error.localizedDescription)")
         }
     }
@@ -138,7 +143,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             }
 
             nightscout.applyToStorage()
-            importedComponents.append("Nightscout settings")
+            importedComponents.append(String(localized: "Nightscout settings"))
             LogManager.shared.log(category: .general, message: "Nightscout settings imported from \(source) (version: \(nightscout.version))")
         }
 
@@ -150,7 +155,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             }
 
             dexcom.applyToStorage()
-            importedComponents.append("Dexcom settings")
+            importedComponents.append(String(localized: "Dexcom settings"))
             LogManager.shared.log(category: .general, message: "Dexcom settings imported from \(source) (version: \(dexcom.version))")
         }
 
@@ -159,37 +164,38 @@ class ImportExportSettingsViewModel: ObservableObject {
                 let validation = remote.validateCompatibilityWithCurrentStorage()
                 if validation.isCompatible {
                     remote.applyToStorage()
-                    importedComponents.append("Remote settings (\(remote.remoteType.rawValue))")
+                    importedComponents.append(String(localized: "Remote settings (\(remote.remoteType.displayName))"))
                     LogManager.shared.log(category: .general, message: "Remote settings imported from \(source) (version: \(remote.version), type: \(remote.remoteType.rawValue), device: \(remote.device))")
                 } else {
-                    throw NSError(domain: "SettingsImport", code: 1, userInfo: [NSLocalizedDescriptionKey: "Remote settings conflict: \(validation.message)"])
+                    throw NSError(domain: "SettingsImport", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "Remote settings conflict: \(validation.message)")])
                 }
             } else {
-                throw NSError(domain: "SettingsImport", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid remote settings in \(source)"])
+                throw NSError(domain: "SettingsImport", code: 2, userInfo: [NSLocalizedDescriptionKey: String(localized: "Invalid remote settings in \(source)")])
             }
         }
 
         if let alarms = settings.alarms {
             LogManager.shared.log(category: .general, message: "Attempting to import alarm settings: \(alarms.alarms.count) alarms")
             alarms.applyToStorage()
-            importedComponents.append("Alarm settings (\(alarms.alarms.count) alarms)")
+            importedComponents.append(String(localized: "Alarm settings (\(alarms.alarms.count) alarms)"))
             LogManager.shared.log(category: .general, message: "Alarm settings imported from \(source) (version: \(alarms.version), \(alarms.alarms.count) alarms)")
         }
 
         if let apns = settings.apns {
             if apns.hasValidSettings() {
                 apns.applyToStorage()
-                importedComponents.append("APNS settings")
+                importedComponents.append(String(localized: "APNS settings"))
                 LogManager.shared.log(category: .general, message: "APNS settings imported from \(source) (version: \(apns.version), keyId: \(apns.keyId))")
             } else {
-                throw NSError(domain: "SettingsImport", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid APNS settings in \(source)"])
+                throw NSError(domain: "SettingsImport", code: 3, userInfo: [NSLocalizedDescriptionKey: String(localized: "Invalid APNS settings in \(source)")])
             }
         }
 
         // Update the success message with what was imported
         if !importedComponents.isEmpty {
             let componentsList = importedComponents.joined(separator: ", ")
-            qrCodeErrorMessage = "Successfully imported: \(componentsList)"
+            qrCodeErrorMessage = String(localized: "Successfully imported: \(componentsList)")
+            qrCodeMessageIsSuccess = true
         }
     }
 
@@ -200,7 +206,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         case .nightscout:
             let nightscoutSettings = NightscoutSettingsExport.fromCurrentStorage()
             if !nightscoutSettings.hasValidSettings() {
-                qrCodeErrorMessage = "Please configure your Nightscout settings first (URL and Token)"
+                qrCodeErrorMessage = String(localized: "Please configure your Nightscout settings first (URL and Token)")
                 return nil
             }
             settings = CombinedSettingsExport(
@@ -212,9 +218,9 @@ class ImportExportSettingsViewModel: ObservableObject {
             if !remoteSettings.hasValidSettings() {
                 let currentRemoteType = Storage.shared.remoteType.value
                 if currentRemoteType == .none {
-                    qrCodeErrorMessage = "Please configure your Remote settings first (select a remote type and configure required fields)"
+                    qrCodeErrorMessage = String(localized: "Please configure your Remote settings first (select a remote type and configure required fields)")
                 } else {
-                    qrCodeErrorMessage = "Please complete your Remote settings configuration (check required fields for \(currentRemoteType.rawValue))"
+                    qrCodeErrorMessage = String(localized: "Please complete your Remote settings configuration (check required fields for \(currentRemoteType.displayName))")
                 }
                 return nil
             }
@@ -226,7 +232,7 @@ class ImportExportSettingsViewModel: ObservableObject {
             let alarmSettings = AlarmSettingsExport.fromCurrentStorage()
             LogManager.shared.log(category: .general, message: "Generating alarm export: \(alarmSettings.alarms.count) alarms")
             if !alarmSettings.hasValidSettings() {
-                qrCodeErrorMessage = "Please configure your Alarm settings first"
+                qrCodeErrorMessage = String(localized: "Please configure your Alarm settings first")
                 return nil
             }
             settings = CombinedSettingsExport(
@@ -236,7 +242,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         case .dexcom:
             let dexcomSettings = DexcomSettingsExport.fromCurrentStorage()
             if !dexcomSettings.hasValidSettings() {
-                qrCodeErrorMessage = "Please configure your Dexcom Share settings first (username and password)"
+                qrCodeErrorMessage = String(localized: "Please configure your Dexcom Share settings first (username and password)")
                 return nil
             }
             settings = CombinedSettingsExport(
@@ -246,7 +252,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         case .apns:
             let apnsSettings = APNSSettingsExport.fromCurrentStorage()
             if !apnsSettings.hasValidSettings() {
-                qrCodeErrorMessage = "Please configure your APNS settings first (valid APNS Key ID and APNS Key)"
+                qrCodeErrorMessage = String(localized: "Please configure your APNS settings first (valid APNS Key ID and APNS Key)")
                 return nil
             }
             settings = CombinedSettingsExport(
@@ -317,7 +323,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         } else {
             LogManager.shared.log(category: .general, message: "No settings found, clearing import data")
             // No settings found, show alert and clear any pending data
-            importNotFoundMessage = "The settings file exists but contains no valid settings to import."
+            importNotFoundMessage = String(localized: "The settings file exists but contains no valid settings to import.")
             showImportNotFoundAlert = true
             showImportConfirmation = false
             importPreview = nil
@@ -333,7 +339,7 @@ class ImportExportSettingsViewModel: ObservableObject {
         do {
             try applyImportedSettings(settings, source: pendingImportSource)
         } catch {
-            qrCodeErrorMessage = "Import failed: \(error.localizedDescription)"
+            qrCodeErrorMessage = String(localized: "Import failed: \(error.localizedDescription)")
         }
 
         // Reset confirmation state

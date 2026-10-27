@@ -224,7 +224,7 @@ final class OnboardingViewModel: ObservableObject {
     var progressLabel: String {
         let title = step.phaseTitle
         if let progress = phaseProgress, progress.count > 1 {
-            return "\(title) · \(min(progress.page + 1, progress.count)) of \(progress.count)"
+            return String(localized: "\(title) · \(min(progress.page + 1, progress.count)) of \(progress.count)", comment: "Onboarding progress: phase name, page, page count")
         }
         return title
     }
@@ -324,63 +324,63 @@ final class OnboardingViewModel: ObservableObject {
         }
 
         return [
-            seed(.low, title: "Low glucose",
-                 detail: "Warns when glucose is low, now or soon.",
+            seed(.low, title: String(localized: "Low glucose"),
+                 detail: String(localized: "Warns when glucose is low, now or soon."),
                  requiresNightscout: false)
             {
-                $0.name = "Low glucose"
+                $0.name = String(localized: "Low glucose")
                 $0.belowBG = 70
                 $0.predictiveMinutes = 20
             },
-            seed(.low, title: "Urgent low",
-                 detail: "A separate warning for when glucose is very low.",
+            seed(.low, title: String(localized: "Urgent low"),
+                 detail: String(localized: "A separate warning for when glucose is very low."),
                  requiresNightscout: false)
             {
-                $0.name = "Urgent low"
+                $0.name = String(localized: "Urgent low")
                 $0.belowBG = 54
                 $0.predictiveMinutes = 0
                 $0.persistentMinutes = 0
             },
-            seed(.high, title: "High glucose",
-                 detail: "Warns when glucose is high.",
+            seed(.high, title: String(localized: "High glucose"),
+                 detail: String(localized: "Warns when glucose is high."),
                  requiresNightscout: false)
             {
                 $0.aboveBG = 180
             },
-            seed(.fastDrop, title: "Fast drop",
-                 detail: "Warns when glucose is falling quickly.",
+            seed(.fastDrop, title: String(localized: "Fast drop"),
+                 detail: String(localized: "Warns when glucose is falling quickly."),
                  requiresNightscout: false),
-            seed(.missedReading, title: "Missed readings",
-                 detail: "Warns when glucose stops updating.",
+            seed(.missedReading, title: String(localized: "Missed readings"),
+                 detail: String(localized: "Warns when glucose stops updating."),
                  requiresNightscout: false),
-            seed(.notLooping, title: "Not looping",
-                 detail: "Warns when the loop stops running.",
+            seed(.notLooping, title: String(localized: "Not looping"),
+                 detail: String(localized: "Warns when the loop stops running."),
                  requiresNightscout: true),
-            seed(.battery, title: "Looping phone battery",
-                 detail: "Warns when the battery of the phone running Loop or Trio is low.",
+            seed(.battery, title: String(localized: "Looping phone battery"),
+                 detail: String(localized: "Warns when the battery of the phone running Loop or Trio is low."),
                  requiresNightscout: true),
-            seed(.iob, title: "IOB",
-                 detail: "Warns when insulin on board is high.",
+            seed(.iob, title: String(localized: "IOB"),
+                 detail: String(localized: "Warns when insulin on board is high."),
                  requiresNightscout: true),
-            seed(.cob, title: "COB",
-                 detail: "Warns when carbs on board are high.",
+            seed(.cob, title: String(localized: "COB"),
+                 detail: String(localized: "Warns when carbs on board are high."),
                  requiresNightscout: true),
-            seed(.sensorChange, title: "Sensor change",
-                 detail: "Reminds you when the CGM sensor is due.",
+            seed(.sensorChange, title: String(localized: "Sensor change"),
+                 detail: String(localized: "Reminds you when the CGM sensor is due."),
                  requiresNightscout: true)
             {
                 $0.threshold = 10
                 $0.activeOption = .day
             },
-            seed(.pumpChange, title: "Pump change",
-                 detail: "Reminds you when the pump site is due.",
+            seed(.pumpChange, title: String(localized: "Pump change"),
+                 detail: String(localized: "Reminds you when the pump site is due."),
                  requiresNightscout: true)
             {
                 $0.threshold = 3
                 $0.activeOption = .day
             },
-            seed(.pump, title: "Pump insulin",
-                 detail: "Warns when pump reservoir insulin is low.",
+            seed(.pump, title: String(localized: "Pump insulin"),
+                 detail: String(localized: "Warns when pump reservoir insulin is low."),
                  requiresNightscout: true),
         ]
     }

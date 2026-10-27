@@ -20,7 +20,7 @@ class Observable {
     /// End of the active temp target as Unix epoch seconds; nil = no active temp target.
     var tempTargetEndAt = ObservableValue<TimeInterval?>(default: nil)
 
-    var minAgoText = ObservableValue<String>(default: "?? min ago")
+    var minAgoText = ObservableValue<String>(default: String(localized: "?? min ago"))
     var bgText = ObservableValue<String>(default: "BG")
     var bg = ObservableValue<Int?>(default: nil)
     var bgStale = ObservableValue<Bool>(default: true)
@@ -29,7 +29,7 @@ class Observable {
     var deltaText = ObservableValue<String>(default: "+0")
     var iobText = ObservableValue<String>(default: "--")
 
-    var serverText = ObservableValue<String>(default: "Server")
+    var serverText = ObservableValue<String>(default: String(localized: "Server"))
     var loopStatusText = ObservableValue<String>(default: "")
     var loopStatusColor = ObservableValue<Color>(default: .primary)
     var predictionText = ObservableValue<String>(default: "")

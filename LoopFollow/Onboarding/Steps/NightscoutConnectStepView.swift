@@ -49,8 +49,8 @@ struct NightscoutConnectStepView: View {
     private var addressForm: some View {
         Form {
             titleSection(
-                "Connect to Nightscout",
-                "Enter your site address. We'll check it, and only ask for a token if your site needs one."
+                String(localized: "Connect to Nightscout"),
+                String(localized: "Enter your site address. We'll check it, and only ask for a token if your site needs one.")
             )
             urlSection
         }
@@ -62,8 +62,8 @@ struct NightscoutConnectStepView: View {
                 tokenDoneSection
             } else {
                 titleSection(
-                    "Add a token",
-                    "This site needs a token. Paste one, or have LoopFollow create a read-only token from your API secret."
+                    String(localized: "Add a token"),
+                    String(localized: "This site needs a token. Paste one, or have LoopFollow create a read-only token from your API secret.")
                 )
                 tokenModeSection
 
@@ -198,7 +198,7 @@ struct NightscoutConnectStepView: View {
             HStack {
                 Text("Token")
                 TogglableSecureInput(
-                    placeholder: "Enter Token",
+                    placeholder: String(localized: "Enter Token"),
                     text: $viewModel.nightscoutToken,
                     style: .singleLine,
                     textContentType: .password
@@ -235,7 +235,7 @@ struct NightscoutConnectStepView: View {
             HStack {
                 Text("Secret")
                 TogglableSecureInput(
-                    placeholder: "Enter API Secret",
+                    placeholder: String(localized: "Enter API Secret"),
                     text: $apiSecret,
                     style: .singleLine,
                     textContentType: .password

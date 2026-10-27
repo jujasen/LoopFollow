@@ -42,7 +42,7 @@ struct ImportExportSettingsView: View {
                         HStack {
                             Image(systemName: exportType.icon)
                                 .foregroundColor(.blue)
-                            Text("Export \(exportType.rawValue)")
+                            Text("Export \(exportType.importDescription)")
                             Spacer()
                             Image(systemName: exportType == .alarms ? "list.bullet" : "qrcode")
                                 .foregroundColor(.secondary)
@@ -56,7 +56,7 @@ struct ImportExportSettingsView: View {
 
             if !viewModel.qrCodeErrorMessage.isEmpty {
                 Section {
-                    let isSuccess = viewModel.qrCodeErrorMessage.contains("successfully") || viewModel.qrCodeErrorMessage.contains("Successfully imported")
+                    let isSuccess = viewModel.qrCodeMessageIsSuccess
                     let displayText = isSuccess ? "✅ \(viewModel.qrCodeErrorMessage)" : viewModel.qrCodeErrorMessage
 
                     Text(displayText)
@@ -93,7 +93,7 @@ struct ImportExportSettingsView: View {
                             .padding()
                     }
                 }
-                .navigationTitle("Export \(viewModel.exportType.rawValue)")
+                .navigationTitle("Export \(viewModel.exportType.importDescription)")
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarItems(trailing: Button("Close") {
                     viewModel.isShowingQRCodeDisplay = false
@@ -154,7 +154,7 @@ struct ImportConfirmationView: View {
                             if let url = preview.nightscoutURL, !url.isEmpty {
                                 SettingRowView(
                                     icon: "network",
-                                    title: "Nightscout URL",
+                                    title: String(localized: "Nightscout URL"),
                                     value: url,
                                     color: .blue
                                 )
@@ -163,7 +163,7 @@ struct ImportConfirmationView: View {
                             if let username = preview.dexcomUsername, !username.isEmpty {
                                 SettingRowView(
                                     icon: "person.circle",
-                                    title: "Dexcom Username",
+                                    title: String(localized: "Dexcom Username"),
                                     value: username,
                                     color: .green
                                 )
@@ -172,8 +172,8 @@ struct ImportConfirmationView: View {
                             if let remoteType = preview.remoteType, !remoteType.isEmpty, remoteType != "None" {
                                 SettingRowView(
                                     icon: "antenna.radiowaves.left.and.right",
-                                    title: "Remote Type",
-                                    value: remoteType,
+                                    title: String(localized: "Remote Type"),
+                                    value: RemoteType(rawValue: remoteType)?.displayName ?? remoteType,
                                     color: .orange
                                 )
                             }
@@ -181,8 +181,8 @@ struct ImportConfirmationView: View {
                             if preview.alarmCount > 0 {
                                 SettingRowView(
                                     icon: "bell",
-                                    title: "Alarms",
-                                    value: "\(preview.alarmCount) alarm(s): \(preview.alarmNames.joined(separator: ", "))",
+                                    title: String(localized: "Alarms"),
+                                    value: String(localized: "\(preview.alarmCount) alarm(s): \(preview.alarmNames.joined(separator: ", "))"),
                                     color: .red
                                 )
                             }
@@ -190,7 +190,7 @@ struct ImportConfirmationView: View {
                             if let apnsKeyId = preview.apnsKeyId, !apnsKeyId.isEmpty {
                                 SettingRowView(
                                     icon: "key.horizontal",
-                                    title: "APNS Key ID",
+                                    title: String(localized: "APNS Key ID"),
                                     value: apnsKeyId,
                                     color: .purple
                                 )

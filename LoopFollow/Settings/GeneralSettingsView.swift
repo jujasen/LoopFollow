@@ -108,7 +108,7 @@ struct GeneralSettingsView: View {
 
                         if speakLowBG.value || speakProactiveLowBG.value {
                             BGPicker(
-                                title: "Low BG Limit",
+                                title: String(localized: "Low BG Limit"),
                                 range: 40 ... 108,
                                 value: $speakLowBGLimit.value
                             )
@@ -116,7 +116,7 @@ struct GeneralSettingsView: View {
 
                         if speakProactiveLowBG.value {
                             BGPicker(
-                                title: "Fast Drop Delta",
+                                title: String(localized: "Fast Drop Delta"),
                                 range: 3 ... 20,
                                 value: $speakFastDropDelta.value
                             )
@@ -126,7 +126,7 @@ struct GeneralSettingsView: View {
 
                         if speakHighBG.value {
                             BGPicker(
-                                title: "High BG Limit",
+                                title: String(localized: "High BG Limit"),
                                 range: 140 ... 300,
                                 value: $speakHighBGLimit.value
                             )

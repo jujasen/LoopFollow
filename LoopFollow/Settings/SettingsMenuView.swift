@@ -10,7 +10,7 @@ struct SettingsMenuView: View {
     var body: some View {
         List {
             ForEach(SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty), id: \.0) { section, routes in
-                Section(section.rawValue) {
+                Section(section.displayName) {
                     ForEach(routes) { route in
                         NavigationRow(title: route.title,
                                       icon: route.icon,
@@ -33,6 +33,17 @@ enum SettingsSection: String, CaseIterable, Hashable {
     case alarms = "Alarms"
     case integrations = "Integrations"
     case advanced = "Advanced Settings"
+
+    var displayName: String {
+        switch self {
+        case .data: return String(localized: "Data Settings")
+        case .display: return String(localized: "Display Settings")
+        case .app: return String(localized: "App Settings")
+        case .alarms: return String(localized: "Alarms")
+        case .integrations: return String(localized: "Integrations")
+        case .advanced: return String(localized: "Advanced Settings")
+        }
+    }
 }
 
 /// A single setting inside a settings screen, exposed to Menu search. Leaves
@@ -78,22 +89,22 @@ enum SettingsRoute: Hashable, Identifiable {
         switch self {
         case .nightscout: return "Nightscout"
         case .dexcom: return "Dexcom"
-        case .general: return "General"
-        case .graph: return "Graph"
-        case .infoDisplay: return "Information Display"
-        case .units: return "Units and Metrics"
-        case .tabSettings: return "Tabs"
-        case .backgroundRefresh: return "Background Refresh"
-        case .importExport: return "Import/Export"
+        case .general: return String(localized: "General")
+        case .graph: return String(localized: "Graph")
+        case .infoDisplay: return String(localized: "Information Display")
+        case .units: return String(localized: "Units and Metrics")
+        case .tabSettings: return String(localized: "Tabs")
+        case .backgroundRefresh: return String(localized: "Background Refresh")
+        case .importExport: return String(localized: "Import/Export")
         case .apn: return "APN"
         #if !targetEnvironment(macCatalyst)
-            case .liveActivity: return "Live Activity"
+            case .liveActivity: return String(localized: "Live Activity")
         #endif
-        case .remote: return "Remote"
-        case .alarmSettings: return "Alarms"
-        case .calendar: return "Calendar"
-        case .contact: return "Contact"
-        case .advanced: return "Advanced"
+        case .remote: return String(localized: "Remote")
+        case .alarmSettings: return String(localized: "Alarms")
+        case .calendar: return String(localized: "Calendar")
+        case .contact: return String(localized: "Contact")
+        case .advanced: return String(localized: "Advanced")
         case .settings, .aggregatedStats: return ""
         }
     }
@@ -144,119 +155,119 @@ enum SettingsRoute: Hashable, Identifiable {
     var leaves: [SettingsLeaf] {
         switch self {
         case .nightscout: return [
-                SettingsLeaf("URL"),
-                SettingsLeaf("Access Token", ["token"]),
-                SettingsLeaf("Enable WebSocket", ["websocket", "real-time"]),
+                SettingsLeaf(String(localized: "URL")),
+                SettingsLeaf(String(localized: "Access Token"), ["token"]),
+                SettingsLeaf(String(localized: "Enable WebSocket"), ["websocket", "real-time"]),
             ]
         case .dexcom: return [
-                SettingsLeaf("User Name", ["username"]),
-                SettingsLeaf("Password"),
-                SettingsLeaf("Server"),
+                SettingsLeaf(String(localized: "User Name"), ["username"]),
+                SettingsLeaf(String(localized: "Password")),
+                SettingsLeaf(String(localized: "Server")),
             ]
         case .general: return [
-                SettingsLeaf("Display App Badge", ["badge"]),
-                SettingsLeaf("Persistent Notification"),
-                SettingsLeaf("Appearance", ["dark mode", "light mode", "theme"]),
-                SettingsLeaf("Display Stats"),
-                SettingsLeaf("Display Small Graph"),
-                SettingsLeaf("Color BG Text"),
-                SettingsLeaf("Keep Screen Active", ["screen lock", "screenlock"]),
-                SettingsLeaf("Show Display Name"),
-                SettingsLeaf("Snoozer emoji"),
-                SettingsLeaf("Force portrait mode", ["orientation", "landscape"]),
-                SettingsLeaf("Time Zone Override", ["timezone"]),
-                SettingsLeaf("Speak BG", ["voice", "speech"]),
-                SettingsLeaf("Send anonymous usage stats", ["telemetry", "diagnostics"]),
+                SettingsLeaf(String(localized: "Display App Badge"), ["badge"]),
+                SettingsLeaf(String(localized: "Persistent Notification")),
+                SettingsLeaf(String(localized: "Appearance"), ["dark mode", "light mode", "theme"]),
+                SettingsLeaf(String(localized: "Display Stats")),
+                SettingsLeaf(String(localized: "Display Small Graph")),
+                SettingsLeaf(String(localized: "Color BG Text")),
+                SettingsLeaf(String(localized: "Keep Screen Active"), ["screen lock", "screenlock"]),
+                SettingsLeaf(String(localized: "Show Display Name")),
+                SettingsLeaf(String(localized: "Snoozer emoji")),
+                SettingsLeaf(String(localized: "Force portrait mode"), ["orientation", "landscape"]),
+                SettingsLeaf(String(localized: "Time Zone Override"), ["timezone"]),
+                SettingsLeaf(String(localized: "Speak BG"), ["voice", "speech"]),
+                SettingsLeaf(String(localized: "Send anonymous usage stats"), ["telemetry", "diagnostics"]),
             ]
         case .graph: return [
-                SettingsLeaf("Display Dots"),
-                SettingsLeaf("Display Lines"),
-                SettingsLeaf("Show DIA Lines", ["dia"]),
-                SettingsLeaf("Show −30 min Line", ["-30"]),
-                SettingsLeaf("Show −90 min Line", ["-90"]),
-                SettingsLeaf("Show Yesterday's BG", ["yesterday"]),
-                SettingsLeaf("Show Midnight Lines"),
-                SettingsLeaf("Show Carb/Bolus Values", ["carbs"]),
-                SettingsLeaf("Show Carb Absorption"),
-                SettingsLeaf("Treatments on Small Graph"),
-                SettingsLeaf("Small Graph Height", ["height"]),
-                SettingsLeaf("Hours of Prediction", ["prediction"]),
-                SettingsLeaf("Prediction Style"),
-                SettingsLeaf("Min Basal", ["basal scale"]),
-                SettingsLeaf("Min BG Scale"),
-                SettingsLeaf("Show Days Back", ["history", "days back"]),
+                SettingsLeaf(String(localized: "Display Dots")),
+                SettingsLeaf(String(localized: "Display Lines")),
+                SettingsLeaf(String(localized: "Show DIA Lines"), ["dia"]),
+                SettingsLeaf(String(localized: "Show −30 min Line"), ["-30"]),
+                SettingsLeaf(String(localized: "Show −90 min Line"), ["-90"]),
+                SettingsLeaf(String(localized: "Show Yesterday's BG"), ["yesterday"]),
+                SettingsLeaf(String(localized: "Show Midnight Lines")),
+                SettingsLeaf(String(localized: "Show Carb/Bolus Values"), ["carbs"]),
+                SettingsLeaf(String(localized: "Show Carb Absorption")),
+                SettingsLeaf(String(localized: "Treatments on Small Graph")),
+                SettingsLeaf(String(localized: "Small Graph Height"), ["height"]),
+                SettingsLeaf(String(localized: "Hours of Prediction"), ["prediction"]),
+                SettingsLeaf(String(localized: "Prediction Style")),
+                SettingsLeaf(String(localized: "Min Basal"), ["basal scale"]),
+                SettingsLeaf(String(localized: "Min BG Scale")),
+                SettingsLeaf(String(localized: "Show Days Back"), ["history", "days back"]),
             ]
         case .infoDisplay:
-            return [SettingsLeaf("Hide Information Table")]
+            return [SettingsLeaf(String(localized: "Hide Information Table"))]
                 + InfoType.allCases.map { SettingsLeaf($0.name) }
         case .units: return [
-                SettingsLeaf("Glucose Unit"),
-                SettingsLeaf("Range Mode", ["tir", "titr", "time in range"]),
-                SettingsLeaf("Glycemic Metrics", ["hba1c", "ehba1c", "gmi"]),
-                SettingsLeaf("Variability", ["standard deviation", "cv"]),
+                SettingsLeaf(String(localized: "Glucose Unit")),
+                SettingsLeaf(String(localized: "Range Mode"), ["tir", "titr", "time in range"]),
+                SettingsLeaf(String(localized: "Glycemic Metrics"), ["hba1c", "ehba1c", "gmi"]),
+                SettingsLeaf(String(localized: "Variability"), ["standard deviation", "cv"]),
             ]
         case .backgroundRefresh: return [
-                SettingsLeaf("Background Refresh Type", ["silent tune", "bluetooth", "rileylink", "omnipod", "heartbeat"]),
+                SettingsLeaf(String(localized: "Background Refresh Type"), ["silent tune", "bluetooth", "rileylink", "omnipod", "heartbeat"]),
             ]
         case .importExport: return [
-                SettingsLeaf("Scan QR Code to Import Settings", ["qr"]),
-                SettingsLeaf("Export Settings To QR Code", ["qr"]),
+                SettingsLeaf(String(localized: "Scan QR Code to Import Settings"), ["qr"]),
+                SettingsLeaf(String(localized: "Export Settings To QR Code"), ["qr"]),
             ]
         case .apn: return [
-                SettingsLeaf("APNS Key ID", ["apns"]),
-                SettingsLeaf("APNS Key", ["apns", "p8"]),
+                SettingsLeaf(String(localized: "APNS Key ID"), ["apns"]),
+                SettingsLeaf(String(localized: "APNS Key"), ["apns", "p8"]),
             ]
         #if !targetEnvironment(macCatalyst)
             case .liveActivity: return [
-                    SettingsLeaf("Enable Live Activity"),
-                    SettingsLeaf("Restart Live Activity"),
-                    SettingsLeaf("Grid Slots", ["carplay", "watch"]),
+                    SettingsLeaf(String(localized: "Enable Live Activity")),
+                    SettingsLeaf(String(localized: "Restart Live Activity")),
+                    SettingsLeaf(String(localized: "Grid Slots"), ["carplay", "watch"]),
                 ]
         #endif
         case .remote: return [
-                SettingsLeaf("Loop Remote Control"),
-                SettingsLeaf("Trio Remote Control", ["trc"]),
-                SettingsLeaf("Favorite Foods", ["favorites", "meals", "food"]),
-                SettingsLeaf("Meal with Bolus"),
-                SettingsLeaf("Meal with Fat/Protein"),
-                SettingsLeaf("Guardrails", ["max bolus", "max carbs", "max fat", "max protein"]),
-                SettingsLeaf("Bolus Increment"),
-                SettingsLeaf("Shared Secret"),
-                SettingsLeaf("QR Code URL", ["qr"]),
+                SettingsLeaf(String(localized: "Loop Remote Control")),
+                SettingsLeaf(String(localized: "Trio Remote Control"), ["trc"]),
+                SettingsLeaf(String(localized: "Favorite Foods"), ["favorites", "meals", "food"]),
+                SettingsLeaf(String(localized: "Meal with Bolus")),
+                SettingsLeaf(String(localized: "Meal with Fat/Protein")),
+                SettingsLeaf(String(localized: "Guardrails"), ["max bolus", "max carbs", "max fat", "max protein"]),
+                SettingsLeaf(String(localized: "Bolus Increment")),
+                SettingsLeaf(String(localized: "Shared Secret")),
+                SettingsLeaf(String(localized: "QR Code URL"), ["qr"]),
             ]
         case .alarmSettings: return [
-                SettingsLeaf("All Alerts Snoozed", ["snooze all"]),
-                SettingsLeaf("All Sounds Muted", ["mute all"]),
-                SettingsLeaf("Day starts", ["schedule", "day/night"]),
-                SettingsLeaf("Night starts", ["schedule", "day/night"]),
-                SettingsLeaf("Override System Volume", ["volume"]),
-                SettingsLeaf("Audio During Calls"),
-                SettingsLeaf("Ignore Zero BG"),
-                SettingsLeaf("Auto-Snooze CGM Start", ["autosnooze"]),
-                SettingsLeaf("Volume Buttons Snooze Alarms"),
+                SettingsLeaf(String(localized: "All Alerts Snoozed"), ["snooze all"]),
+                SettingsLeaf(String(localized: "All Sounds Muted"), ["mute all"]),
+                SettingsLeaf(String(localized: "Day starts"), ["schedule", "day/night"]),
+                SettingsLeaf(String(localized: "Night starts"), ["schedule", "day/night"]),
+                SettingsLeaf(String(localized: "Override System Volume"), ["volume"]),
+                SettingsLeaf(String(localized: "Audio During Calls")),
+                SettingsLeaf(String(localized: "Ignore Zero BG")),
+                SettingsLeaf(String(localized: "Auto-Snooze CGM Start"), ["autosnooze"]),
+                SettingsLeaf(String(localized: "Volume Buttons Snooze Alarms")),
             ]
         case .calendar: return [
-                SettingsLeaf("Save BG to Calendar", ["watch", "carplay"]),
-                SettingsLeaf("Calendar Text"),
+                SettingsLeaf(String(localized: "Save BG to Calendar"), ["watch", "carplay"]),
+                SettingsLeaf(String(localized: "Calendar Text")),
             ]
         case .contact: return [
-                SettingsLeaf("Enable Contact BG Updates", ["watch face"]),
-                SettingsLeaf("Background Color"),
-                SettingsLeaf("Color Mode"),
-                SettingsLeaf("Text Color"),
-                SettingsLeaf("Show Trend"),
-                SettingsLeaf("Show Delta"),
-                SettingsLeaf("Show IOB"),
+                SettingsLeaf(String(localized: "Enable Contact BG Updates"), ["watch face"]),
+                SettingsLeaf(String(localized: "Background Color")),
+                SettingsLeaf(String(localized: "Color Mode")),
+                SettingsLeaf(String(localized: "Text Color")),
+                SettingsLeaf(String(localized: "Show Trend")),
+                SettingsLeaf(String(localized: "Show Delta")),
+                SettingsLeaf(String(localized: "Show IOB")),
             ]
         case .advanced: return [
-                SettingsLeaf("Download Treatments"),
-                SettingsLeaf("Download Prediction"),
-                SettingsLeaf("Graph Basal"),
-                SettingsLeaf("Graph Bolus"),
-                SettingsLeaf("Graph Carbs"),
-                SettingsLeaf("Graph Other Treatments"),
-                SettingsLeaf("BG Update Delay", ["delay"]),
-                SettingsLeaf("Debug Log Level", ["logging"]),
+                SettingsLeaf(String(localized: "Download Treatments")),
+                SettingsLeaf(String(localized: "Download Prediction")),
+                SettingsLeaf(String(localized: "Graph Basal")),
+                SettingsLeaf(String(localized: "Graph Bolus")),
+                SettingsLeaf(String(localized: "Graph Carbs")),
+                SettingsLeaf(String(localized: "Graph Other Treatments")),
+                SettingsLeaf(String(localized: "BG Update Delay"), ["delay"]),
+                SettingsLeaf(String(localized: "Debug Log Level"), ["logging"]),
             ]
         case .tabSettings, .settings, .aggregatedStats: return []
         }
@@ -364,7 +375,7 @@ extension UIViewController {
         let a = UIAlertController(title: title,
                                   message: message,
                                   preferredStyle: .alert)
-        a.addAction(UIAlertAction(title: "OK", style: .default))
+        a.addAction(UIAlertAction(title: String(localized: "OK"), style: .default))
         present(a, animated: true)
     }
 }

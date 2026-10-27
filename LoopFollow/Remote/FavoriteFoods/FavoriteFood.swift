@@ -149,9 +149,9 @@ struct StoredFavoriteFood: Identifiable, Codable, Equatable {
     /// "45 g carbs · 3 hr absorption", or the number of serving sizes for a multi-portion food.
     var summary: String {
         if hasMultiplePortions {
-            return "\(portions.count) serving sizes · \(absorptionTimeString) absorption"
+            return String(localized: "\(portions.count) serving sizes · \(absorptionTimeString) absorption")
         }
-        return "\(FavoriteFoodFormatters.carbs(carbs)) carbs · \(absorptionTimeString) absorption"
+        return String(localized: "\(FavoriteFoodFormatters.carbs(carbs)) carbs · \(absorptionTimeString) absorption")
     }
 
     func portion(withID id: String?) -> FavoriteFoodPortion? {

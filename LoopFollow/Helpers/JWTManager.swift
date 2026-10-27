@@ -109,7 +109,7 @@ class JWTManager {
         var errorDescription: String? {
             switch self {
             case .keyDecodingFailed:
-                return "Failed to decode APNs p8 key content. Ensure it is valid base64."
+                return String(localized: "Failed to decode APNs p8 key content. Ensure it is valid base64.")
             }
         }
     }

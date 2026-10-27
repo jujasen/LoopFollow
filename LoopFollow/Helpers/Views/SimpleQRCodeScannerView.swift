@@ -50,7 +50,7 @@ class SimpleQRCodeScannerViewController: UIViewController {
             target: self,
             action: #selector(cancelTapped)
         )
-        navigationItem.title = "Scan QR Code"
+        navigationItem.title = String(localized: "Scan QR Code")
 
         setupCamera()
     }
@@ -63,7 +63,7 @@ class SimpleQRCodeScannerViewController: UIViewController {
               let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
               session.canAddInput(videoInput)
         else {
-            let error = NSError(domain: "QRCodeScannerError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to set up camera input."])
+            let error = NSError(domain: "QRCodeScannerError", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "Failed to set up camera input.")])
             completion(.failure(error))
             return
         }
@@ -76,7 +76,7 @@ class SimpleQRCodeScannerViewController: UIViewController {
             metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             metadataOutput.metadataObjectTypes = [.qr]
         } else {
-            let error = NSError(domain: "QRCodeScannerError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to set up metadata output."])
+            let error = NSError(domain: "QRCodeScannerError", code: 2, userInfo: [NSLocalizedDescriptionKey: String(localized: "Failed to set up metadata output.")])
             completion(.failure(error))
             return
         }
@@ -97,7 +97,7 @@ class SimpleQRCodeScannerViewController: UIViewController {
                 session.stopRunning()
             }
         }
-        let error = NSError(domain: "QRCodeScannerError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Scanning cancelled by user."])
+        let error = NSError(domain: "QRCodeScannerError", code: 0, userInfo: [NSLocalizedDescriptionKey: String(localized: "Scanning cancelled by user.")])
         completion(.failure(error))
     }
 

@@ -101,9 +101,9 @@ class BuildDetails {
     // Expiration header based on build type
     var expirationHeaderString: String {
         if isTestFlightBuild() {
-            return "TestFlight Expires"
+            return String(localized: "TestFlight Expires")
         } else {
-            return "App Expires"
+            return String(localized: "App Expires")
         }
     }
 }

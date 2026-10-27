@@ -11,8 +11,8 @@ struct DataSourceChoiceStepView: View {
             VStack(spacing: 24) {
                 OnboardingStepHeader(
                     systemImage: "antenna.radiowaves.left.and.right",
-                    title: "Choose a data source",
-                    subtitle: "LoopFollow needs a glucose data source. Pick one now — you can change or add more later in Settings."
+                    title: String(localized: "Choose a data source"),
+                    subtitle: String(localized: "LoopFollow needs a glucose data source. Pick one now — you can change or add more later in Settings.")
                 )
                 .padding(.horizontal)
 
@@ -21,19 +21,19 @@ struct DataSourceChoiceStepView: View {
                         source: .nightscout,
                         icon: "globe",
                         title: "Nightscout",
-                        detail: "Follow a Nightscout site. Works with Loop, Trio, and most uploaders. Enables the full set of LoopFollow features."
+                        detail: String(localized: "Follow a Nightscout site. Works with Loop, Trio, and most uploaders. Enables the full set of LoopFollow features.")
                     )
                     choiceCard(
                         source: .dexcom,
                         icon: "sensor.tag.radiowaves.forward.fill",
                         title: "Dexcom Share",
-                        detail: "Follow glucose directly from a Dexcom Share account, without a Nightscout site."
+                        detail: String(localized: "Follow glucose directly from a Dexcom Share account, without a Nightscout site.")
                     )
                     choiceCard(
                         source: .copyFromPhone,
                         icon: "qrcode",
-                        title: "Copy from another phone",
-                        detail: "Already using LoopFollow on another phone? Scan its QR code to copy the connection here."
+                        title: String(localized: "Copy from another phone"),
+                        detail: String(localized: "Already using LoopFollow on another phone? Scan its QR code to copy the connection here.")
                     )
                 }
                 .padding(.horizontal)

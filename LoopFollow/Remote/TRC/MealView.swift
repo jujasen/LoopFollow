@@ -48,7 +48,7 @@ struct MealView: View {
             VStack {
                 Form {
                     if !quickPickMeals.quickPickMeals.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
+                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Meals"), infoText: QuickPickSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(quickPickMeals.quickPickMeals) { meal in
@@ -101,7 +101,7 @@ struct MealView: View {
                         }
 
                         HKQuantityInputView(
-                            label: "Carbs",
+                            label: String(localized: "Carbs"),
                             quantity: $carbs,
                             unit: .gram(),
                             maxLength: 4,
@@ -115,7 +115,7 @@ struct MealView: View {
 
                         if mealWithFatProtein.value {
                             HKQuantityInputView(
-                                label: "Fat",
+                                label: String(localized: "Fat"),
                                 quantity: $fat,
                                 unit: .gram(),
                                 maxLength: 4,
@@ -128,7 +128,7 @@ struct MealView: View {
                             )
 
                             HKQuantityInputView(
-                                label: "Protein",
+                                label: String(localized: "Protein"),
                                 quantity: $protein,
                                 unit: .gram(),
                                 maxLength: 4,
@@ -143,7 +143,7 @@ struct MealView: View {
 
                         if mealWithBolus.value {
                             HKQuantityInputView(
-                                label: "Bolus Amount",
+                                label: String(localized: "Bolus Amount"),
                                 quantity: $bolusAmount,
                                 unit: .internationalUnit(),
                                 maxLength: 4,
@@ -238,31 +238,31 @@ struct MealView: View {
                     let fatAmount = fat.doubleValue(for: HKUnit.gram())
                     let bolusAmount = bolusAmount.doubleValue(for: .internationalUnit())
 
-                    var message = "Are you sure you want to send the meal data"
+                    var message: String
 
                     if let selectedTime = selectedTime {
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
                         let timeString = timeFormatter.string(from: selectedTime)
-                        message += " for \(timeString)?"
+                        message = String(localized: "Are you sure you want to send the meal data for \(timeString)?")
                     } else {
-                        message += " now?"
+                        message = String(localized: "Are you sure you want to send the meal data now?")
                     }
 
                     if carbsAmount > 0 {
-                        message += String(format: "\nCarbs: %.0f g", carbsAmount)
+                        message += "\n" + String(format: String(localized: "Carbs: %.0f g"), carbsAmount)
                     }
 
                     if proteinAmount > 0 {
-                        message += String(format: "\nProtein: %.0f g", proteinAmount)
+                        message += "\n" + String(format: String(localized: "Protein: %.0f g"), proteinAmount)
                     }
 
                     if fatAmount > 0 {
-                        message += String(format: "\nFat: %.0f g", fatAmount)
+                        message += "\n" + String(format: String(localized: "Fat: %.0f g"), fatAmount)
                     }
 
                     if bolusAmount > 0 {
-                        message += String(format: "\nBolus: %.2f U", bolusAmount)
+                        message += "\n" + String(format: String(localized: "Bolus: %.2f U"), bolusAmount)
                     }
 
                     return Alert(
@@ -271,7 +271,7 @@ struct MealView: View {
                         primaryButton: .default(Text("Confirm"), action: {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 if bolusAmount > 0 {
-                                    AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
+                                    AuthService.authenticate(reason: String(localized: "Confirm your identity to send bolus.")) { result in
                                         DispatchQueue.main.async {
                                             switch result {
                                             case .success:
@@ -281,7 +281,7 @@ struct MealView: View {
                                                 self.alertType = .validationError
                                                 self.showAlert = true
                                             case .failed:
-                                                self.alertMessage = "Authentication failed"
+                                                self.alertMessage = String(localized: "Authentication failed")
                                                 self.alertType = .validationError
                                                 self.showAlert = true
                                             case .canceled:
@@ -362,7 +362,7 @@ struct MealView: View {
                             bolus: bolusAmount.doubleValue(for: .internationalUnit())
                         )
                     }
-                    statusMessage = "Meal command sent successfully."
+                    statusMessage = String(localized: "Meal command sent successfully.")
                     LogManager.shared.log(
                         category: .apns,
                         message: "sendMealPushNotification succeeded - Carbs: \(carbs.doubleValue(for: .gram())) g, Protein: \(protein.doubleValue(for: .gram())) g, Fat: \(fat.doubleValue(for: .gram())) g, Bolus: \(bolusAmount.doubleValue(for: .internationalUnit())) U, Scheduled: \(scheduledDate != nil ? formatDate(scheduledDate!) : "now")"
@@ -376,7 +376,7 @@ struct MealView: View {
                     isScheduling = false
                     alertType = .statusSuccess
                 } else {
-                    statusMessage = errorMessage ?? "Failed to send meal command."
+                    statusMessage = errorMessage ?? String(localized: "Failed to send meal command.")
                     LogManager.shared.log(
                         category: .apns,
                         message: "sendMealPushNotification failed with error: \(errorMessage ?? "unknown error")"

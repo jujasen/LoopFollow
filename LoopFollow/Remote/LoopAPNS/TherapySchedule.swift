@@ -15,9 +15,9 @@ enum TherapySettingKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .carbRatio: return "Carb Ratios"
-        case .basalRate: return "Basal Rates"
-        case .insulinSensitivity: return "Insulin Sensitivities"
+        case .carbRatio: return String(localized: "Carb Ratios")
+        case .basalRate: return String(localized: "Basal Rates")
+        case .insulinSensitivity: return String(localized: "Insulin Sensitivities")
         }
     }
 
@@ -138,18 +138,18 @@ enum TherapySchedule {
         var errorDescription: String? {
             switch self {
             case .empty:
-                return "The schedule needs at least one time."
+                return String(localized: "The schedule needs at least one time.")
             case .mustStartAtMidnight:
-                return "The first time must be 00:00."
+                return String(localized: "The first time must be 00:00.")
             case let .duplicateTime(start):
-                return "\(TherapySchedule.timeString(start)) is used more than once."
+                return String(localized: "\(TherapySchedule.timeString(start)) is used more than once.")
             case let .tooManyTimes(maximum):
-                return "The pump holds at most \(maximum) times."
+                return String(localized: "The pump holds at most \(maximum) times.")
             case let .outOfRange(_, value, range):
-                return String(format: "%@ is outside what Loop allows (%@–%@).",
+                return String(format: String(localized: "%@ is outside what Loop allows (%@–%@)."),
                               format(value), format(range.lowerBound), format(range.upperBound))
             case let .unsupportedIncrement(value, increment):
-                return String(format: "%@ is not a step of %@ the pump can deliver.", format(value, digits: 3), format(increment, digits: 2))
+                return String(format: String(localized: "%@ is not a step of %@ the pump can deliver."), format(value, digits: 3), format(increment, digits: 2))
             }
         }
 

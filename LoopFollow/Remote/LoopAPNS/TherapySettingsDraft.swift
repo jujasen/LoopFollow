@@ -27,6 +27,27 @@ enum TherapySetting: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .closedLoop: return String(localized: "Closed Loop")
+        case .dosingStrategy: return String(localized: "Dosing Strategy")
+        case .glucoseSafetyLimit: return String(localized: "Glucose Safety Limit")
+        case .correctionRange: return String(localized: "Correction Range")
+        case .preMealRange: return String(localized: "Pre-Meal Range")
+        case .workoutRange: return String(localized: "Workout Range")
+        case .carbRatio: return String(localized: "Carb Ratios")
+        case .basalRate: return String(localized: "Basal Rates")
+        case .maximumBasalRate: return String(localized: "Maximum Basal Rate")
+        case .maximumBolus: return String(localized: "Maximum Bolus")
+        case .insulinSensitivity: return String(localized: "Insulin Sensitivities")
+        case .insulinModel: return String(localized: "Insulin Model")
+        case .overridePresets: return String(localized: "Override Presets")
+        case .glucoseBasedPartialApplication: return String(localized: "Glucose Based Partial Application")
+        case .integralRetrospectiveCorrection: return String(localized: "Integral Retrospective Correction")
+        }
+    }
+
+    /// English name used in the APNS alert text sent to Loop. Not localized: it is part of the payload.
+    var alertTitle: String {
+        switch self {
         case .closedLoop: return "Closed Loop"
         case .dosingStrategy: return "Dosing Strategy"
         case .glucoseSafetyLimit: return "Glucose Safety Limit"
@@ -87,8 +108,8 @@ enum InsulinModelOption: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .rapidActingAdult: return "Rapid-Acting – Adults"
-        case .rapidActingChild: return "Rapid-Acting – Children"
+        case .rapidActingAdult: return String(localized: "Rapid-Acting – Adults")
+        case .rapidActingChild: return String(localized: "Rapid-Acting – Children")
         case .fiasp: return "Fiasp"
         case .lyumjev: return "Lyumjev"
         case .afrezza: return "Afrezza"
@@ -100,7 +121,7 @@ enum InsulinModelOption: String, CaseIterable, Identifiable {
     static let selectable: [InsulinModelOption] = [.rapidActingAdult, .rapidActingChild, .fiasp, .lyumjev]
 
     static func title(for rawValue: String?) -> String {
-        guard let rawValue else { return "Unknown" }
+        guard let rawValue else { return String(localized: "Unknown") }
         return InsulinModelOption(rawValue: rawValue)?.title ?? rawValue
     }
 }
@@ -113,13 +134,13 @@ enum DosingStrategyOption: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .tempBasalOnly: return "Temp Basal Only"
-        case .automaticBolus: return "Automatic Bolus"
+        case .tempBasalOnly: return String(localized: "Temp Basal Only")
+        case .automaticBolus: return String(localized: "Automatic Bolus")
         }
     }
 
     static func title(for rawValue: String?) -> String {
-        guard let rawValue else { return "Unknown" }
+        guard let rawValue else { return String(localized: "Unknown") }
         return DosingStrategyOption(rawValue: rawValue)?.title ?? rawValue
     }
 }
@@ -154,7 +175,7 @@ struct OverridePresetDraft: Identifiable, Equatable {
     var insulinNeedsPercent: Int { Int((insulinNeedsScaleFactor * 100).rounded()) }
 
     static func durationString(_ seconds: Int) -> String {
-        guard seconds > 0 else { return "Indefinite" }
+        guard seconds > 0 else { return String(localized: "Indefinite", comment: "Override duration: no end") }
         let hours = seconds / 3600
         let minutes = (seconds % 3600) / 60
         switch (hours, minutes) {
@@ -355,7 +376,7 @@ struct TherapySettingsDraft: Equatable {
 
     /// Names for the notification Loop shows, from a payload's keys: "Carb Ratios and Insulin Sensitivities".
     static func changedTitles(in payload: [String: Any]) -> [String] {
-        TherapySetting.allCases.filter { payload[$0.payloadKey] != nil }.map(\.title)
+        TherapySetting.allCases.filter { payload[$0.payloadKey] != nil }.map(\.alertTitle)
     }
 
     // MARK: - Confirmation lines
@@ -363,25 +384,25 @@ struct TherapySettingsDraft: Equatable {
     func changes(from original: TherapySettingsDraft) -> [TherapyChange] {
         let g = glucoseDigits
         let gUnit = glucoseUnitLabel
-        func glucose(_ value: Double?) -> String { value.map { TherapySchedule.format($0, digits: g) + " " + gUnit } ?? "Unknown" }
+        func glucose(_ value: Double?) -> String { value.map { TherapySchedule.format($0, digits: g) + " " + gUnit } ?? String(localized: "Unknown") }
         func glucoseRange(_ range: ClosedRange<Double>?) -> String {
-            range.map { TherapySchedule.formatRange($0.lowerBound, $0.upperBound, digits: g) + " " + gUnit } ?? "Unknown"
+            range.map { TherapySchedule.formatRange($0.lowerBound, $0.upperBound, digits: g) + " " + gUnit } ?? String(localized: "Unknown")
         }
-        func insulin(_ value: Double?, _ unit: String) -> String { value.map { TherapySchedule.format($0, digits: 3) + " " + unit } ?? "Unknown" }
-        func onOff(_ value: Bool?) -> String { value.map { $0 ? "On" : "Off" } ?? "Unknown" }
+        func insulin(_ value: Double?, _ unit: String) -> String { value.map { TherapySchedule.format($0, digits: 3) + " " + unit } ?? String(localized: "Unknown") }
+        func onOff(_ value: Bool?) -> String { value.map { $0 ? String(localized: "On") : String(localized: "Off") } ?? String(localized: "Unknown") }
         func line<T>(_ old: T, _ new: T, _ describe: (T) -> String) -> [String] { ["\(describe(old)) → \(describe(new))"] }
 
         return changedSettings(from: original).map { setting in
             switch setting {
             case .closedLoop:
                 return TherapyChange(setting: setting, lines: line(original.closedLoop, closedLoop, onOff),
-                                     warning: closedLoop == false ? "Loop stops dosing automatically. It only gives insulin that is bolused by hand." : nil)
+                                     warning: closedLoop == false ? String(localized: "Loop stops dosing automatically. It only gives insulin that is bolused by hand.") : nil)
             case .dosingStrategy:
                 return TherapyChange(setting: setting, lines: line(original.dosingStrategy, dosingStrategy, DosingStrategyOption.title), warning: nil)
             case .glucoseSafetyLimit:
                 let lowered = (suspendThreshold ?? 0) < (original.suspendThreshold ?? .infinity)
                 return TherapyChange(setting: setting, lines: line(original.suspendThreshold, suspendThreshold, glucose),
-                                     warning: lowered ? "A lower Glucose Safety Limit lets Loop keep giving insulin at lower glucose." : nil)
+                                     warning: lowered ? String(localized: "A lower Glucose Safety Limit lets Loop keep giving insulin at lower glucose.") : nil)
             case .correctionRange:
                 return TherapyChange(setting: setting, lines: scheduleLines(TherapySchedule.changeLines(from: original.correctionRanges, to: correctionRanges, digits: g), unit: gUnit), warning: nil)
             case .preMealRange:
@@ -395,11 +416,11 @@ struct TherapySettingsDraft: Equatable {
             case .maximumBasalRate:
                 let raised = (maximumBasalRate ?? 0) > (original.maximumBasalRate ?? -.infinity)
                 return TherapyChange(setting: setting, lines: line(original.maximumBasalRate, maximumBasalRate) { insulin($0, "U/h") },
-                                     warning: raised ? "A higher Maximum Basal Rate lets Loop give more insulin through temp basals." : nil)
+                                     warning: raised ? String(localized: "A higher Maximum Basal Rate lets Loop give more insulin through temp basals.") : nil)
             case .maximumBolus:
                 let raised = (maximumBolus ?? 0) > (original.maximumBolus ?? -.infinity)
                 return TherapyChange(setting: setting, lines: line(original.maximumBolus, maximumBolus) { insulin($0, "U") },
-                                     warning: raised ? "A higher Maximum Bolus allows larger boluses, also automatic ones." : nil)
+                                     warning: raised ? String(localized: "A higher Maximum Bolus allows larger boluses, also automatic ones.") : nil)
             case .insulinModel:
                 return TherapyChange(setting: setting, lines: line(original.insulinModel, insulinModel, InsulinModelOption.title), warning: nil)
             case .overridePresets:
@@ -414,7 +435,7 @@ struct TherapySettingsDraft: Equatable {
 
     private func scheduleLines(_ lines: [String], unit: String) -> [String] {
         // Times can be reordered without changing a value, which leaves nothing to list.
-        lines.isEmpty ? ["Times changed"] : lines.map { $0.hasPrefix("−") ? $0 : "\($0) \(unit)" }
+        lines.isEmpty ? [String(localized: "Times changed")] : lines.map { $0.hasPrefix("−") ? $0 : "\($0) \(unit)" }
     }
 
     private func presetChangeLines(from old: [OverridePresetDraft]) -> [String] {
@@ -433,23 +454,23 @@ struct TherapySettingsDraft: Equatable {
             }
             guard before != preset else { continue }
             var parts = [String]()
-            if before.name != preset.name { parts.append("name \(before.name) → \(preset.name)") }
-            if before.symbol != preset.symbol { parts.append("symbol \(before.symbol) → \(preset.symbol)") }
+            if before.name != preset.name { parts.append(String(localized: "name \(before.name) → \(preset.name)", comment: "Override preset change line")) }
+            if before.symbol != preset.symbol { parts.append(String(localized: "symbol \(before.symbol) → \(preset.symbol)", comment: "Override preset change line")) }
             if before.insulinNeedsScaleFactor != preset.insulinNeedsScaleFactor {
-                parts.append("insulin needs \(before.insulinNeedsPercent)% → \(preset.insulinNeedsPercent)%")
+                parts.append(String(localized: "insulin needs \(before.insulinNeedsPercent)% → \(preset.insulinNeedsPercent)%", comment: "Override preset change line"))
             }
             if before.targetRange != preset.targetRange {
                 func target(_ range: ClosedRange<Double>?) -> String {
-                    range.map { TherapySchedule.formatRange($0.lowerBound, $0.upperBound, digits: glucoseDigits) + " " + glucoseUnitLabel } ?? "Correction Range"
+                    range.map { TherapySchedule.formatRange($0.lowerBound, $0.upperBound, digits: glucoseDigits) + " " + glucoseUnitLabel } ?? String(localized: "Correction Range")
                 }
-                parts.append("target \(target(before.targetRange)) → \(target(preset.targetRange))")
+                parts.append(String(localized: "target \(target(before.targetRange)) → \(target(preset.targetRange))", comment: "Override preset change line"))
             }
             if before.duration != preset.duration {
-                parts.append("duration \(OverridePresetDraft.durationString(before.duration)) → \(OverridePresetDraft.durationString(preset.duration))")
+                parts.append(String(localized: "duration \(OverridePresetDraft.durationString(before.duration)) → \(OverridePresetDraft.durationString(preset.duration))", comment: "Override preset change line"))
             }
             lines.append("\(preset.symbol) \(preset.name): " + parts.joined(separator: ", "))
         }
-        if lines.isEmpty { lines.append("Order changed") }
+        if lines.isEmpty { lines.append(String(localized: "Order changed")) }
         return lines
     }
 

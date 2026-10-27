@@ -35,7 +35,7 @@ struct WelcomeStepView: View {
             VStack(spacing: 12) {
                 if viewModel.isAlreadyConfigured {
                     Button { viewModel.skip() } label: {
-                        primaryLabel("Skip")
+                        primaryLabel(String(localized: "Skip"))
                     }
                     .buttonStyle(.borderedProminent)
 
@@ -45,7 +45,7 @@ struct WelcomeStepView: View {
                     }
                 } else {
                     Button { advance() } label: {
-                        primaryLabel("Get Started")
+                        primaryLabel(String(localized: "Get Started"))
                     }
                     .buttonStyle(.borderedProminent)
 
