@@ -273,12 +273,12 @@ enum FavoriteFoodFormatters {
         let minutes = totalMinutes % 60
 
         if hours == 0 {
-            return "\(minutes) min"
+            return String(localized: "\(minutes) min")
         }
         if minutes == 0 {
-            return "\(hours) hr"
+            return String(localized: "\(hours) hr")
         }
-        return "\(hours) hr \(minutes) min"
+        return String(localized: "\(hours) hr \(minutes) min")
     }
 }
 

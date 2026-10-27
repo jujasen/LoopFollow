@@ -19,9 +19,9 @@ enum TimeUnit {
     /// A user-facing label
     var label: String {
         switch self {
-        case .minute: return "min"
-        case .hour: return "hours"
-        case .day: return "days"
+        case .minute: return String(localized: "min")
+        case .hour: return String(localized: "hours")
+        case .day: return String(localized: "days")
         case .none: return "none"
         }
     }

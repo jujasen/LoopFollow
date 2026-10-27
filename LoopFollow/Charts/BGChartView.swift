@@ -1599,7 +1599,7 @@ private struct StaticYAxisOverlay: View, Equatable {
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
                         let rate = basalScale > 0 ? v / basalScale : 0
-                        Text(String(format: "%.1fU", rate))
+                        Text(Localizer.formatToLocalizedString(rate, maxFractionDigits: 1, minFractionDigits: 1) + String(localized: "U"))
                     }
                 }
             }

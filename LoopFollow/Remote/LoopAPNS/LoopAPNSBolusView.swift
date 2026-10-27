@@ -54,7 +54,7 @@ struct LoopAPNSBolusView: View {
                                 }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
-                                            Text("\(String(format: "%.2f", recommendedBolus))U")
+                                            Text("\(Localizer.formatToLocalizedString(recommendedBolus, maxFractionDigits: 2, minFractionDigits: 2))U")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
                                             Text(minutesSinceCalculation == 1 ? String(localized: "Calculated 1 minute ago") : String(localized: "Calculated \(minutesSinceCalculation) minutes ago"))
@@ -285,7 +285,7 @@ struct LoopAPNSBolusView: View {
                 case .confirmation:
                     return Alert(
                         title: Text("Confirm Insulin"),
-                        message: Text("Send \(String(format: "%.2f", insulinAmount.doubleValue(for: .internationalUnit()))) units of insulin?"),
+                        message: Text("Send \(Localizer.formatToLocalizedString(insulinAmount.doubleValue(for: .internationalUnit()), maxFractionDigits: 2, minFractionDigits: 2)) units of insulin?"),
                         primaryButton: .default(Text("Send")) {
                             authenticateAndSendInsulin()
                         },
@@ -344,7 +344,7 @@ struct LoopAPNSBolusView: View {
         let insulinValue = insulinAmount.doubleValue(for: .internationalUnit())
 
         if insulinValue > maxBolus {
-            alertMessage = String(localized: "Insulin amount (\(String(format: "%.2f", insulinValue))U) exceeds the maximum allowed (\(String(format: "%.2f", maxBolus))U). Please reduce the amount.")
+            alertMessage = String(localized: "Insulin amount (\(Localizer.formatToLocalizedString(insulinValue, maxFractionDigits: 2, minFractionDigits: 2))U) exceeds the maximum allowed (\(Localizer.formatToLocalizedString(maxBolus, maxFractionDigits: 2, minFractionDigits: 2))U). Please reduce the amount.")
             alertType = .error
             showAlert = true
             return

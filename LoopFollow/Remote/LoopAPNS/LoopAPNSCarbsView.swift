@@ -51,14 +51,14 @@ struct LoopAPNSCarbsView: View {
 
     private var absorptionTimeText: String {
         if absorptionMinutes == 0 {
-            return "\(absorptionHours) hr"
+            return String(localized: "\(absorptionHours) hr")
         }
 
-        return "\(absorptionHours) hr \(absorptionMinutes) min"
+        return String(localized: "\(absorptionHours) hr \(absorptionMinutes) min")
     }
 
     private var absorptionConfirmationText: String {
-        String(format: "%.1f", absorptionTimeValue)
+        Localizer.formatToLocalizedString(absorptionTimeValue, maxFractionDigits: 1, minFractionDigits: 1)
     }
 
     private var minimumAbsorptionPreset: AbsorptionPreset {

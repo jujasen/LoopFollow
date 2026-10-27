@@ -8552,6 +8552,176 @@
           }
         }
       }
+    },
+    "Acknowledge": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kvitter"
+          }
+        }
+      }
+    },
+    "Snooze": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre"
+          }
+        }
+      }
+    },
+    "Snooze for": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre i"
+          }
+        }
+      }
+    },
+    "All alerts snoozed": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle varsler slumres"
+          }
+        }
+      }
+    },
+    "− 30m": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "− 30 m"
+          }
+        }
+      }
+    },
+    "+ 30m": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ 30 m"
+          }
+        }
+      }
+    },
+    "End now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avslutt nå"
+          }
+        }
+      }
+    },
+    "Snooze all · 1h": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre alle · 1 t"
+          }
+        }
+      }
+    },
+    "Snooze Date": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre til dato"
+          }
+        }
+      }
+    },
+    "Snooze Time": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre til klokkeslett"
+          }
+        }
+      }
+    },
+    "Snooze until (date)": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre til (dato)"
+          }
+        }
+      }
+    },
+    "Snooze until (time)": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre til (klokkeslett)"
+          }
+        }
+      }
+    },
+    "hours": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "timer"
+          }
+        }
+      }
+    },
+    "%lld hr %lld min": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld t %lld min"
+          }
+        }
+      }
+    },
+    "Insulin sent to Loop. Loop confirms when it is given, and LoopFollow warns you if Loop rejects it.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulin sendt til Loop. Loop bekrefter når den er gitt, og LoopFollow varsler deg hvis Loop avviser den."
+          }
+        }
+      }
+    },
+    "Carbs for %@ sent to Loop. LoopFollow warns you if Loop rejects them.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbo for kl. %@ sendt til Loop. LoopFollow varsler deg hvis Loop avviser dem."
+          }
+        }
+      }
+    },
+    "%@ min ago": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min siden"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
