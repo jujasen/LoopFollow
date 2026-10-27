@@ -10,6 +10,9 @@ import Testing
 /// (`TherapySettingsRemoteNotification` / `TherapySettingsAction`), which is tested against the
 /// same shape. Change the two together.
 struct TherapySettingsTests {
+    /// The app's messages follow the phone's language; English wording is only checked in English.
+    static var runsInEnglish: Bool { Bundle.main.preferredLocalizations.first?.hasPrefix("en") ?? true }
+
     private static func entry(_ hour: Double, _ value: Double) -> TherapyScheduleEntry {
         TherapyScheduleEntry(start: Int(hour * 3600), value: value)
     }
@@ -301,7 +304,7 @@ struct TherapySettingsTests {
         draft.suspendThreshold = 95
         draft.preMealRange = 95 ... 100
         draft.correctionRanges = [TherapyRangeEntry(start: 0, low: 90, high: 110)]
-        #expect(Self.blocking(draft, original, .correctionRange).first?.message.contains("Glucose Safety Limit") == true)
+        #expect(Self.blocking(draft, original, .correctionRange).first?.message.contains(String(localized: "the Glucose Safety Limit")) == true)
         #expect(!Self.blocking(draft, original, .glucoseSafetyLimit).isEmpty)
 
         draft.correctionRanges = [TherapyRangeEntry(start: 0, low: 100, high: 181)]
@@ -337,7 +340,7 @@ struct TherapySettingsTests {
         let original = Self.base()
         var draft = original
         draft.basalRates = [Self.entry(0, 1.6)]
-        #expect(Self.blocking(draft, original, .basalRate).first?.message.contains("Maximum Basal Rate") == true)
+        #expect(Self.blocking(draft, original, .basalRate).first.map { !Self.runsInEnglish || $0.message.contains("Maximum Basal Rate") } == true)
         draft.basalRates = [Self.entry(0, 0.07)]
         #expect(!Self.blocking(draft, original, .basalRate).isEmpty)
         draft.basalRates = [Self.entry(0, 0)]
@@ -360,7 +363,7 @@ struct TherapySettingsTests {
         #expect(Self.blocking(draft, original, .maximumBasalRate).isEmpty)
         #expect(!Self.warnings(draft, original, .maximumBasalRate).isEmpty)
         draft.maximumBasalRate = 0.25
-        #expect(Self.blocking(draft, original, .maximumBasalRate).first?.message.contains("highest basal rate") == true)
+        #expect(Self.blocking(draft, original, .maximumBasalRate).first.map { !Self.runsInEnglish || $0.message.contains("highest basal rate") } == true)
 
         // A lower carb ratio in the same command is what Loop checks against.
         draft.maximumBasalRate = 4.5
@@ -454,7 +457,7 @@ struct TherapySettingsTests {
         #expect(bolus.warning != nil)
 
         let loop = try #require(changes[.closedLoop])
-        #expect(loop.lines == ["On → Off"])
+        #expect(loop.lines == ["\(String(localized: "On")) → \(String(localized: "Off"))"])
         #expect(loop.warning != nil)
 
         let suspend = try #require(changes[.glucoseSafetyLimit])
@@ -487,7 +490,7 @@ struct TherapySettingsTests {
         draft.overridePresets![0].insulinNeedsScaleFactor = 1.5
         draft.overridePresets!.append(OverridePresetDraft(name: "Run", symbol: "🏃", duration: 3600, insulinNeedsScaleFactor: 0.5))
         let lines = draft.changes(from: original).first { $0.setting == .overridePresets }?.lines ?? []
-        #expect(lines == ["🤒 Sick: insulin needs 130% → 150%", "+ 🏃 Run: 50%, 1 h"])
+        #expect(lines == ["🤒 Sick: " + String(localized: "insulin needs \(130)% → \(150)%"), "+ 🏃 Run: 50%, 1 h"])
 
         draft = original
         draft.overridePresets = []

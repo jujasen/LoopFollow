@@ -56,8 +56,8 @@ struct CarbFoodLabelTests {
 
     @Test("chart pill shows the emoji and the name")
     func chartPill() {
-        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: "🍕 Pizza"), grams: 30, time: "12:30") == "Carbs 🍕\nPizza\n30g\n12:30")
-        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: "🌮"), grams: 30, time: "12:30") == "Carbs 🌮\n30g\n12:30")
-        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: nil), grams: 30, time: "12:30") == "Carbs\n30g\n12:30")
+        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: "🍕 Pizza"), grams: 30, time: "12:30") == String(localized: "Carbs \("🍕")") + "\nPizza\n30g\n12:30")
+        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: "🌮"), grams: 30, time: "12:30") == String(localized: "Carbs \("🌮")") + "\n30g\n12:30")
+        #expect(BGChartModel.carbPillText(food: CarbFoodLabel(foodType: nil), grams: 30, time: "12:30") == String(localized: "Carbs") + "\n30g\n12:30")
     }
 }

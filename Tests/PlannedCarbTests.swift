@@ -118,8 +118,8 @@ struct PlannedCarbTests {
     @Test("chart pill shows the meal, the grams and the window")
     func chartPill() {
         #expect(BGChartModel.plannedCarbPillText(food: CarbFoodLabel(foodType: "🥛 Melk"), grams: 6, window: ("21:30", "23:00"))
-            == "Later carbs 🥛\nMelk\n6g\n21:30–23:00")
+            == String(localized: "Later carbs \("🥛")") + "\nMelk\n6g\n21:30–23:00")
         #expect(BGChartModel.plannedCarbPillText(food: CarbFoodLabel(foodType: nil), grams: 6, window: ("21:30", "23:00"))
-            == "Later carbs\n6g\n21:30–23:00")
+            == String(localized: "Later carbs") + "\n6g\n21:30–23:00")
     }
 }
