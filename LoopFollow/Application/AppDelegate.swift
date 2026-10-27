@@ -49,9 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
-        let action = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: String(localized: "Open App"), options: .foreground)
-        let category = UNNotificationCategory(identifier: BackgroundAlertIdentifier.categoryIdentifier, actions: [action], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
+        AlarmManager.registerNotificationCategories()
 
         UNUserNotificationCenter.current().delegate = self
 
@@ -189,9 +187,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Observable.shared.selectedTabIndex.value = 0
         }
 
-        if response.actionIdentifier == "snooze" {
-            AlarmManager.shared.performSnooze()
-        }
+        AlarmManager.shared.handleNotificationAction(response.actionIdentifier)
 
         completionHandler()
     }

@@ -181,6 +181,36 @@
           }
         }
       }
+    },
+    "I've checked": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeg har sjekket"
+          }
+        }
+      }
+    },
+    "Snooze 1 h": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slumre 1 t"
+          }
+        }
+      }
+    },
+    "«I've checked» keeps it quiet until glucose comes down or the pod is changed.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Jeg har sjekket» holder varselet stille til BS går ned eller poden byttes."
+          }
+        }
+      }
     }
   }
 }

@@ -9,6 +9,18 @@ enum PumpFailureText {
         String(localized: "Pump may not be delivering insulin", table: "PumpFailure", comment: "Title of the alert when glucose keeps rising although insulin was given")
     }
 
+    static var acknowledgeTitle: String {
+        String(localized: "I've checked", table: "PumpFailure", comment: "Button on the pump-delivery alert: silences it until glucose comes down or the pod is changed")
+    }
+
+    static var snoozeHourTitle: String {
+        String(localized: "Snooze 1 h", table: "PumpFailure", comment: "Button on the pump-delivery alert: snoozes it for one hour")
+    }
+
+    static var acknowledgeHint: String {
+        String(localized: "«I've checked» keeps it quiet until glucose comes down or the pod is changed.", table: "PumpFailure", comment: "Explains the acknowledge button on the pump-delivery alert")
+    }
+
     static func body(_ assessment: PumpDeliveryCheck.Assessment?) -> String {
         let advice = String(localized: "Check the pod and cannula, measure ketones, and consider insulin by pen and a new pod.", table: "PumpFailure", comment: "Advice in the pump-delivery alert")
         guard let assessment else { return advice }

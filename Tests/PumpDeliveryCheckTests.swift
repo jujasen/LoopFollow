@@ -8,7 +8,7 @@ import Testing
 struct PumpDeliveryCheckTests {
     private static let oslo = TimeZone(identifier: "Europe/Oslo")!
 
-    private static func check(_ fixture: PumpDeliveryFixtures.Fixture) -> PumpDeliveryCheck {
+    static func check(_ fixture: PumpDeliveryFixtures.Fixture) -> PumpDeliveryCheck {
         let now = fixture.now
         func at(_ offset: Int) -> Date { now.addingTimeInterval(TimeInterval(offset)) }
         return PumpDeliveryCheck(

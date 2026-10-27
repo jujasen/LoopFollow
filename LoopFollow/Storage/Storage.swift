@@ -246,6 +246,8 @@ class Storage {
     var insightTabPlaced = StorageValue<Bool>(key: "insightTabPlaced", defaultValue: false)
     /// Set once the pump-delivery alert has been added to the alarm list.
     var pumpFailureAlarmAdded = StorageValue<Bool>(key: "pumpFailureAlarmAdded", defaultValue: false)
+    /// «Jeg har sjekket» on the pump-delivery alert; see PumpFailureAcknowledgement.
+    var pumpFailureAcknowledgement = StorageValue<PumpFailureAcknowledgement?>(key: "pumpFailureAcknowledgement", defaultValue: nil)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 

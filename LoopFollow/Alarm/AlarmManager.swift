@@ -181,14 +181,98 @@ class AlarmManager {
         }
     }
 
+    // MARK: - Pump-delivery alert
+
+    /// «Jeg har sjekket»: silent until the condition clears or the pod is changed.
+    func acknowledgePumpFailure(now: Date = Date()) {
+        let pod = Storage.shared.cageInsertTime.value
+        Storage.shared.pumpFailureAcknowledgement.value = PumpFailureAcknowledgement(
+            acknowledgedAt: now,
+            podInsertTime: pod > 0 ? pod : nil
+        )
+        LogManager.shared.log(category: .alarm, message: "Pump delivery alert acknowledged")
+        stopPumpFailureAlarm()
+    }
+
+    /// «Slumre 1 t».
+    func snoozePumpFailure(for interval: TimeInterval = 3600, now: Date = Date()) {
+        var alarms = Storage.shared.alarms.value
+        for idx in alarms.indices where alarms[idx].type == .pumpFailure {
+            alarms[idx].snoozedUntil = now.addingTimeInterval(interval)
+        }
+        Storage.shared.alarms.value = alarms
+        LogManager.shared.log(category: .alarm, message: "Pump delivery alert snoozed for \(Int(interval / 60)) min")
+        stopPumpFailureAlarm()
+    }
+
+    private func stopPumpFailureAlarm() {
+        // Works also when the app was relaunched from the notification and no alarm is
+        // active in memory yet.
+        if let id = Observable.shared.currentAlarm.value,
+           Storage.shared.alarms.value.first(where: { $0.id == id })?.type != .pumpFailure
+        {
+            return
+        }
+        Observable.shared.alarmSoundPlaying.value = false
+        stopAlarm()
+        let center = UNUserNotificationCenter.current()
+        center.getDeliveredNotifications { delivered in
+            let ids = delivered
+                .filter { $0.request.content.categoryIdentifier == Self.pumpFailureCategory }
+                .map(\.request.identifier)
+            center.removeDeliveredNotifications(withIdentifiers: ids)
+        }
+    }
+
+    // MARK: - Notifications
+
+    static let alarmCategory = "category"
+    static let pumpFailureCategory = "pumpFailure"
+    static let snoozeAction = "snooze"
+    static let pumpFailureAcknowledgeAction = "pumpFailure.acknowledge"
+    static let pumpFailureSnoozeAction = "pumpFailure.snooze1h"
+
+    /// Every category the app posts with. Setting categories replaces all of them,
+    /// so they are always registered together.
+    static func registerNotificationCategories(snoozeTitle: String = String(localized: "Snooze")) {
+        let openApp = UNNotificationAction(identifier: "OPEN_APP_ACTION", title: String(localized: "Open App"), options: .foreground)
+        let background = UNNotificationCategory(identifier: BackgroundAlertIdentifier.categoryIdentifier, actions: [openApp], intentIdentifiers: [], options: [])
+        let snooze = UNNotificationAction(identifier: snoozeAction, title: snoozeTitle, options: [])
+        let alarm = UNNotificationCategory(identifier: alarmCategory, actions: [snooze], intentIdentifiers: [], options: [])
+        let acknowledge = UNNotificationAction(identifier: pumpFailureAcknowledgeAction, title: PumpFailureText.acknowledgeTitle, options: [])
+        let snoozeHour = UNNotificationAction(identifier: pumpFailureSnoozeAction, title: PumpFailureText.snoozeHourTitle, options: [])
+        let pumpFailure = UNNotificationCategory(identifier: pumpFailureCategory, actions: [acknowledge, snoozeHour], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([background, alarm, pumpFailure])
+    }
+
+    /// Handles a tap on a notification action; true when it was an alarm action.
+    @discardableResult
+    func handleNotificationAction(_ identifier: String) -> Bool {
+        switch identifier {
+        case Self.snoozeAction:
+            performSnooze()
+        case Self.pumpFailureAcknowledgeAction:
+            acknowledgePumpFailure()
+        case Self.pumpFailureSnoozeAction:
+            snoozePumpFailure()
+        default:
+            return false
+        }
+        return true
+    }
+
     func stopAlarm() {
         AlarmSound.stop()
         Observable.shared.currentAlarm.value = nil
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
-    func sendNotification(title: String, body: String? = nil, actionTitle: String? = nil) {
+    func sendNotification(title: String, body: String? = nil, actionTitle: String? = nil, category: String = AlarmManager.alarmCategory) {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        if let actionTitle = actionTitle {
+            Self.registerNotificationCategories(snoozeTitle: actionTitle)
+        }
 
         let content = UNMutableNotificationContent()
         content.title = title
@@ -196,17 +280,11 @@ class AlarmManager {
         content.subtitle += Observable.shared.directionText.value + " "
         content.subtitle += Observable.shared.deltaText.value
         if let body { content.body = body }
-        content.categoryIdentifier = "category"
+        content.categoryIdentifier = category
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-
-        if let actionTitle = actionTitle {
-            let action = UNNotificationAction(identifier: "snooze", title: actionTitle, options: [])
-            let category = UNNotificationCategory(identifier: "category", actions: [action], intentIdentifiers: [], options: [])
-            UNUserNotificationCenter.current().setNotificationCategories([category])
-        }
     }
 }

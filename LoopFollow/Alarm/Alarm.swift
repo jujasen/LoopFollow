@@ -277,11 +277,18 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(
-            title: type == .pumpFailure ? PumpFailureText.title : type.rawValue,
-            body: type == .pumpFailure ? PumpFailureText.body(Observable.shared.pumpFailureAssessment.value) : nil,
-            actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze"
-        )
+        if type == .pumpFailure {
+            AlarmManager.shared.sendNotification(
+                title: PumpFailureText.title,
+                body: PumpFailureText.body(Observable.shared.pumpFailureAssessment.value),
+                category: AlarmManager.pumpFailureCategory
+            )
+        } else {
+            AlarmManager.shared.sendNotification(
+                title: type.rawValue,
+                actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze"
+            )
+        }
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)

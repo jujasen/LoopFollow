@@ -14,6 +14,8 @@ struct MainTabView: View {
     @ObservedObject private var statisticsPosition = Storage.shared.statisticsPosition
     @ObservedObject private var treatmentsPosition = Storage.shared.treatmentsPosition
     @ObservedObject private var activeBanner = Observable.shared.activeBanner
+    @ObservedObject private var currentAlarm = Observable.shared.currentAlarm
+    @ObservedObject private var alarms = Storage.shared.alarms
 
     @State private var showTelemetryConsent = false
     @State private var showOnboarding = false
@@ -32,9 +34,27 @@ struct MainTabView: View {
                 AppBannerView(message: message)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
+            if let alarm = alarmForCard {
+                ActiveAlarmCard(alarm: alarm)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
             tabView
         }
         .animation(.easeInOut(duration: 0.25), value: activeBanner.value)
+        .animation(.easeInOut(duration: 0.25), value: currentAlarm.value)
+    }
+
+    /// The sounding alarm, unless the Snoozer tab — which has its own controls — is on screen.
+    private var alarmForCard: Alarm? {
+        guard let id = currentAlarm.value,
+              let alarm = alarms.value.first(where: { $0.id == id })
+        else { return nil }
+        let items = orderedItems
+        let index = selectedTab.value
+        if index >= 0, index < items.count, items[index] == .snoozer {
+            return nil
+        }
+        return alarm
     }
 
     private var tabView: some View {
