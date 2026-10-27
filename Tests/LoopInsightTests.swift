@@ -81,6 +81,74 @@ struct LoopInsightTests {
         #expect(document.uploadedAt == Date(timeIntervalSince1970: 1_791_965_100))
     }
 
+    /// The same document with what Loop's short insight adds: now/action, the week's
+    /// suggestions and the patterns behind them.
+    private static var uploadedShort: [String: Any] {
+        var document = uploaded
+        var insight = document["insight"] as! [String: Any]
+        insight["todayText"] = [
+            "summary": "Rolig dag så langt.", "points": [String](), "dose_hints": [String](),
+            "now": "BS 11,2 og stiger etter frokost.", "action": "Vurder 0,3 E korreksjon.",
+            "created_at": "2026-10-14T07:30:00Z",
+        ]
+        insight["longTermText"] = [
+            "summary": "Kveldene er høye etter middag.", "points": ["Høy etter middag 5 av 7 dager."], "dose_hints": [String](),
+            "created_at": "2026-10-14T02:10:00Z",
+            "suggestions": [
+                ["setting": "carb_ratio", "daypart": "kveld 19-24", "startHour": 19, "endHour": 24, "current": 15, "proposed": 13.5,
+                 "reason": "Over 10 etter middag 5 av 7 dager.", "evidenceDays": 5],
+                ["setting": "basal_rate", "daypart": "natt 00-06", "startHour": 0, "endHour": 6, "current": 0.3, "proposed": 0.25,
+                 "reason": "Faller om natta.", "evidenceDays": 3],
+                ["setting": "target", "daypart": "natt 00-06", "startHour": 0, "endHour": 6, "current": 5.5, "proposed": 6,
+                 "reason": "Ukjent innstilling.", "evidenceDays": 4],
+            ],
+        ]
+        var longTerm = insight["longTerm"] as! [String: Any]
+        longTerm["patterns"] = [["daypart": "kveld 19-24", "daysWithData": 7, "highAfterMealDays": 5, "lowAfterMealDays": 0, "lowDays": 0, "highDays": 5, "risingNights": 1]]
+        insight["longTerm"] = longTerm
+        document["insight"] = insight
+        return document
+    }
+
+    @Test("the short insight's now, action, suggestions and patterns are read")
+    func readsTheShortInsight() throws {
+        let document = try #require(LoopInsightDocument.find(in: [Self.uploadedShort]))
+        let today = try #require(document.insight.todayText)
+        #expect(today.now == "BS 11,2 og stiger etter frokost.")
+        #expect(today.action == "Vurder 0,3 E korreksjon.")
+        #expect(today.points.isEmpty)
+
+        let week = try #require(document.insight.longTermText)
+        #expect(week.summary == "Kveldene er høye etter middag.")
+        let suggestions = try #require(week.suggestions)
+        #expect(suggestions.count == 2, "a setting this app doesn't know is left out")
+        #expect(suggestions[0].setting == .carbRatio)
+        #expect(suggestions[0].proposed == 13.5)
+        #expect(suggestions[0].evidenceDays == 5)
+        #expect(suggestions[0].givesMoreInsulin, "a lower carb ratio gives more insulin")
+        #expect(!suggestions[1].givesMoreInsulin, "a lower basal rate gives less")
+        #expect(document.insight.longTerm?.patterns?.first?.highAfterMealDays == 5)
+    }
+
+    @Test("an older document without now, action or suggestions still reads")
+    func readsTheOldInsight() throws {
+        let document = try #require(LoopInsightDocument.find(in: [Self.uploaded]))
+        let today = try #require(document.insight.todayText)
+        #expect(today.now == nil)
+        #expect(today.action == nil)
+        #expect(today.suggestions == nil)
+        #expect(document.insight.longTerm?.patterns == nil)
+    }
+
+    @Test("a text without points or dose hints still reads")
+    func textWithoutLists() throws {
+        let json = #"{"summary": "Kort.", "created_at": "2026-10-14T07:30:00Z", "now": ""}"#
+        let text = try LoopInsightDocument.decoder().decode(LoopInsightText.self, from: Data(json.utf8))
+        #expect(text.points.isEmpty)
+        #expect(text.doseHints.isEmpty)
+        #expect(text.now == nil, "an empty sentence counts as none")
+    }
+
     @Test("the insight takes a free place, or else the Nightscout tab's, and only once")
     func placement() {
         let storage = Storage.shared

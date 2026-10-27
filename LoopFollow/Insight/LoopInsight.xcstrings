@@ -34,17 +34,6 @@
         }
       }
     },
-    "09–15 weekday / weekend": {
-      "comment": "Insight: daytime on weekdays against weekends",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "09–15 hverdag / helg"
-          }
-        }
-      }
-    },
     ">10 at 3 h %d %%": {
       "comment": "Insight: share of meals above 10 three hours on",
       "localizations": {
@@ -67,17 +56,6 @@
         }
       }
     },
-    "AI Doses": {
-      "comment": "Header of the AI dose outcomes in the insight tab",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI-doser"
-          }
-        }
-      }
-    },
     "AI in Loop today: %1$@ calls, about $%2$@ (about %3$@ kr).": {
       "comment": "Insight: OpenAI use today in Loop (1: calls)(2: dollars)(3: kroner)",
       "localizations": {
@@ -96,17 +74,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kunne ikke lese Nightscout."
-          }
-        }
-      }
-    },
-    "Days 8–%d": {
-      "comment": "Insight: the days before the last seven (1: days kept)",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dag 8–%d"
           }
         }
       }
@@ -140,17 +107,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siste 7 dager"
-          }
-        }
-      }
-    },
-    "Loop 2 h: how far glucose ended above (+) or below (−) Loop's forecast two hours on. Meals: only those without extra carbs, corrections or treated lows.": {
-      "comment": "Footer explaining the parts of the day in the insight tab",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loop 2 t: hvor mye blodsukkeret endte over (+) eller under (−) Loops prognose to timer fram. Måltider: bare de uten ekstra karbo, korreksjon eller behandlet føling."
           }
         }
       }
@@ -199,17 +155,6 @@
         }
       }
     },
-    "Low after a used AI dose": {
-      "comment": "Insight: lows within four hours of a used AI dose",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Føling etter brukt AI-dose"
-          }
-        }
-      }
-    },
     "Nightscout is not set up.": {
       "comment": "Insight tab error: no Nightscout address",
       "localizations": {
@@ -239,61 +184,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tall fra Nightscout kl. %@."
-          }
-        }
-      }
-    },
-    "Parts of the Day": {
-      "comment": "Header of the parts of the day in the insight tab",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tider på døgnet"
-          }
-        }
-      }
-    },
-    "Shown / used": {
-      "comment": "Insight: AI doses shown and used",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vist / brukt"
-          }
-        }
-      }
-    },
-    "The AI writes about the weeks behind each night after 04:00.": {
-      "comment": "Shown before the AI has written about the weeks behind",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI skriver om de siste ukene hver natt etter kl. 04."
-          }
-        }
-      }
-    },
-    "The AI writes about today from 06:00, and again when a meal is over or after a low.": {
-      "comment": "Shown before the AI has written about today",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI skriver om dagen fra kl. 06, og på nytt når et måltid er over eller etter en føling."
-          }
-        }
-      }
-    },
-    "The Weeks Behind": {
-      "comment": "Header of the long-term section in the insight tab",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Siste uker"
           }
         }
       }
@@ -448,6 +338,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "behandlet føling"
+          }
+        }
+      }
+    },
+    "Now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nå"
+          }
+        }
+      }
+    },
+    "This Week": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne uka"
+          }
+        }
+      }
+    },
+    "Suggested Settings": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forslag til innstillinger"
+          }
+        }
+      }
+    },
+    "Only patterns seen on at least three days. Talk it over with the diabetes team before changing anything.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare mønstre som er sett minst tre dager. Snakk med diabetesteamet før du endrer noe."
+          }
+        }
+      }
+    },
+    "Show Details": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis detaljer"
+          }
+        }
+      }
+    },
+    "Carb ratio": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbofaktor"
+          }
+        }
+      }
+    },
+    "Insulin sensitivity": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulinsensitivitet"
+          }
+        }
+      }
+    },
+    "Basal rate": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basal"
+          }
+        }
+      }
+    },
+    "AI doses shown / used": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-doser vist / brukt"
+          }
+        }
+      }
+    },
+    "The AI looks at the situation every half hour from 06:00.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI ser på situasjonen hver halvtime fra kl. 06."
+          }
+        }
+      }
+    },
+    "The AI looks at the week each night after 04:00.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI ser på uka hver natt etter kl. 04."
+          }
+        }
+      }
+    },
+    "No numbers yet. Loop reads them from Nightscout.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen tall ennå. Loop henter dem fra Nightscout."
           }
         }
       }

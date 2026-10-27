@@ -1,8 +1,8 @@
 // LoopFollow
 // LoopInsightView.swift
 
-// The insight tab, laid out like Loop's own: today, the weeks behind, the parts of the day and
-// the AI doses — as Loop last put it in Nightscout.
+// The insight tab, laid out like Loop's own: the situation now, today, this week and suggested
+// settings, short; the rest behind «Vis detaljer» — as Loop last put it in Nightscout.
 
 import SwiftUI
 
@@ -21,17 +21,27 @@ struct LoopInsightView: View {
         }
     }
 
+    @State private var showsDetails = false
+
+    /// Today's text and numbers, only while they are from today.
+    private var todayText: LoopInsightText? {
+        status?.todayText.flatMap { Calendar.current.isDateInToday($0.createdAt) ? $0 : nil }
+    }
+
+    private var today: LoopInsightToday? {
+        status?.today.flatMap { Calendar.current.isDateInToday($0.computedAt) ? $0 : nil }
+    }
+
     private var content: some View {
         List {
+            nowSection
             todaySection
-            if status?.longTermText != nil || status?.longTerm != nil {
-                longTermSection
+            weekSection
+            if let suggestions = status?.longTermText?.suggestions, !suggestions.isEmpty {
+                suggestionsSection(suggestions)
             }
-            if let longTerm = status?.longTerm {
-                daypartsSection(longTerm)
-                if !longTerm.advice.isEmpty {
-                    adviceSection(longTerm.advice)
-                }
+            if hasDetails {
+                detailsSection
             }
             updateSection
         }
@@ -51,42 +61,168 @@ struct LoopInsightView: View {
         }
     }
 
-    // MARK: Today
+    // MARK: Now
 
     @ViewBuilder
-    private var todaySection: some View {
+    private var nowSection: some View {
         Section {
-            if let text = status?.todayText, Calendar.current.isDateInToday(text.createdAt) {
-                InsightTextView(text: text)
+            if let text = todayText, let now = text.now {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(now)
+                        .font(.body.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let action = text.action {
+                        Label {
+                            Text(action).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                        } icon: {
+                            Image(systemName: "hand.point.right.fill").foregroundColor(.orange)
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    Text(text.createdAt.formatted(date: .omitted, time: .shortened))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 4)
             } else if store.document?.aiEnabled == true {
-                Text(String(localized: "The AI writes about today from 06:00, and again when a meal is over or after a low.", table: "LoopInsight", comment: "Shown before the AI has written about today"))
+                Text(String(localized: "The AI looks at the situation every half hour from 06:00.", table: "LoopInsight", comment: "Shown before the AI has written about the situation now"))
                     .font(.footnote)
                     .foregroundColor(.secondary)
-            }
-
-            if let today = status?.today, Calendar.current.isDateInToday(today.computedAt) {
-                if let period = today.period {
-                    PeriodRow(period: period, hoursAboveTen: today.hoursAboveTen)
-                }
-                if let deviation = today.forecastDeviationMmol {
-                    Label {
-                        Text(deviationText(deviation))
-                            .font(.subheadline)
-                    } icon: {
-                        Image(systemName: deviation > 0 ? "arrow.up.right" : deviation < 0 ? "arrow.down.right" : "equal")
-                            .foregroundColor(abs(deviation) >= 1 ? .orange : .secondary)
-                    }
-                }
-                ForEach(today.meals, id: \.date) { meal in
-                    MealRow(meal: meal)
-                }
             } else if store.document == nil {
                 Text(String(localized: "Nothing from Loop yet. Loop puts the insight in Nightscout, and it is read from there.", table: "LoopInsight", comment: "Insight tab before anything was read"))
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
         } header: {
+            Text(String(localized: "Now", table: "LoopInsight", comment: "Header of the situation now in the insight tab"))
+        }
+    }
+
+    // MARK: Today
+
+    @ViewBuilder
+    private var todaySection: some View {
+        Section {
+            if let text = todayText, !text.summary.isEmpty {
+                Text(text.summary)
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let today, let period = today.period {
+                PeriodRow(period: period, hoursAboveTen: today.hoursAboveTen)
+            } else if store.document != nil, status?.today == nil {
+                Text(String(localized: "No numbers yet. Loop reads them from Nightscout.", table: "LoopInsight", comment: "Insight tab: the document has no numbers yet"))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+        } header: {
             Text(String(localized: "Today", table: "LoopInsight", comment: "Header of today's section in the insight tab"))
+        }
+    }
+
+    // MARK: This week
+
+    @ViewBuilder
+    private var weekSection: some View {
+        Section {
+            if let text = status?.longTermText, !text.summary.isEmpty {
+                Text(text.summary)
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if store.document?.aiEnabled == true {
+                Text(String(localized: "The AI looks at the week each night after 04:00.", table: "LoopInsight", comment: "Shown before the AI has written about the week"))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+            if let week = status?.longTerm?.last7Days {
+                LabeledValue(label: String(localized: "Last 7 days", table: "LoopInsight", comment: "Insight: last seven days"), value: periodSummary(week))
+            }
+        } header: {
+            Text(String(localized: "This Week", table: "LoopInsight", comment: "Header of the week section in the insight tab"))
+        }
+    }
+
+    // MARK: Suggested settings
+
+    private func suggestionsSection(_ suggestions: [LoopInsightSuggestion]) -> some View {
+        Section {
+            ForEach(suggestions, id: \.self) { suggestion in
+                SuggestionRow(suggestion: suggestion)
+            }
+        } header: {
+            Text(String(localized: "Suggested Settings", table: "LoopInsight", comment: "Header of the suggested therapy settings changes in the insight tab"))
+        } footer: {
+            Text(String(localized: "Only patterns seen on at least three days. Talk it over with the diabetes team before changing anything.", table: "LoopInsight", comment: "Footer of the suggested therapy settings changes in the insight tab"))
+        }
+    }
+
+    // MARK: Details
+
+    private var hasDetails: Bool {
+        if let todayText, !todayText.doseHints.isEmpty { return true }
+        if let today, today.forecastDeviationMmol != nil || !today.meals.isEmpty { return true }
+        if let text = status?.longTermText, !text.points.isEmpty || !text.doseHints.isEmpty { return true }
+        if let longTerm = status?.longTerm, !longTerm.dayparts.isEmpty || !longTerm.advice.isEmpty { return true }
+        return false
+    }
+
+    private var detailsSection: some View {
+        Section {
+            DisclosureGroup(isExpanded: $showsDetails) {
+                if let text = todayText {
+                    hints(text.doseHints)
+                }
+                if let today, let deviation = today.forecastDeviationMmol {
+                    Label {
+                        Text(deviationText(deviation)).font(.subheadline)
+                    } icon: {
+                        Image(systemName: deviation > 0 ? "arrow.up.right" : deviation < 0 ? "arrow.down.right" : "equal")
+                            .foregroundColor(abs(deviation) >= 1 ? .orange : .secondary)
+                    }
+                }
+                if let today {
+                    ForEach(today.meals, id: \.date) { meal in
+                        MealRow(meal: meal)
+                    }
+                }
+                if let text = status?.longTermText {
+                    ForEach(text.points, id: \.self) { point in
+                        Text(verbatim: "• \(point)")
+                            .font(.footnote)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    hints(text.doseHints)
+                }
+                if let longTerm = status?.longTerm {
+                    ForEach(longTerm.dayparts, id: \.name) { part in
+                        DaypartRow(part: part)
+                    }
+                    if !longTerm.advice.isEmpty {
+                        let accepted = longTerm.advice.filter(\.accepted)
+                        LabeledValue(
+                            label: String(localized: "AI doses shown / used", table: "LoopInsight", comment: "Insight: AI doses shown and used"),
+                            value: "\(longTerm.advice.count) / \(accepted.count)"
+                        )
+                        ForEach(longTerm.advice.suffix(5).reversed(), id: \.date) { record in
+                            AdviceRow(record: record)
+                        }
+                    }
+                }
+            } label: {
+                Text(String(localized: "Show Details", table: "LoopInsight", comment: "Disclosure for the details behind the insight"))
+            }
+        }
+    }
+
+    private func hints(_ hints: [String]) -> some View {
+        ForEach(hints, id: \.self) { hint in
+            Label {
+                Text(hint).font(.footnote).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "lightbulb").foregroundColor(.purple)
+            }
         }
     }
 
@@ -98,71 +234,6 @@ struct LoopInsightView: View {
                 : String(format: NSLocalizedString("Loop is forecasting %@ mmol/L higher than usual today: less insulin is needed than usual.", tableName: "LoopInsight", comment: "Insight: today's forecast deviation, less insulin needed (1: mmol/L)"), value)
         }
         return String(format: NSLocalizedString("Loop's forecast is about as usual today (%@ mmol/L).", tableName: "LoopInsight", comment: "Insight: today's forecast deviation is small (1: signed mmol/L)"), signed(deviation))
-    }
-
-    // MARK: The weeks behind
-
-    @ViewBuilder
-    private var longTermSection: some View {
-        Section {
-            if let text = status?.longTermText {
-                InsightTextView(text: text)
-            } else if store.document?.aiEnabled == true {
-                Text(String(localized: "The AI writes about the weeks behind each night after 04:00.", table: "LoopInsight", comment: "Shown before the AI has written about the weeks behind"))
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-            }
-            if let longTerm = status?.longTerm {
-                if let week = longTerm.last7Days {
-                    LabeledValue(label: String(localized: "Last 7 days", table: "LoopInsight", comment: "Insight: last seven days"), value: periodSummary(week))
-                }
-                if let earlier = longTerm.earlierDays {
-                    LabeledValue(label: String(format: NSLocalizedString("Days 8–%d", tableName: "LoopInsight", comment: "Insight: the days before the last seven (1: days kept)"), longTerm.days), value: periodSummary(earlier))
-                }
-                if let weekday = longTerm.weekdayDaytime, let weekend = longTerm.weekendDaytime {
-                    LabeledValue(
-                        label: String(localized: "09–15 weekday / weekend", table: "LoopInsight", comment: "Insight: daytime on weekdays against weekends"),
-                        value: "\(weekday.timeInRangePercent) % / \(weekend.timeInRangePercent) %"
-                    )
-                }
-            }
-        } header: {
-            Text(String(localized: "The Weeks Behind", table: "LoopInsight", comment: "Header of the long-term section in the insight tab"))
-        }
-    }
-
-    private func daypartsSection(_ longTerm: LoopInsightLongTerm) -> some View {
-        Section {
-            ForEach(longTerm.dayparts, id: \.name) { part in
-                DaypartRow(part: part)
-            }
-        } header: {
-            Text(String(localized: "Parts of the Day", table: "LoopInsight", comment: "Header of the parts of the day in the insight tab"))
-        } footer: {
-            Text(String(localized: "Loop 2 h: how far glucose ended above (+) or below (−) Loop's forecast two hours on. Meals: only those without extra carbs, corrections or treated lows.", table: "LoopInsight", comment: "Footer explaining the parts of the day in the insight tab"))
-        }
-    }
-
-    private func adviceSection(_ advice: [LoopInsightAdvice]) -> some View {
-        Section {
-            let accepted = advice.filter(\.accepted)
-            LabeledValue(
-                label: String(localized: "Shown / used", table: "LoopInsight", comment: "Insight: AI doses shown and used"),
-                value: "\(advice.count) / \(accepted.count)"
-            )
-            let finished = accepted.compactMap(\.lowestWithin4hMmol)
-            if !finished.isEmpty {
-                LabeledValue(
-                    label: String(localized: "Low after a used AI dose", table: "LoopInsight", comment: "Insight: lows within four hours of a used AI dose"),
-                    value: "\(finished.filter { $0 < 3.9 }.count) / \(finished.count)"
-                )
-            }
-            ForEach(advice.suffix(5).reversed(), id: \.date) { record in
-                AdviceRow(record: record)
-            }
-        } header: {
-            Text(String(localized: "AI Doses", table: "LoopInsight", comment: "Header of the AI dose outcomes in the insight tab"))
-        }
     }
 
     // MARK: Updating
@@ -226,32 +297,45 @@ private func signed(_ value: Double) -> String {
 private let unitsSymbol = String(localized: "U", table: "LoopInsight", comment: "Symbol for insulin units")
 private let hoursSymbol = String(localized: "h", table: "LoopInsight", comment: "Symbol for hours")
 
-private struct InsightTextView: View {
-    let text: LoopInsightText
+private struct SuggestionRow: View {
+    let suggestion: LoopInsightSuggestion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(text.summary)
-                .font(.body)
-                .fixedSize(horizontal: false, vertical: true)
-            ForEach(text.doseHints, id: \.self) { hint in
-                Label {
-                    Text(hint).font(.subheadline).fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: "lightbulb").foregroundColor(.purple)
-                }
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(verbatim: "\(title) \(String(format: "%02d", suggestion.startHour))–\(String(format: "%02d", suggestion.endHour))")
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Text(verbatim: "\(value(suggestion.current)) → \(value(suggestion.proposed)) \(unit)")
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundColor(suggestion.givesMoreInsulin ? .orange : .blue)
             }
-            ForEach(text.points, id: \.self) { point in
-                Text(verbatim: "• \(point)")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(text.createdAt.formatted(date: .abbreviated, time: .shortened))
-                .font(.caption2)
+            Text(suggestion.reason)
+                .font(.footnote)
                 .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
+    }
+
+    private var title: String {
+        switch suggestion.setting {
+        case .carbRatio: return String(localized: "Carb ratio", table: "LoopInsight", comment: "Insight suggestion: carb ratio")
+        case .insulinSensitivity: return String(localized: "Insulin sensitivity", table: "LoopInsight", comment: "Insight suggestion: insulin sensitivity")
+        case .basalRate: return String(localized: "Basal rate", table: "LoopInsight", comment: "Insight suggestion: basal rate")
+        }
+    }
+
+    private var unit: String {
+        switch suggestion.setting {
+        case .carbRatio: return "g/" + unitsSymbol
+        case .insulinSensitivity: return "mmol/L/" + unitsSymbol
+        case .basalRate: return unitsSymbol + "/" + hoursSymbol
+        }
+    }
+
+    private func value(_ number: Double) -> String {
+        number.formatted(.number.precision(.fractionLength(0 ... 2)))
     }
 }
 

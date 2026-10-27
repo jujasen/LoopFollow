@@ -91,7 +91,45 @@ struct LoopInsightLongTerm: Codable, Equatable {
     var averageDailyCarbsGrams: Double
     var averageDailyBolusUnits: Double
     var advice: [LoopInsightAdvice]
+    /// What the settings suggestions are built on; read but not shown. Absent in older documents.
+    var patterns: [LoopInsightPattern]?
     var computedAt: Date
+}
+
+/// How often a part of the day went high or low after meals and at night, over the last two weeks.
+struct LoopInsightPattern: Codable, Equatable {
+    var daypart: String
+    var daysWithData: Int
+    var highAfterMealDays: Int
+    var lowAfterMealDays: Int
+    var lowDays: Int
+    var highDays: Int
+    var risingNights: Int?
+    var fallingNights: Int?
+}
+
+/// A change to the therapy settings the AI suggests, kept by Loop only when the pattern behind it
+/// was seen on at least three days.
+struct LoopInsightSuggestion: Codable, Hashable {
+    enum Setting: String, Codable {
+        case carbRatio = "carb_ratio"
+        case insulinSensitivity = "insulin_sensitivity"
+        case basalRate = "basal_rate"
+    }
+
+    var setting: Setting
+    var daypart: String
+    var startHour: Int
+    var endHour: Int
+    var current: Double
+    var proposed: Double
+    var reason: String
+    var evidenceDays: Int
+
+    /// More insulin than now: a lower carb ratio or sensitivity, or a higher basal rate.
+    var givesMoreInsulin: Bool {
+        setting == .basalRate ? proposed > current : proposed < current
+    }
 }
 
 struct LoopInsightToday: Codable, Equatable {
@@ -110,11 +148,49 @@ struct LoopInsightText: Codable, Equatable {
     var points: [String]
     var doseHints: [String]
     var createdAt: Date
+    /// Today only: the situation right now, in one sentence.
+    var now: String?
+    /// Today only: what to do now, when something should be done.
+    var action: String?
+    /// The weeks behind only: settings changes the AI suggests.
+    var suggestions: [LoopInsightSuggestion]?
 
     enum CodingKeys: String, CodingKey {
-        case summary, points
+        case summary, points, now, action, suggestions
         case doseHints = "dose_hints"
         case createdAt = "created_at"
+    }
+
+    init(summary: String, points: [String] = [], doseHints: [String] = [], createdAt: Date, now: String? = nil, action: String? = nil, suggestions: [LoopInsightSuggestion]? = nil) {
+        self.summary = summary
+        self.points = points
+        self.doseHints = doseHints
+        self.createdAt = createdAt
+        self.now = now
+        self.action = action
+        self.suggestions = suggestions
+    }
+
+    /// Everything but the summary and time may be missing; a suggestion this app can't read is
+    /// left out rather than losing the text.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        summary = try container.decode(String.self, forKey: .summary)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        points = try container.decodeIfPresent([String].self, forKey: .points) ?? []
+        doseHints = try container.decodeIfPresent([String].self, forKey: .doseHints) ?? []
+        now = try container.decodeIfPresent(String.self, forKey: .now).flatMap { $0.isEmpty ? nil : $0 }
+        action = try container.decodeIfPresent(String.self, forKey: .action).flatMap { $0.isEmpty ? nil : $0 }
+        suggestions = try container.decodeIfPresent([LoopInsightLossy<LoopInsightSuggestion>].self, forKey: .suggestions)?.compactMap(\.value)
+    }
+}
+
+/// Decodes to nil instead of failing the array around it.
+struct LoopInsightLossy<T: Decodable>: Decodable {
+    let value: T?
+
+    init(from decoder: Decoder) throws {
+        value = try? T(from: decoder)
     }
 }
 
