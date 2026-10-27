@@ -57,12 +57,6 @@ extension MainViewController {
         var sgv: Int
     }
 
-    // The waiting rest of a split bolus, at the carb lane's height
-    struct splitBolusRestGraphStruct {
-        var rest: SplitBolusRest
-        var sgv: Int
-    }
-
     func clearOldTempBasal() {
         basalData.removeAll()
         updateBasalGraph()
@@ -85,11 +79,6 @@ extension MainViewController {
 
     func clearOldPlannedCarbs() {
         plannedCarbData.removeAll()
-        updateCarbGraph()
-    }
-
-    func clearOldSplitBolusRests() {
-        splitBolusRestData.removeAll()
         updateCarbGraph()
     }
 

@@ -47,7 +47,6 @@ extension MainViewController {
         var smb: [[String: AnyObject]] = []
         var carbs: [[String: AnyObject]] = []
         var plannedCarbs: [[String: AnyObject]] = []
-        var splitBolusRests: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
@@ -82,9 +81,6 @@ extension MainViewController {
             case PlannedCarb.eventType:
                 // Not carbs yet: kept apart so it never counts toward today's carbs or COB.
                 plannedCarbs.append(entry)
-            case SplitBolusRest.eventType:
-                // Not carbs either, until a parent or Loop logs it.
-                splitBolusRests.append(entry)
             case "Temporary Override", "Exercise":
                 temporaryOverride.append(entry)
             case "Temporary Target":
@@ -146,14 +142,6 @@ extension MainViewController {
         } else {
             if carbData.count > 0 {
                 clearOldCarb()
-            }
-        }
-        if splitBolusRests.count > 0 {
-            processNSSplitBolusRests(entries: splitBolusRests, carbEntries: carbs)
-        } else {
-            SplitBolusRestStore.shared.update(rests: [], carbEntries: carbs)
-            if splitBolusRestData.count > 0 {
-                clearOldSplitBolusRests()
             }
         }
         if plannedCarbs.count > 0 {
