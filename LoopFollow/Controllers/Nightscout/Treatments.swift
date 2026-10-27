@@ -47,6 +47,7 @@ extension MainViewController {
         var smb: [[String: AnyObject]] = []
         var carbs: [[String: AnyObject]] = []
         var plannedCarbs: [[String: AnyObject]] = []
+        var aiBolusSuggestions: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
@@ -78,6 +79,9 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
+            case AIBolusSuggestion.eventType:
+                // A suggestion from Loop's meal watch, not a dose.
+                aiBolusSuggestions.append(entry)
             case PlannedCarb.eventType:
                 // Not carbs yet: kept apart so it never counts toward today's carbs or COB.
                 plannedCarbs.append(entry)
@@ -144,6 +148,7 @@ extension MainViewController {
                 clearOldCarb()
             }
         }
+        processNSAIBolusSuggestions(entries: aiBolusSuggestions)
         if plannedCarbs.count > 0 {
             processNSPlannedCarbs(entries: plannedCarbs)
         } else {

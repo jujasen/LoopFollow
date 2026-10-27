@@ -29,6 +29,10 @@ extension MainViewController {
             // A command was just sent: catch Loop's note if it rejects it.
             interval = 60
         }
+        if AIBolusSuggestionStore.shared.hasOpenSuggestion {
+            // An AI suggestion is open: notice soon when it is given, declined or replaced.
+            interval = 60
+        }
         TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date().addingTimeInterval(interval))
         TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(3))
     }

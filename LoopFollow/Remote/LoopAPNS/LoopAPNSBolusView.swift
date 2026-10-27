@@ -25,6 +25,17 @@ struct LoopAPNSBolusView: View {
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
+    /// An amount to start from, such as an AI suggestion; it can be changed before sending.
+    private let prefilledUnits: Double?
+    /// Called once the bolus has been sent.
+    private let onSent: (() -> Void)?
+    @State private var didPrefill = false
+
+    init(prefilledUnits: Double? = nil, onSent: (() -> Void)? = nil) {
+        self.prefilledUnits = prefilledUnits
+        self.onSent = onSent
+    }
+
     // Computed property to check if TOTP should be blocked
     private var isTOTPBlocked: Bool {
         TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
@@ -216,6 +227,10 @@ struct LoopAPNSBolusView: View {
                 quickPickBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
 
                 loadRecommendedBolus()
+                if !didPrefill, let prefilledUnits, prefilledUnits > 0 {
+                    didPrefill = true
+                    insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: prefilledUnits)
+                }
                 // Reset timer state so it shows '-' until first tick
                 otpTimeRemaining = nil
                 // Don't reset TOTP usage flag here - let the timer handle it
@@ -405,6 +420,7 @@ struct LoopAPNSBolusView: View {
                     }
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
+                    self.onSent?()
                     self.alertMessage = String(localized: "Insulin sent to Loop. Loop confirms when it is given, and LoopFollow warns you if Loop rejects it.")
                     self.alertType = .success
                     LogManager.shared.log(

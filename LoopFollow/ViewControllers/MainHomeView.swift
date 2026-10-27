@@ -60,6 +60,12 @@ struct MainHomeView: View {
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             }
 
+            // Loop's AI bolus suggestions, with a button that opens the bolus screen filled in
+            if isNightscoutEnabled {
+                AIBolusSuggestionCard()
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            }
+
             // Main chart (fills remaining space)
             BGChartView(model: chartModel, config: .main)
 

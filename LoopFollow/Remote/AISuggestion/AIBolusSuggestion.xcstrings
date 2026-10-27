@@ -1,0 +1,56 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "✨ Suggestion: %@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨ Forslag: %@ E"
+          }
+        }
+      }
+    },
+    "✨ Suggestion: %1$@ U for %2$@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨ Forslag: %1$@ E til %2$@"
+          }
+        }
+      }
+    },
+    "Lapses at %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faller bort kl. %@"
+          }
+        }
+      }
+    },
+    "Review": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se over"
+          }
+        }
+      }
+    },
+    "Decline": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avslå"
+          }
+        }
+      }
+    }
+  }
+}

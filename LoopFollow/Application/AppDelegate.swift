@@ -189,6 +189,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         AlarmManager.shared.handleNotificationAction(response.actionIdentifier)
 
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+           let id = response.notification.request.content.userInfo[AIBolusSuggestionNotifier.userInfoKey] as? String
+        {
+            // An AI bolus suggestion: open the bolus screen filled in with it.
+            UIApplication.shared.topMost?.dismiss(animated: true)
+            Observable.shared.selectedTabIndex.value = 0
+            // After any dismissal above has finished, or the sheet would not show.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                AIBolusSuggestionStore.shared.review(id: id)
+            }
+        }
+
         completionHandler()
     }
 

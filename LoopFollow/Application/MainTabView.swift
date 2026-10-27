@@ -16,6 +16,7 @@ struct MainTabView: View {
     @ObservedObject private var activeBanner = Observable.shared.activeBanner
     @ObservedObject private var currentAlarm = Observable.shared.currentAlarm
     @ObservedObject private var alarms = Storage.shared.alarms
+    @ObservedObject private var aiSuggestions = AIBolusSuggestionStore.shared
 
     @State private var showTelemetryConsent = false
     @State private var showOnboarding = false
@@ -42,6 +43,12 @@ struct MainTabView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: activeBanner.value)
         .animation(.easeInOut(duration: 0.25), value: currentAlarm.value)
+        .sheet(item: $aiSuggestions.reviewing) { suggestion in
+            // The normal bolus screen, filled in with the suggestion; confirm and one-time code as always.
+            LoopAPNSBolusView(prefilledUnits: suggestion.units) {
+                AIBolusSuggestionStore.shared.dismiss(suggestion)
+            }
+        }
     }
 
     /// The sounding alarm, unless the Snoozer tab — which has its own controls — is on screen.
