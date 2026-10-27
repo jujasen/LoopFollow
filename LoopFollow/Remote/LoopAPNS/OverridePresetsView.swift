@@ -133,7 +133,7 @@ struct OverridePresetsView: View {
                 case .statusFailure:
                     return Alert(
                         title: Text("Error"),
-                        message: Text(viewModel.statusMessage ?? "An error occurred."),
+                        message: Text(viewModel.statusMessage ?? String(localized: "An error occurred.")),
                         dismissButton: .default(Text("OK"))
                     )
                 case .none:
@@ -395,7 +395,7 @@ class OverridePresetsViewModel: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.statusMessage = "Failed to load override presets: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to load override presets: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
                 self.isLoading = false
@@ -412,14 +412,14 @@ class OverridePresetsViewModel: ObservableObject {
             try await sendOverrideNotification(preset: preset, duration: duration)
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "\(preset.name) override activated successfully."
+                self.statusMessage = String(localized: "\(preset.name) override activated successfully.")
                 self.alertType = .statusSuccess
                 self.showAlert = true
             }
         } catch {
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Failed to activate override: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to activate override: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
             }
@@ -435,14 +435,14 @@ class OverridePresetsViewModel: ObservableObject {
             try await sendCancelOverrideNotification()
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Active override cancelled successfully."
+                self.statusMessage = String(localized: "Active override cancelled successfully.")
                 self.alertType = .statusSuccess
                 self.showAlert = true
             }
         } catch {
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Failed to cancel override: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to cancel override: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
             }
@@ -482,7 +482,7 @@ class OverridePresetsViewModel: ObservableObject {
                 if success {
                     continuation.resume()
                 } else {
-                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? "Unknown error"]))
+                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? String(localized: "Unknown error")]))
                 }
             }
         }
@@ -495,7 +495,7 @@ class OverridePresetsViewModel: ObservableObject {
                 if success {
                     continuation.resume()
                 } else {
-                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? "Unknown error"]))
+                    continuation.resume(throwing: NSError(domain: "OverrideError", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage ?? String(localized: "Unknown error")]))
                 }
             }
         }
@@ -513,7 +513,7 @@ struct OverridePreset {
 
     var durationDescription: String {
         if duration == 0 {
-            return "Indefinite"
+            return String(localized: "Indefinite", comment: "Override duration: no end")
         } else {
             let hours = Int(duration) / 3600
             let minutes = Int(duration) % 3600 / 60
@@ -534,11 +534,11 @@ enum OverrideError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .nightscoutNotConfigured:
-            return "Nightscout URL and token not configured in settings"
+            return String(localized: "Nightscout URL and token not configured in settings")
         case .invalidResponse:
-            return "Invalid response from server"
+            return String(localized: "Invalid response from server")
         case let .serverError(code):
-            return "Server error: \(code)"
+            return String(localized: "Server error: \(code)")
         }
     }
 }

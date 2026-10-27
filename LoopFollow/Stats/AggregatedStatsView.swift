@@ -273,12 +273,12 @@ struct InsulinTotalsCard: View {
                 .foregroundColor(.secondary)
 
             VStack(spacing: 10) {
-                metricRow(title: "Programmed Basal", value: programmedBasal, color: .indigo)
-                metricRow(title: "Total Negative Basal", value: totalNegativeBasal, color: .red)
-                metricRow(title: "Total Positive Basal", value: totalPositiveBasal, color: .green)
-                metricRow(title: "Actual Basal", value: actualBasal, color: .indigo)
-                metricRow(title: "Avg Bolus", value: avgBolus, color: .purple)
-                metricRow(title: "Total Daily Dose", value: totalDailyDose, color: .pink)
+                metricRow(title: String(localized: "Programmed Basal"), value: programmedBasal, color: .indigo)
+                metricRow(title: String(localized: "Total Negative Basal"), value: totalNegativeBasal, color: .red)
+                metricRow(title: String(localized: "Total Positive Basal"), value: totalPositiveBasal, color: .green)
+                metricRow(title: String(localized: "Actual Basal"), value: actualBasal, color: .indigo)
+                metricRow(title: String(localized: "Avg Bolus"), value: avgBolus, color: .purple)
+                metricRow(title: String(localized: "Total Daily Dose"), value: totalDailyDose, color: .pink)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -333,7 +333,7 @@ struct StatsGridView: View {
                     showGMI.toggle()
                 }) {
                     StatCard(
-                        title: showGMI ? "GMI" : "Est. A1C",
+                        title: showGMI ? "GMI" : String(localized: "Est. A1C"),
                         value: showGMI ? formatGMI(simpleStats.avgGlucose) : formatEhbA1c(simpleStats.avgGlucose),
                         unit: UnitSettingsStore.shared.glycemicOutputUnit.rawValue,
                         color: .blue,
@@ -343,7 +343,7 @@ struct StatsGridView: View {
                 .buttonStyle(PlainButtonStyle())
 
                 StatCard(
-                    title: "Avg Glucose",
+                    title: String(localized: "Avg Glucose"),
                     value: formatGlucose(simpleStats.avgGlucose),
                     unit: UnitSettingsStore.shared.glucoseUnit.rawValue,
                     color: Color(red: 0.20, green: 0.99, blue: 0.70)
@@ -353,7 +353,7 @@ struct StatsGridView: View {
                     showStdDev.toggle()
                 }) {
                     StatCard(
-                        title: showStdDev ? "Std Deviation" : "CV",
+                        title: showStdDev ? String(localized: "Std Deviation") : "CV",
                         value: showStdDev ? formatStdDev(simpleStats.stdDeviation) : formatCV(simpleStats.coefficientOfVariation),
                         unit: showStdDev ? UnitSettingsStore.shared.glucoseUnit.rawValue : "%",
                         color: .orange,
@@ -364,18 +364,18 @@ struct StatsGridView: View {
 
                 if hasCarbData {
                     StatCard(
-                        title: "Avg Carbs",
+                        title: String(localized: "Avg Carbs"),
                         value: formatCarbs(simpleStats.avgCarbs),
-                        unit: "g/day",
+                        unit: String(localized: "g/day"),
                         color: .yellow
                     )
                 }
 
                 if hasInsulinData {
                     StatCard(
-                        title: "Programmed Basal",
+                        title: String(localized: "Programmed Basal"),
                         value: formatInsulin(simpleStats.programmedBasal),
-                        unit: "U/day",
+                        unit: String(localized: "U/day"),
                         color: .indigo
                     )
                     .onTapGesture(count: 3) {
@@ -383,9 +383,9 @@ struct StatsGridView: View {
                     }
 
                     StatCard(
-                        title: "Avg Bolus",
+                        title: String(localized: "Avg Bolus"),
                         value: formatInsulin(simpleStats.avgBolus),
-                        unit: "U/day",
+                        unit: String(localized: "U/day"),
                         color: .purple
                     )
                     .onTapGesture(count: 3) {
@@ -393,7 +393,7 @@ struct StatsGridView: View {
                     }
 
                     StatCard(
-                        title: "Total Daily Dose",
+                        title: String(localized: "Total Daily Dose"),
                         value: formatInsulin(simpleStats.totalDailyDose),
                         unit: "U",
                         color: .pink

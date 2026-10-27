@@ -333,12 +333,12 @@ struct RemoteSettingsExport: Codable {
 
         // If remote type is changing, warn user
         if currentRemoteType != .none && currentRemoteType != remoteType {
-            message += "Remote type is changing from \(currentRemoteType.rawValue) to \(remoteType.rawValue). This may affect your remote commands.\n"
+            message += String(localized: "Remote type is changing from \(currentRemoteType.displayName) to \(remoteType.displayName). This may affect your remote commands.") + "\n"
         }
 
         // If user is changing, warn user
         if !currentUser.isEmpty && currentUser != user {
-            message += "Remote user is changing from '\(currentUser)' to '\(user)'. This may affect your remote commands.\n"
+            message += String(localized: "Remote user is changing from '\(currentUser)' to '\(user)'. This may affect your remote commands.") + "\n"
         }
 
         // For TRC and LoopAPNS, check if key details are changing
@@ -347,11 +347,11 @@ struct RemoteSettingsExport: Codable {
             let currentApnsKey = storage.remoteApnsKey.value
 
             if !currentKeyId.isEmpty, currentKeyId != remoteKeyId {
-                message += "APNS Key ID is changing. This may affect your remote commands.\n"
+                message += String(localized: "APNS Key ID is changing. This may affect your remote commands.") + "\n"
             }
 
             if !currentApnsKey.isEmpty, currentApnsKey != remoteApnsKey {
-                message += "APNS Key is changing. This may affect your remote commands.\n"
+                message += String(localized: "APNS Key is changing. This may affect your remote commands.") + "\n"
             }
         }
 
@@ -359,7 +359,7 @@ struct RemoteSettingsExport: Codable {
         if remoteType == .trc {
             let currentSharedSecret = storage.sharedSecret.value
             if !currentSharedSecret.isEmpty, currentSharedSecret != sharedSecret {
-                message += "Shared secret is changing. This may affect your remote commands.\n"
+                message += String(localized: "Shared secret is changing. This may affect your remote commands.") + "\n"
             }
         }
 
@@ -369,18 +369,18 @@ struct RemoteSettingsExport: Codable {
             let currentQrCodeURL = storage.loopAPNSQrCodeURL.value
 
             if let teamId = teamId, let currentTeamId = currentTeamId, teamId != currentTeamId {
-                message += "Team ID is changing. This may affect your remote commands.\n"
+                message += String(localized: "Team ID is changing. This may affect your remote commands.") + "\n"
             }
 
             if !currentQrCodeURL.isEmpty, currentQrCodeURL != loopAPNSQrCodeURL {
-                message += "Loop APNS QR Code URL is changing. This may affect your remote commands.\n"
+                message += String(localized: "Loop APNS QR Code URL is changing. This may affect your remote commands.") + "\n"
             }
         }
 
         // If both have tokens but they don't match, show warning
         let hasCurrentToken = !storage.token.value.isEmpty
         if hasCurrentToken {
-            message += "Note: This import does not include Nightscout token settings. Your current Nightscout token will be preserved.\n"
+            message += String(localized: "Note: This import does not include Nightscout token settings. Your current Nightscout token will be preserved.") + "\n"
         }
 
         let isCompatible = !shouldPromptForURL && !shouldPromptForToken

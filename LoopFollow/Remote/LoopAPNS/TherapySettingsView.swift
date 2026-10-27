@@ -84,8 +84,8 @@ struct TherapySettingsView: View {
                     dosingSection
                     glucoseSafetyLimitSection
                     correctionRangeSection
-                    rangeSection(.preMealRange, range: draft.preMealRange, footer: "The target Loop uses while Pre-Meal is on, until carbs are entered.")
-                    rangeSection(.workoutRange, range: draft.workoutRange, footer: "The target Loop uses while the Workout override is on.")
+                    rangeSection(.preMealRange, range: draft.preMealRange, footer: String(localized: "The target Loop uses while Pre-Meal is on, until carbs are entered."))
+                    rangeSection(.workoutRange, range: draft.workoutRange, footer: String(localized: "The target Loop uses while the Workout override is on."))
                     scheduleSection(.carbRatio)
                     scheduleSection(.basalRate)
                     deliveryLimitsSection
@@ -206,11 +206,11 @@ struct TherapySettingsView: View {
     }
 
     private var headerText: String {
-        var text = "Tap a value to change it. Changes are reviewed before they are sent, and Loop checks them again: if one value is outside what Loop allows, nothing is changed."
+        var text = String(localized: "Tap a value to change it. Changes are reviewed before they are sent, and Loop checks them again: if one value is outside what Loop allows, nothing is changed.")
         if let loadedAt {
             let formatter = RelativeDateTimeFormatter()
             formatter.unitsStyle = .full
-            text = "Read from Loop's Nightscout profile \(formatter.localizedString(for: loadedAt, relativeTo: Date())). " + text
+            text = String(localized: "Read from Loop's Nightscout profile \(formatter.localizedString(for: loadedAt, relativeTo: Date())).") + " " + text
         }
         return text
     }
@@ -239,7 +239,7 @@ struct TherapySettingsView: View {
     private var glucoseSafetyLimitSection: some View {
         Section(
             header: Text(TherapySetting.glucoseSafetyLimit.title),
-            footer: issuesFooter([.glucoseSafetyLimit], note: "Loop doesn't dose below this glucose.")
+            footer: issuesFooter([.glucoseSafetyLimit], note: String(localized: "Loop doesn't dose below this glucose."))
         ) {
             valueRow(
                 title: TherapySetting.glucoseSafetyLimit.title,
@@ -255,7 +255,7 @@ struct TherapySettingsView: View {
         let original = Dictionary(self.original.correctionRanges.map { ($0.start, $0) }, uniquingKeysWith: { first, _ in first })
         return Section(
             header: Text("\(TherapySetting.correctionRange.title) (\(glucoseUnitLabel))"),
-            footer: issuesFooter([.correctionRange], note: "The range Loop aims for. Each range applies from its time until the next.")
+            footer: issuesFooter([.correctionRange], note: String(localized: "The range Loop aims for. Each range applies from its time until the next."))
         ) {
             if draft.correctionRanges.isEmpty {
                 Text("Unknown").foregroundColor(.secondary)
@@ -285,7 +285,7 @@ struct TherapySettingsView: View {
                     editCorrectionRange(entry, isNew: true)
                 }
             } label: {
-                Label(draft.correctionRanges.isEmpty ? "Set Correction Range" : "Add Time", systemImage: "plus")
+                Label(draft.correctionRanges.isEmpty ? String(localized: "Set Correction Range") : String(localized: "Add Time"), systemImage: "plus")
             }
             .disabled(draft.correctionRanges.count >= TherapySchedule.maximumEntryCount)
         }
@@ -321,7 +321,7 @@ struct TherapySettingsView: View {
 
         return Section(
             header: Text("\(kind.title) (\(unitLabel))"),
-            footer: issuesFooter([setting], note: "Each value applies from its time until the next. Tap a time to change it, swipe to remove it.")
+            footer: issuesFooter([setting], note: String(localized: "Each value applies from its time until the next. Tap a time to change it, swipe to remove it."))
         ) {
             if entries.isEmpty {
                 Text("Unknown").foregroundColor(.secondary)
@@ -360,7 +360,7 @@ struct TherapySettingsView: View {
     private var deliveryLimitsSection: some View {
         Section(
             header: Text("Delivery Limits"),
-            footer: issuesFooter([.maximumBasalRate, .maximumBolus], note: "The most insulin Loop gives as a temp basal, and in one bolus.")
+            footer: issuesFooter([.maximumBasalRate, .maximumBolus], note: String(localized: "The most insulin Loop gives as a temp basal, and in one bolus."))
         ) {
             valueRow(
                 title: TherapySetting.maximumBasalRate.title,
@@ -402,8 +402,8 @@ struct TherapySettingsView: View {
         return Section(
             header: Text(TherapySetting.overridePresets.title),
             footer: issuesFooter([.overridePresets], note: draft.overridePresets == nil
-                ? "Loop's override presets haven't been read from Nightscout, so they can't be changed here."
-                : "Loop's preset list is replaced as a whole with this one.")
+                ? String(localized: "Loop's override presets haven't been read from Nightscout, so they can't be changed here.")
+                : String(localized: "Loop's preset list is replaced as a whole with this one."))
         ) {
             if let presets = draft.overridePresets {
                 if presets.isEmpty {
@@ -448,7 +448,7 @@ struct TherapySettingsView: View {
         Section(
             header: Text("Algorithm Experiments"),
             footer: issuesFooter([.glucoseBasedPartialApplication, .integralRetrospectiveCorrection],
-                                 note: "Unknown means Nightscout doesn't show the current value; it stays as it is in Loop unless a value is picked.")
+                                 note: String(localized: "Unknown means Nightscout doesn't show the current value; it stays as it is in Loop unless a value is picked."))
         ) {
             boolRow(.glucoseBasedPartialApplication, value: $draft.glucoseBasedPartialApplication)
             boolRow(.integralRetrospectiveCorrection, value: $draft.integralRetrospectiveCorrection)
@@ -500,7 +500,7 @@ struct TherapySettingsView: View {
                 if isChanged {
                     changeDot
                 }
-                Text(value ?? "Unknown")
+                Text(value ?? String(localized: "Unknown"))
                     .foregroundColor(value == nil ? .secondary : .primary)
             }
         }
@@ -576,7 +576,7 @@ struct TherapySettingsView: View {
         draft = original
 
         if !LoopAPNSService().validateSetup() {
-            alertMessage = "Loop APNS setup is incomplete. Please configure all required fields in settings."
+            alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
             alertType = .error
             showAlert = true
         }
@@ -619,7 +619,7 @@ struct TherapySettingsView: View {
         let isFirst = entry.start == 0 && (!isNew || draft.correctionRanges.isEmpty)
         let available = TherapySchedule.availableStarts(in: draft.correctionRanges, keeping: isNew ? nil : entry.start)
         numberEdit = TherapyNumberEdit(
-            title: isNew ? "Add Time" : TherapySchedule.timeString(entry.start), header: TherapySetting.correctionRange.title,
+            title: isNew ? String(localized: "Add Time") : TherapySchedule.timeString(entry.start), header: TherapySetting.correctionRange.title,
             unitLabel: glucoseUnitLabel, digits: glucoseDigits, increment: nil, limits: limits, bounds: bounds,
             time: isFirst ? .first : .choose(available), start: entry.start,
             values: [entry.low.isNaN ? nil : entry.low, entry.high.isNaN ? nil : entry.high], isRange: true,
@@ -648,7 +648,7 @@ struct TherapySettingsView: View {
         let isFirst = entry.start == 0 && (!isNew || entries.isEmpty)
         let available = TherapySchedule.availableStarts(in: entries, keeping: isNew ? nil : entry.start)
         numberEdit = TherapyNumberEdit(
-            title: isNew ? "Add Time" : TherapySchedule.timeString(entry.start), header: kind.title,
+            title: isNew ? String(localized: "Add Time") : TherapySchedule.timeString(entry.start), header: kind.title,
             unitLabel: kind.unitLabel(glucoseUnit: unit), digits: kind.fractionDigits(glucoseUnit: unit), increment: kind.increment,
             limits: limits, bounds: bounds, time: isFirst ? .first : .choose(available), start: entry.start,
             values: [entry.value.isNaN ? nil : entry.value], isRange: false, canDelete: !isNew && !isFirst,
@@ -696,7 +696,7 @@ struct TherapySettingsView: View {
     }
 
     private func authenticateAndSend() {
-        AuthService.authenticate(reason: "Confirm your identity to change Loop's settings.") { result in
+        AuthService.authenticate(reason: String(localized: "Confirm your identity to change Loop's settings.")) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
@@ -706,7 +706,7 @@ struct TherapySettingsView: View {
                     self.alertType = .error
                     self.showAlert = true
                 case .failed:
-                    self.alertMessage = "Authentication failed"
+                    self.alertMessage = String(localized: "Authentication failed")
                     self.alertType = .error
                     self.showAlert = true
                 case .canceled:
@@ -719,7 +719,7 @@ struct TherapySettingsView: View {
     private func send() {
         guard blockingIssues.isEmpty else { return }
         guard let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) else {
-            alertMessage = "Invalid QR code URL. Please re-scan the QR code in settings."
+            alertMessage = String(localized: "Invalid QR code URL. Please re-scan the QR code in settings.")
             alertType = .error
             showAlert = true
             return
@@ -736,11 +736,11 @@ struct TherapySettingsView: View {
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     // Loop uploads its new profile once the change is saved; read it back soon after.
                     TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(20))
-                    self.alertMessage = "Loop confirms with a notification when the new settings are saved. If a value is outside what Loop allows, nothing is changed."
+                    self.alertMessage = String(localized: "Loop confirms with a notification when the new settings are saved. If a value is outside what Loop allows, nothing is changed.")
                     self.alertType = .success
                     LogManager.shared.log(category: .apns, message: "Therapy settings sent")
                 } else {
-                    self.alertMessage = errorMessage ?? "Failed to send the settings. Check your Loop APNS configuration."
+                    self.alertMessage = errorMessage ?? String(localized: "Failed to send the settings. Check your Loop APNS configuration.")
                     self.alertType = .error
                     LogManager.shared.log(category: .apns, message: "Failed to send therapy settings: \(errorMessage ?? "unknown error")")
                 }
@@ -876,12 +876,12 @@ private struct TherapyNumberEditor: View {
     }
 
     private var problem: String? {
-        guard let parsed else { return texts.contains(where: { !$0.isEmpty }) ? "Enter a number" : nil }
+        guard let parsed else { return texts.contains(where: { !$0.isEmpty }) ? String(localized: "Enter a number") : nil }
         if let outside = parsed.first(where: { !edit.limits.contains($0) }) {
-            return "\(format(outside)) is outside what Loop allows (\(format(edit.limits.lowerBound))–\(format(edit.limits.upperBound)) \(edit.unitLabel))."
+            return String(localized: "\(format(outside)) is outside what Loop allows (\(format(edit.limits.lowerBound))–\(format(edit.limits.upperBound)) \(edit.unitLabel)).")
         }
         if edit.isRange, parsed[0] > parsed[1] {
-            return "The low value must not be above the high value."
+            return String(localized: "The low value must not be above the high value.")
         }
         return nil
     }
@@ -890,9 +890,9 @@ private struct TherapyNumberEditor: View {
         guard let parsed, problem == nil else { return [] }
         var notes = [String]()
         if let outside = parsed.first(where: { !edit.bounds.absolute.contains($0) }) {
-            notes.append("With Loop's other settings as they are, \(format(outside)) is outside the allowed \(format(edit.bounds.absolute.lowerBound))–\(format(edit.bounds.absolute.upperBound)) \(edit.unitLabel). Change the other setting too before sending.")
+            notes.append(String(localized: "With Loop's other settings as they are, \(format(outside)) is outside the allowed \(format(edit.bounds.absolute.lowerBound))–\(format(edit.bounds.absolute.upperBound)) \(edit.unitLabel). Change the other setting too before sending."))
         } else if parsed.contains(where: { !edit.bounds.recommended.contains($0) }) {
-            notes.append("Outside Loop's recommended \(format(edit.bounds.recommended.lowerBound))–\(format(edit.bounds.recommended.upperBound)) \(edit.unitLabel).")
+            notes.append(String(localized: "Outside Loop's recommended \(format(edit.bounds.recommended.lowerBound))–\(format(edit.bounds.recommended.upperBound)) \(edit.unitLabel)."))
         }
         if let increment = edit.increment {
             let typed = texts.compactMap { text -> Double? in
@@ -900,7 +900,7 @@ private struct TherapyNumberEditor: View {
                 return formatter.number(from: trimmed)?.doubleValue ?? Double(trimmed.replacingOccurrences(of: ",", with: "."))
             }
             if zip(typed, parsed).contains(where: { abs($0 - $1) > 1e-9 }) {
-                notes.append("The pump delivers in steps of \(TherapySchedule.format(increment, digits: 2)) \(edit.unitLabel); this is saved as \(parsed.map(format).joined(separator: "–")) \(edit.unitLabel).")
+                notes.append(String(localized: "The pump delivers in steps of \(TherapySchedule.format(increment, digits: 2)) \(edit.unitLabel); this is saved as \(parsed.map(format).joined(separator: "–")) \(edit.unitLabel)."))
             }
         }
         return notes
@@ -940,7 +940,7 @@ private struct TherapyNumberEditor: View {
                     ForEach(texts.indices, id: \.self) { index in
                         HStack {
                             if edit.isRange {
-                                Text(index == 0 ? "Low" : "High")
+                                Text(index == 0 ? String(localized: "Low", comment: "Range low value") : String(localized: "High", comment: "Range high value"))
                                     .frame(width: 48, alignment: .leading)
                             }
                             TextField("Value", text: $texts[index])
@@ -1057,20 +1057,20 @@ private struct OverridePresetEditor: View {
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     private var problem: String? {
-        if trimmedName.isEmpty { return "Enter a name." }
-        if otherNames.contains(trimmedName) { return "Another preset already has this name." }
-        if symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "Enter a symbol, such as an emoji." }
-        if hasTarget && target == nil { return "Enter a target range with the low value not above the high value." }
+        if trimmedName.isEmpty { return String(localized: "Enter a name.") }
+        if otherNames.contains(trimmedName) { return String(localized: "Another preset already has this name.") }
+        if symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return String(localized: "Enter a symbol, such as an emoji.") }
+        if hasTarget && target == nil { return String(localized: "Enter a target range with the low value not above the high value.") }
         if let target {
             let limits = TherapyGuardrails.overrideTargetLimits(unit: glucoseUnit)
             if !limits.contains(target.lowerBound) || !limits.contains(target.upperBound) {
                 let allowed = TherapySchedule.formatRange(limits.lowerBound, limits.upperBound, digits: digits)
-                return "The target must be within \(allowed) \(glucoseUnit.localizedShortUnitString)."
+                return String(localized: "The target must be within \(allowed) \(glucoseUnit.localizedShortUnitString).")
             }
         }
-        if !indefinite && duration > TherapyGuardrails.maximumOverrideDuration { return "A preset lasts at most 24 hours." }
-        if !hasTarget && percent == 100 { return "Set a target or overall insulin needs other than 100%." }
-        if !indefinite && duration == 0 { return "Choose a duration, or make the preset indefinite." }
+        if !indefinite && duration > TherapyGuardrails.maximumOverrideDuration { return String(localized: "A preset lasts at most 24 hours.") }
+        if !hasTarget && percent == 100 { return String(localized: "Set a target or overall insulin needs other than 100%.") }
+        if !indefinite && duration == 0 { return String(localized: "Choose a duration, or make the preset indefinite.") }
         return nil
     }
 
@@ -1103,7 +1103,7 @@ private struct OverridePresetEditor: View {
 
                 Section(
                     header: Text("Target Range"),
-                    footer: Text(hasTarget ? "Loop aims for this range while the preset is on." : "Loop keeps using the Correction Range.")
+                    footer: Text(hasTarget ? String(localized: "Loop aims for this range while the preset is on.") : String(localized: "Loop keeps using the Correction Range."))
                 ) {
                     Toggle("Custom Target", isOn: $hasTarget)
                     if hasTarget {
@@ -1151,7 +1151,7 @@ private struct OverridePresetEditor: View {
                     }
                 }
             }
-            .navigationTitle(isNew ? "New Preset" : preset.name)
+            .navigationTitle(isNew ? String(localized: "New Preset") : preset.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

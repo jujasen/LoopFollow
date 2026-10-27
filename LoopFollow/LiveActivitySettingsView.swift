@@ -14,7 +14,7 @@
         @State private var keyId: String = Storage.shared.lfKeyId.value
         @State private var apnsKey: String = Storage.shared.lfApnsKey.value
 
-        private let slotLabels = ["Top left", "Top right", "Bottom left", "Bottom right"]
+        private let slotLabels = [String(localized: "Top left"), String(localized: "Top right"), String(localized: "Bottom left"), String(localized: "Bottom right")]
 
         private var apnsConfigured: Bool {
             APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey)

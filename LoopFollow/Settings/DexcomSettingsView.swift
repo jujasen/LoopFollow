@@ -25,7 +25,7 @@ struct DexcomSettingsView: View {
                 HStack {
                     Text("Password")
                     TogglableSecureInput(
-                        placeholder: "Enter Password",
+                        placeholder: String(localized: "Enter Password"),
                         text: $viewModel.password,
                         style: .singleLine,
                         textContentType: .password

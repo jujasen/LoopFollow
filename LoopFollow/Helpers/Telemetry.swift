@@ -279,7 +279,7 @@ struct TelemetryPreviewView: View {
         let payload = TelemetryClient.shared.buildPayload()
         guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys]),
               let text = String(data: data, encoding: .utf8)
-        else { return "Unable to render payload." }
+        else { return String(localized: "Unable to render payload.") }
         return text
     }
 }

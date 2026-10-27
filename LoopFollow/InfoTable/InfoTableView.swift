@@ -13,7 +13,7 @@ struct InfoTableView: View {
     var body: some View {
         List {
             if let tz = timeZoneOverride {
-                row(name: "Time Zone", value: tz)
+                row(name: String(localized: "Time Zone"), value: tz)
             }
             ForEach(infoManager.visibleRows) { item in
                 row(name: item.name, value: item.value, valueColor: color(for: item))

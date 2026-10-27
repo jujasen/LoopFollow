@@ -42,7 +42,7 @@ struct FavoriteFoodsView: View {
                 ForEach(sections) { section in
                     Section(header: sectionHeader(for: section)) {
                         if section.foods.isEmpty {
-                            Text(section.isUnfiled ? "No foods outside a folder." : "This folder is empty.")
+                            Text(section.isUnfiled ? String(localized: "No foods outside a folder.") : String(localized: "This folder is empty."))
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                         }
@@ -215,7 +215,7 @@ struct FavoriteFoodsView: View {
         if let folder = section.folder {
             return folder.title
         }
-        return storedFolders.value.isEmpty ? "All Favorites" : "Not in a Folder"
+        return storedFolders.value.isEmpty ? String(localized: "All Favorites") : String(localized: "Not in a Folder")
     }
 
     private func folderMenu(for folder: FavoriteFoodFolder) -> some View {
@@ -352,7 +352,7 @@ struct FavoriteFoodFolderEditorView: View {
                     }
                 }
             }
-            .navigationTitle(existingFolder == nil ? "New Folder" : "Edit Folder")
+            .navigationTitle(existingFolder == nil ? String(localized: "New Folder") : String(localized: "Edit Folder"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -206,15 +206,15 @@ struct NightscoutFoodAPI {
         var errorDescription: String? {
             switch self {
             case .notConfigured:
-                return "Nightscout address or token is missing."
+                return String(localized: "Nightscout address or token is missing.")
             case let .http(status, body):
                 switch status {
                 case 401, 403:
-                    return "Nightscout rejected the food token (\(status)). Set the sync up again with your API secret."
+                    return String(localized: "Nightscout rejected the food token (\(status)). Set the sync up again with your API secret.")
                 case 404:
-                    return "This Nightscout site has no food API."
+                    return String(localized: "This Nightscout site has no food API.")
                 default:
-                    return "Nightscout returned \(status). \(body)"
+                    return String(localized: "Nightscout returned \(status). \(body)")
                 }
             }
         }

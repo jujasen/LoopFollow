@@ -40,7 +40,7 @@ struct TempTargetView: View {
             VStack {
                 if device.value != "Trio" {
                     ErrorMessageView(
-                        message: "Remote commands are currently only available for Trio."
+                        message: String(localized: "Remote commands are currently only available for Trio.")
                     )
                 } else {
                     Form {
@@ -213,7 +213,7 @@ struct TempTargetView: View {
                 case .validation:
                     return Alert(
                         title: Text("Validation Error"),
-                        message: Text(alertMessage ?? "Invalid input."),
+                        message: Text(alertMessage ?? String(localized: "Invalid input.")),
                         dismissButton: .default(Text("OK"))
                     )
                 case .none:
@@ -261,11 +261,11 @@ struct TempTargetView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Temp target command successfully sent."
+                    self.statusMessage = String(localized: "Temp target command successfully sent.")
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification succeeded with target: \(newHKTarget), duration: \(duration)")
                 } else {
-                    self.statusMessage = errorMessage ?? "Failed to send temp target command."
+                    self.statusMessage = errorMessage ?? String(localized: "Failed to send temp target command.")
                     self.alertType = .statusFailure
                     LogManager.shared.log(category: .apns, message: "sendTempTargetPushNotification failed with target: \(newHKTarget), duration: \(duration), error: \(errorMessage ?? "unknown error")")
                 }
@@ -281,11 +281,11 @@ struct TempTargetView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Cancel temp target command successfully sent."
+                    self.statusMessage = String(localized: "Cancel temp target command successfully sent.")
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification succeeded")
                 } else {
-                    self.statusMessage = errorMessage ?? "Failed to send cancel temp target command."
+                    self.statusMessage = errorMessage ?? String(localized: "Failed to send cancel temp target command.")
                     self.alertType = .statusFailure
                     LogManager.shared.log(category: .apns, message: "sendCancelTempTargetPushNotification failed with error: \(errorMessage ?? "unknown error")")
                 }

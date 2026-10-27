@@ -80,10 +80,10 @@ struct AddEditFavoriteFoodView: View {
 
     private var saveDisabledReason: String? {
         if trimmedName.isEmpty {
-            return "Give the food a name."
+            return String(localized: "Give the food a name.")
         }
         if validPortions.isEmpty {
-            return "Enter the carbs for at least one serving size."
+            return String(localized: "Enter the carbs for at least one serving size.")
         }
         return nil
     }
@@ -142,7 +142,7 @@ struct AddEditFavoriteFoodView: View {
                 }
             }
         }
-        .navigationTitle(originalFood == nil ? "New Favorite Food" : (originalFood?.name ?? ""))
+        .navigationTitle(originalFood == nil ? String(localized: "New Favorite Food") : (originalFood?.name ?? ""))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isModal {
@@ -308,7 +308,7 @@ struct AddEditFavoriteFoodView: View {
     }
 
     private var portionNamePlaceholder: String {
-        portions.count > 1 ? "1 slice" : "Serving size (optional)"
+        portions.count > 1 ? String(localized: "1 slice", comment: "Placeholder example of a serving size name") : String(localized: "Serving size (optional)")
     }
 
     private func normalizeAbsorptionMinutes() {

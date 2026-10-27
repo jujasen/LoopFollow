@@ -41,7 +41,7 @@ struct URLTokenValidationView: View {
                     HStack {
                         Text("Current URL:")
                         Spacer()
-                        Text(Storage.shared.url.value.isEmpty ? "Not set" : Storage.shared.url.value)
+                        Text(Storage.shared.url.value.isEmpty ? String(localized: "Not set") : Storage.shared.url.value)
                             .foregroundColor(.secondary)
                     }
 
@@ -60,7 +60,7 @@ struct URLTokenValidationView: View {
                     HStack {
                         Text("Current Token:")
                         Spacer()
-                        Text(Storage.shared.token.value.isEmpty ? "Not set" : "••••••••")
+                        Text(Storage.shared.token.value.isEmpty ? String(localized: "Not set") : "••••••••")
                             .foregroundColor(.secondary)
                     }
 

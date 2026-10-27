@@ -49,7 +49,7 @@ struct OverridePresetData: Codable, Identifiable {
 
     var durationDescription: String {
         if duration == 0 {
-            return "Indefinite"
+            return String(localized: "Indefinite", comment: "Override duration: no end")
         } else {
             let hours = Int(duration / 3600)
             let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)

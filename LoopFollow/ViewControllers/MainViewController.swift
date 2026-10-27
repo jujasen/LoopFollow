@@ -449,7 +449,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         let loadingLabel = UILabel()
         loadingLabel.translatesAutoresizingMaskIntoConstraints = false
-        loadingLabel.text = "Loading..."
+        loadingLabel.text = String(localized: "Loading...")
         loadingLabel.textAlignment = .center
         loadingLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         loadingLabel.textColor = UIColor.secondaryLabel
@@ -545,7 +545,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         let iconTemplate = UIApplicationShortcutIcon(systemImageName: iconName)
 
         let shortcut = UIApplicationShortcutItem(type: Bundle.main.bundleIdentifier! + ".toggleSpeakBG",
-                                                 localizedTitle: "Speak BG",
+                                                 localizedTitle: String(localized: "Speak BG"),
                                                  localizedSubtitle: nil,
                                                  icon: iconTemplate,
                                                  userInfo: nil)
@@ -560,7 +560,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
 
-        Observable.shared.minAgoText.value = "Refreshing"
+        Observable.shared.minAgoText.value = String(localized: "Refreshing")
         scheduleAllTasks()
         NightscoutSocketManager.shared.connectIfNeeded()
 
@@ -721,24 +721,24 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             if isBlacklisted {
                 let lastBlacklistShown = Storage.shared.lastBlacklistNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastBlacklistShown) > 86400 { // 24 hours
-                    self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
+                    self.versionAlert(message: String(localized: "The current version has a critical issue and should be updated as soon as possible."))
                     Storage.shared.lastBlacklistNotificationShown.value = now
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             } else if isNewer {
                 let lastVersionUpdateShown = Storage.shared.lastVersionUpdateNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastVersionUpdateShown) > 1_209_600 { // 2 weeks
-                    self.versionAlert(message: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update.")
+                    self.versionAlert(message: String(localized: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update."))
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             }
         }
     }
 
-    func versionAlert(title: String = "Update Available", message: String) {
+    func versionAlert(title: String = String(localized: "Update Available"), message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default, handler: nil))
             self.present(alert, animated: true)
         }
     }
@@ -759,8 +759,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
     func expirationAlert() {
         DispatchQueue.main.async {
-            let alert = UIAlertController(title: "App Expiration Warning", message: "This app will expire in less than a week. Please rebuild to continue using it.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            let alert = UIAlertController(title: String(localized: "App Expiration Warning"), message: String(localized: "This app will expire in less than a week. Please rebuild to continue using it."), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default, handler: nil))
             self.present(alert, animated: true)
         }
     }
@@ -1054,7 +1054,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Create Setup Nightscout button
         if setupNightscoutButton == nil {
             setupNightscoutButton = UIButton(type: .system)
-            setupNightscoutButton.setTitle("Setup Nightscout", for: .normal)
+            setupNightscoutButton.setTitle(String(localized: "Setup Nightscout"), for: .normal)
             setupNightscoutButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
             setupNightscoutButton.backgroundColor = UIColor.systemBlue
             setupNightscoutButton.setTitleColor(.white, for: .normal)
@@ -1079,7 +1079,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Create Setup Dexcom Share button
         if setupDexcomButton == nil {
             setupDexcomButton = UIButton(type: .system)
-            setupDexcomButton.setTitle("Setup Dexcom Share", for: .normal)
+            setupDexcomButton.setTitle(String(localized: "Setup Dexcom Share"), for: .normal)
             setupDexcomButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
             setupDexcomButton.backgroundColor = UIColor.systemGreen
             setupDexcomButton.setTitleColor(.white, for: .normal)

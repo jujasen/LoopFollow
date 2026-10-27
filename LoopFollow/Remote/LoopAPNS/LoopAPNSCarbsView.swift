@@ -72,7 +72,7 @@ struct LoopAPNSCarbsView: View {
 
     private var absorptionValidationMessage: String {
         String(
-            format: "Please enter a valid absorption time between %.1f and %.1f hours",
+            format: String(localized: "Please enter a valid absorption time between %.1f and %.1f hours"),
             minAllowedAbsorptionTime,
             maxAllowedAbsorptionTime
         )
@@ -111,7 +111,7 @@ struct LoopAPNSCarbsView: View {
                     favoriteFoodsSection
 
                     if !quickPickMeals.quickPickMeals.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Meals", infoText: QuickPickSectionHeader.mealInfoText)) {
+                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Meals"), infoText: QuickPickSectionHeader.mealInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(quickPickMeals.quickPickMeals) { meal in
@@ -136,7 +136,7 @@ struct LoopAPNSCarbsView: View {
 
                     Section {
                         HKQuantityInputView(
-                            label: "Carbs Amount",
+                            label: String(localized: "Carbs Amount"),
                             quantity: $carbsAmount,
                             unit: .gram(),
                             maxLength: 4,
@@ -297,7 +297,7 @@ struct LoopAPNSCarbsView: View {
                                         .padding(.horizontal, 8)
                                         .background(Color.green.opacity(0.1))
                                         .cornerRadius(4)
-                                    Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                                    Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -439,7 +439,7 @@ struct LoopAPNSCarbsView: View {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
                 if !apnsService.validateSetup() {
-                    alertMessage = "Loop APNS setup is incomplete. Please configure all required fields in settings."
+                    alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
                     alertType = .error
                     showAlert = true
                 }
@@ -520,7 +520,7 @@ struct LoopAPNSCarbsView: View {
 
     private func sendCarbs() {
         guard carbsAmount.doubleValue(for: .gram()) > 0 else {
-            alertMessage = "Please enter a valid carb amount"
+            alertMessage = String(localized: "Please enter a valid carb amount")
             alertType = .error
             showAlert = true
             return
@@ -531,7 +531,7 @@ struct LoopAPNSCarbsView: View {
         let carbsValue = carbsAmount.doubleValue(for: .gram())
 
         if carbsValue > maxCarbs {
-            alertMessage = "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount."
+            alertMessage = String(localized: "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount.")
             alertType = .error
             showAlert = true
             return
@@ -543,14 +543,14 @@ struct LoopAPNSCarbsView: View {
         let latestAcceptedDate = now.addingTimeInterval(60 * 60 * Double(maxFutureHours))
 
         if consumedDate < oldestAcceptedDate {
-            alertMessage = "Time must be within the prior \(maxPastHours) hours"
+            alertMessage = String(localized: "Time must be within the prior \(maxPastHours) hours")
             alertType = .error
             showAlert = true
             return
         }
 
         if consumedDate > latestAcceptedDate {
-            alertMessage = "Time must be within the next \(maxFutureHours) hour"
+            alertMessage = String(localized: "Time must be within the next \(maxFutureHours) hour")
             alertType = .error
             showAlert = true
             return
@@ -565,7 +565,7 @@ struct LoopAPNSCarbsView: View {
 
         // Extract OTP from QR code URL
         guard let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) else {
-            alertMessage = "Invalid QR code URL. Please re-scan the QR code in settings."
+            alertMessage = String(localized: "Invalid QR code URL. Please re-scan the QR code in settings.")
             alertType = .error
             isLoading = false
             showAlert = true
@@ -607,14 +607,14 @@ struct LoopAPNSCarbsView: View {
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     let timeFormatter = DateFormatter()
                     timeFormatter.timeStyle = .short
-                    self.alertMessage = "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!"
+                    self.alertMessage = String(localized: "Carbs sent successfully for \(timeFormatter.string(from: adjustedConsumedDate))!")
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,
                         message: "Carbs sent - Amount: \(carbsAmount.doubleValue(for: .gram()))g, Absorption: \(absorptionConfirmationText)h, Time: \(adjustedConsumedDate)"
                     )
                 } else {
-                    self.alertMessage = errorMessage ?? "Failed to send carbs. Check your Loop APNS configuration."
+                    self.alertMessage = errorMessage ?? String(localized: "Failed to send carbs. Check your Loop APNS configuration.")
                     self.alertType = .error
                     LogManager.shared.log(
                         category: .apns,
@@ -700,7 +700,7 @@ extension LoopAPNSCarbsView {
             NavigationLink {
                 FavoriteFoodsView()
             } label: {
-                Label(favoriteFoods.value.isEmpty ? "Add favorite foods" : "Edit favorites", systemImage: "square.and.pencil")
+                Label(favoriteFoods.value.isEmpty ? String(localized: "Add favorite foods") : String(localized: "Edit favorites"), systemImage: "square.and.pencil")
             }
         }
     }

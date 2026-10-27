@@ -10,6 +10,15 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
     case dexcom = "Dexcom"
     case omnipodDash = "Omnipod Dash"
 
+    /// User-facing name. `rawValue` is persisted and must not change.
+    var displayName: String {
+        switch self {
+        case .none: return String(localized: "None", comment: "Background refresh type: none")
+        case .silentTune: return String(localized: "Silent Tune")
+        case .rileyLink, .dexcom, .omnipodDash: return rawValue
+        }
+    }
+
     /// Indicates if the device type uses Bluetooth
     var isBluetooth: Bool {
         switch self {

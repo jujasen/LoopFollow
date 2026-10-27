@@ -39,27 +39,27 @@ struct TIRView: View {
 
                                 TIRLegendItem(
                                     color: .orange,
-                                    label: "Very High (\(veryHighCutoffText))",
+                                    label: String(localized: "Very High (\(veryHighCutoffText))"),
                                     percentage: average.veryHigh
                                 )
                                 TIRLegendItem(
                                     color: .yellow,
-                                    label: "High (\(highCutoffText))",
+                                    label: String(localized: "High (\(highCutoffText))"),
                                     percentage: average.high
                                 )
                                 TIRLegendItem(
                                     color: .green,
-                                    label: "In Range (\(inRangeCutoffText))",
+                                    label: String(localized: "In Range (\(inRangeCutoffText))"),
                                     percentage: average.inRange
                                 )
                                 TIRLegendItem(
                                     color: .red.opacity(0.5),
-                                    label: "Low (\(lowCutoffText))",
+                                    label: String(localized: "Low (\(lowCutoffText))"),
                                     percentage: average.low
                                 )
                                 TIRLegendItem(
                                     color: .red.opacity(0.8),
-                                    label: "Very Low (\(veryLowCutoffText))",
+                                    label: String(localized: "Very Low (\(veryLowCutoffText))"),
                                     percentage: average.veryLow
                                 )
                             }
@@ -89,11 +89,11 @@ struct TIRView: View {
     private var tirTitle: String {
         switch UnitSettingsStore.shared.timeInRangeMode {
         case .tir:
-            return "Time in Range"
+            return String(localized: "Time in Range")
         case .titr:
-            return "Time in Tight Range"
+            return String(localized: "Time in Tight Range")
         case .custom:
-            return "Custom Range"
+            return String(localized: "Custom Range")
         }
     }
 

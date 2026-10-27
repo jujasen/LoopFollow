@@ -38,15 +38,15 @@ struct TreatmentsView: View {
             return "SMB"
         }
         if isLoopDevice {
-            return "Automatic"
+            return String(localized: "Automatic", comment: "Automatic bolus filter")
         }
         if viewModel.hasAutomaticEntries {
-            return "Automatic"
+            return String(localized: "Automatic", comment: "Automatic bolus filter")
         }
         if viewModel.hasSMBEntries {
             return "SMB"
         }
-        return "Automatic"
+        return String(localized: "Automatic", comment: "Automatic bolus filter")
     }
 
     private var automaticLabelIsSMB: Bool {
@@ -381,7 +381,7 @@ struct TreatmentsView: View {
             return nil
         }
 
-        return "Time Zone Override On: \(overrideTimeZone.identifier)"
+        return String(localized: "Time Zone Override On: \(overrideTimeZone.identifier)")
     }
 }
 
@@ -882,13 +882,13 @@ enum TreatmentType: CaseIterable, Hashable {
 
     var displayName: String {
         switch self {
-        case .carb: return "Carbs"
-        case .bolusManual: return "Bolus"
-        case .bolusAutomatic: return "Automatic"
+        case .carb: return String(localized: "Carbs")
+        case .bolusManual: return String(localized: "Bolus")
+        case .bolusAutomatic: return String(localized: "Automatic")
         case .smb: return "SMB"
-        case .tempBasal: return "Basal"
-        case .override: return "Override"
-        case .tempTarget: return "Temp Target"
+        case .tempBasal: return String(localized: "Basal")
+        case .override: return String(localized: "Override")
+        case .tempTarget: return String(localized: "Temp Target")
         }
     }
 }
@@ -904,13 +904,13 @@ enum TreatmentFilter: Hashable {
 
     func displayName(automaticLabel: String) -> String {
         switch self {
-        case .all: return "All"
-        case .carb: return "Carbs"
-        case .basal: return "Basal"
-        case .bolusAll: return "All Boluses"
+        case .all: return String(localized: "All")
+        case .carb: return String(localized: "Carbs")
+        case .basal: return String(localized: "Basal")
+        case .bolusAll: return String(localized: "All Boluses")
         case .bolusAutomatic: return automaticLabel
         case .bolusSMB: return "SMB"
-        case .bolusManual: return "Manual"
+        case .bolusManual: return String(localized: "Manual")
         }
     }
 
@@ -1179,7 +1179,7 @@ class TreatmentsViewModel: ObservableObject {
                         type: .carb,
                         date: timestamp,
                         title: "\(Int(carbs))g",
-                        subtitle: "Carbs",
+                        subtitle: String(localized: "Carbs"),
                         icon: "circle.fill",
                         color: .orange,
                         bgValue: actualBG
@@ -1197,7 +1197,7 @@ class TreatmentsViewModel: ObservableObject {
                         type: .bolusManual,
                         date: timestamp,
                         title: String(format: "%.2f U", insulin),
-                        subtitle: "Bolus",
+                        subtitle: String(localized: "Bolus"),
                         icon: "circle.fill",
                         color: .blue,
                         bgValue: actualBG
@@ -1226,7 +1226,7 @@ class TreatmentsViewModel: ObservableObject {
                             type: .bolusAutomatic,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
-                            subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
+                            subtitle: isSMB || isTrioSMBType ? "SMB" : String(localized: "Automatic Bolus"),
                             icon: "arrowtriangle.down.fill",
                             color: .blue,
                             bgValue: actualBG
@@ -1238,7 +1238,7 @@ class TreatmentsViewModel: ObservableObject {
                             type: .bolusManual,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
-                            subtitle: "Bolus",
+                            subtitle: String(localized: "Bolus"),
                             icon: "circle.fill",
                             color: .blue,
                             bgValue: actualBG
@@ -1271,7 +1271,7 @@ class TreatmentsViewModel: ObservableObject {
                         type: .tempBasal,
                         date: timestamp,
                         title: String(format: "%.2f U/hr", rate),
-                        subtitle: "Temp Basal",
+                        subtitle: String(localized: "Temp Basal"),
                         icon: "chart.xyaxis.line",
                         color: .blue,
                         bgValue: 0
@@ -1289,9 +1289,9 @@ class TreatmentsViewModel: ObservableObject {
                     ?? (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? ""
 
-                let subtitleParts = ["Override", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil].compactMap { $0 }
+                let subtitleParts = [String(localized: "Override"), durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil].compactMap { $0 }
                 let subtitle = subtitleParts.joined(separator: " • ")
-                let title = reason.isEmpty ? "Temporary Override" : reason
+                let title = reason.isEmpty ? String(localized: "Temporary Override") : reason
 
                 let treatment = Treatment(
                     id: "\(nsId)-override",
@@ -1327,7 +1327,7 @@ class TreatmentsViewModel: ObservableObject {
                 }
 
                 let reason = (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                let subtitleParts = ["Temp Target", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil, reason?.isEmpty == false ? reason : nil].compactMap { $0 }
+                let subtitleParts = [String(localized: "Temp Target"), durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil, reason?.isEmpty == false ? reason : nil].compactMap { $0 }
                 let subtitle = subtitleParts.joined(separator: " • ")
 
                 let treatment = Treatment(

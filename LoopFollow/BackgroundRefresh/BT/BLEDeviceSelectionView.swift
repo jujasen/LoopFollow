@@ -21,7 +21,7 @@ struct BLEDeviceSelectionView: View {
                     ForEach(filteredDevices, id: \.id) { device in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(device.name ?? "Unknown")
+                                Text(device.name ?? String(localized: "Unknown"))
 
                                 Text("RSSI: \(device.rssi) dBm")
                                     .foregroundColor(.secondary)

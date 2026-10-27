@@ -68,7 +68,7 @@ struct GraphSettingsView: View {
             // ── Small Graph ──────────────────────────────────────────────
             Section("Small Graph") {
                 SettingsStepperRow(
-                    title: "Height",
+                    title: String(localized: "Height", comment: "Small graph height setting"),
                     range: 40 ... 80,
                     step: 5,
                     value: $smallGraphHeight.value,
@@ -81,7 +81,7 @@ struct GraphSettingsView: View {
             if nightscoutEnabled {
                 Section("Prediction") {
                     SettingsStepperRow(
-                        title: "Hours of Prediction",
+                        title: String(localized: "Hours of Prediction"),
                         range: 0 ... 6,
                         step: 0.25,
                         value: $predictionToLoad.value,
@@ -103,7 +103,7 @@ struct GraphSettingsView: View {
             if nightscoutEnabled {
                 Section("Basal / BG Scale") {
                     SettingsStepperRow(
-                        title: "Min Basal",
+                        title: String(localized: "Min Basal"),
                         range: 0.5 ... 20,
                         step: 0.5,
                         value: $minBasalScale.value,
@@ -111,7 +111,7 @@ struct GraphSettingsView: View {
                     )
 
                     BGPicker(
-                        title: "Min BG Scale",
+                        title: String(localized: "Min BG Scale"),
                         range: 40 ... 400,
                         value: $minBGScale.value
                     )
@@ -123,7 +123,7 @@ struct GraphSettingsView: View {
             if nightscoutEnabled {
                 Section("History") {
                     SettingsStepperRow(
-                        title: "Show Days Back",
+                        title: String(localized: "Show Days Back"),
                         range: 1 ... 4,
                         step: 1,
                         value: $downloadDays.value,

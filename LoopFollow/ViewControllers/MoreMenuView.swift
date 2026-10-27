@@ -117,8 +117,8 @@ struct MoreMenuView: View {
 
         // Build Information
         Section("Build Information") {
-            buildInfoRow(title: "Version", value: currentVersion, color: versionTint)
-            buildInfoRow(title: "Latest version", value: latestVersion ?? "Fetching…", color: .secondary)
+            buildInfoRow(title: String(localized: "Version"), value: currentVersion, color: versionTint)
+            buildInfoRow(title: String(localized: "Latest version"), value: latestVersion ?? String(localized: "Fetching…"), color: .secondary)
 
             let build = BuildDetails.default
             if !(build.isMacApp() || build.isSimulatorBuild()) {
@@ -129,8 +129,8 @@ struct MoreMenuView: View {
                 )
             }
 
-            buildInfoRow(title: "Built", value: dateTimeUtils.formattedDate(from: build.buildDate()), color: .secondary)
-            buildInfoRow(title: "Branch", value: build.branchAndSha, color: .secondary)
+            buildInfoRow(title: String(localized: "Built"), value: dateTimeUtils.formattedDate(from: build.buildDate()), color: .secondary)
+            buildInfoRow(title: String(localized: "Branch"), value: build.branchAndSha, color: .secondary)
         }
     }
 
@@ -148,9 +148,9 @@ struct MoreMenuView: View {
     /// External Support & Community links, shared by the menu and search so their
     /// titles live in one place.
     private static let supportLinks: [(title: String, icon: String, url: URL)] = [
-        ("LoopFollow Docs", "book", URL(string: "https://loopfollowdocs.org/")!),
+        (String(localized: "LoopFollow Docs"), "book", URL(string: "https://loopfollowdocs.org/")!),
         ("Loop and Learn Discord", "bubble.left.and.bubble.right", URL(string: "https://discord.gg/KQgk3gzuYU")!),
-        ("LoopFollow Facebook Group", "person.2.fill", URL(string: "https://www.facebook.com/groups/loopfollowlnl")!),
+        (String(localized: "LoopFollow Facebook Group"), "person.2.fill", URL(string: "https://www.facebook.com/groups/loopfollowlnl")!),
     ]
 
     /// The searchable universe, assembled from the same sources that render the
@@ -158,7 +158,7 @@ struct MoreMenuView: View {
     /// never needs to be kept in sync by hand.
     private var searchItems: [MenuSearchItem] {
         var items: [MenuSearchItem] = [
-            MenuSearchItem(title: "Settings", icon: "gearshape", keywords: [], kind: .settings(.settings)),
+            MenuSearchItem(title: String(localized: "Settings"), icon: "gearshape", keywords: [], kind: .settings(.settings)),
         ]
 
         let settingsSections = SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty)
@@ -173,8 +173,8 @@ struct MoreMenuView: View {
             items.append(MenuSearchItem(title: item.displayName, icon: item.icon, keywords: [], kind: .feature(item)))
         }
 
-        items.append(MenuSearchItem(title: "View Log", icon: "doc.text.magnifyingglass", keywords: ["logging"], kind: .viewLog))
-        items.append(MenuSearchItem(title: "Share Logs", icon: "square.and.arrow.up", keywords: ["logging"], kind: .shareLogs))
+        items.append(MenuSearchItem(title: String(localized: "View Log"), icon: "doc.text.magnifyingglass", keywords: ["logging"], kind: .viewLog))
+        items.append(MenuSearchItem(title: String(localized: "Share Logs"), icon: "square.and.arrow.up", keywords: ["logging"], kind: .shareLogs))
 
         for link in MoreMenuView.supportLinks {
             items.append(MenuSearchItem(title: link.title, icon: link.icon, keywords: ["support", "community"], kind: .link(link.url)))
@@ -191,7 +191,7 @@ struct MoreMenuView: View {
                         icon: route.icon,
                         keywords: leaf.keywords,
                         kind: .settings(route),
-                        subtitle: "Settings → \(route.title)"
+                        subtitle: String(localized: "Settings → \(route.title)")
                     ))
                 }
             }
@@ -263,8 +263,8 @@ struct MoreMenuView: View {
     private func shareLogs() {
         let files = LogManager.shared.logFilesForTodayAndYesterday()
         guard !files.isEmpty else {
-            alertTitle = "No Logs Available"
-            alertMessage = "There are no logs to share."
+            alertTitle = String(localized: "No Logs Available")
+            alertMessage = String(localized: "There are no logs to share.")
             showAlert = true
             return
         }
@@ -330,7 +330,7 @@ struct MoreMenuView: View {
     private func fetchVersionInfo() async {
         let mgr = AppVersionManager()
         let (latest, newer, blacklisted) = await mgr.checkForNewVersionAsync()
-        latestVersion = latest ?? "Unknown"
+        latestVersion = latest ?? String(localized: "Unknown")
 
         versionTint = blacklisted ? .red
             : newer ? .orange

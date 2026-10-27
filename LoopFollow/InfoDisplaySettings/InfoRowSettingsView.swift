@@ -20,8 +20,8 @@ struct InfoRowSettingsView: View {
                     Toggle("Enable coloring", isOn: enabledBinding(config))
 
                     if item.coloring.enabled {
-                        thresholdRow(title: "Yellow at", value: $item.coloring.warning, default: config.defaultWarning, config: config)
-                        thresholdRow(title: "Red at", value: $item.coloring.urgent, default: config.defaultUrgent, config: config)
+                        thresholdRow(title: String(localized: "Yellow at"), value: $item.coloring.warning, default: config.defaultWarning, config: config)
+                        thresholdRow(title: String(localized: "Red at"), value: $item.coloring.urgent, default: config.defaultUrgent, config: config)
 
                         if let thresholdWarning = thresholdWarning(config) {
                             Label(thresholdWarning, systemImage: "exclamationmark.triangle.fill")
@@ -82,18 +82,18 @@ struct InfoRowSettingsView: View {
         else { return nil }
         switch config.direction {
         case .above:
-            return urgent < warning ? "Red should be at or above yellow." : nil
+            return urgent < warning ? String(localized: "Red should be at or above yellow.") : nil
         case .below:
-            return urgent > warning ? "Red should be at or below yellow." : nil
+            return urgent > warning ? String(localized: "Red should be at or below yellow.") : nil
         }
     }
 
     private func colorFooter(_ config: InfoColorConfig) -> String {
         switch config.direction {
         case .above:
-            return "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm."
+            return String(localized: "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm.")
         case .below:
-            return "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm."
+            return String(localized: "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm.")
         }
     }
 }

@@ -11,7 +11,7 @@ struct ConnectImportStepView: View {
     @StateObject private var importVM = ImportExportSettingsViewModel()
 
     private var importSucceeded: Bool {
-        importVM.qrCodeErrorMessage.contains("Successfully imported")
+        importVM.qrCodeMessageIsSuccess
     }
 
     var body: some View {
@@ -33,8 +33,8 @@ struct ConnectImportStepView: View {
             } header: {
                 OnboardingStepHeader(
                     systemImage: "qrcode",
-                    title: "Copy from another phone",
-                    subtitle: "On your other phone, open Settings → Nightscout (or Dexcom Share) → Import/Export and export to a QR code. Then scan it here."
+                    title: String(localized: "Copy from another phone"),
+                    subtitle: String(localized: "On your other phone, open Settings → Nightscout (or Dexcom Share) → Import/Export and export to a QR code. Then scan it here.")
                 )
                 .textCase(nil)
                 .padding(.bottom, 8)
@@ -75,8 +75,8 @@ struct ConnectImportStepView: View {
         .sheet(isPresented: $importVM.showImportConfirmation) {
             ImportConfirmationView(viewModel: importVM)
         }
-        .onChange(of: importVM.qrCodeErrorMessage) { message in
-            if message.contains("Successfully imported") {
+        .onChange(of: importVM.qrCodeMessageIsSuccess) { succeeded in
+            if succeeded {
                 viewModel.didImportSettings = true
             }
         }

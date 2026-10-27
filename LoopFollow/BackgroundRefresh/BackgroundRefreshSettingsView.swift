@@ -35,7 +35,7 @@ struct BackgroundRefreshSettingsView: View {
         Section {
             Picker("Background Refresh Type", selection: $viewModel.backgroundRefreshType) {
                 ForEach(BackgroundRefreshType.allCases, id: \.self) { type in
-                    Text(type.rawValue).tag(type)
+                    Text(type.displayName).tag(type)
                 }
             }
             .pickerStyle(MenuPickerStyle())
@@ -80,7 +80,7 @@ struct BackgroundRefreshSettingsView: View {
         if let storedDevice = bleManager.getSelectedDevice() {
             Section(header: Text("Selected Device")) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(storedDevice.name ?? "Unknown Device")
+                    Text(storedDevice.name ?? String(localized: "Unknown Device"))
                         .font(.headline)
 
                     deviceConnectionStatus(for: storedDevice)
@@ -116,11 +116,11 @@ struct BackgroundRefreshSettingsView: View {
 
     private func formattedTimeString(from seconds: TimeInterval) -> String {
         if seconds < 60 {
-            return "\(Int(seconds)) seconds"
+            return String(localized: "\(Int(seconds)) seconds")
         } else {
             let minutes = Int(seconds / 60)
             let seconds = Int(seconds.truncatingRemainder(dividingBy: 60))
-            return "\(minutes):\(String(format: "%02d", seconds)) minutes"
+            return String(localized: "\(minutes):\(String(format: "%02d", seconds)) minutes")
         }
     }
 
@@ -137,7 +137,7 @@ struct BackgroundRefreshSettingsView: View {
     }
 
     private var scanningStatusHeader: some View {
-        Text("Scanning for \(viewModel.backgroundRefreshType.rawValue)...")
+        Text("Scanning for \(viewModel.backgroundRefreshType.displayName)...")
             .font(.subheadline)
             .foregroundColor(.secondary)
     }

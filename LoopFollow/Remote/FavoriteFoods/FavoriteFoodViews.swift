@@ -72,7 +72,7 @@ struct FavoriteFoodChip: View {
             return selectedPortion.name
         }
         if food.hasMultiplePortions {
-            return "\(food.portions.count) sizes"
+            return String(localized: "\(food.portions.count) sizes", comment: "Number of serving sizes of a favorite food")
         }
         return food.hasServingSize ? food.servingSize : nil
     }
@@ -158,7 +158,7 @@ struct FavoriteFoodPickerView: View {
 
                 if sections.isEmpty {
                     Section {
-                        Text(storedFoods.value.isEmpty ? "You have no favorite foods yet." : "No matching foods")
+                        Text(storedFoods.value.isEmpty ? String(localized: "You have no favorite foods yet.") : String(localized: "No matching foods"))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -227,6 +227,6 @@ struct FavoriteFoodPickerView: View {
         if let folder = section.folder {
             return folder.title
         }
-        return storedFolders.value.isEmpty ? "All Favorites" : "Not in a Folder"
+        return storedFolders.value.isEmpty ? String(localized: "All Favorites") : String(localized: "Not in a Folder")
     }
 }

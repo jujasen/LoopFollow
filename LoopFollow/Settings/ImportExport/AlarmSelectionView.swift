@@ -194,53 +194,53 @@ struct AlarmSelectionRow: View {
     private var alarmTypeDescription: String {
         switch alarm.type {
         case .temporary:
-            return "Temporary Alert"
+            return String(localized: "Temporary Alert")
         case .iob:
-            return "IOB Alert"
+            return String(localized: "IOB Alert")
         case .cob:
-            return "COB Alert"
+            return String(localized: "COB Alert")
         case .low:
-            return "Low BG Alert"
+            return String(localized: "Low BG Alert")
         case .high:
-            return "High BG Alert"
+            return String(localized: "High BG Alert")
         case .fastDrop:
-            return "Fast Drop Alert"
+            return String(localized: "Fast Drop Alert")
         case .fastRise:
-            return "Fast Rise Alert"
+            return String(localized: "Fast Rise Alert")
         case .missedReading:
-            return "Missed Reading Alert"
+            return String(localized: "Missed Reading Alert")
         case .notLooping:
-            return "Not Looping Alert"
+            return String(localized: "Not Looping Alert")
         case .missedBolus:
-            return "Missed Bolus Alert"
+            return String(localized: "Missed Bolus Alert")
         case .futureCarbs:
-            return "Future Carbs Alert"
+            return String(localized: "Future Carbs Alert")
         case .sensorChange:
-            return "Sensor Change Alert"
+            return String(localized: "Sensor Change Alert")
         case .pumpChange:
-            return "Pump Change Alert"
+            return String(localized: "Pump Change Alert")
         case .pump:
-            return "Pump Insulin Alert"
+            return String(localized: "Pump Insulin Alert")
         case .pumpBattery:
-            return "Pump Battery Alert"
+            return String(localized: "Pump Battery Alert")
         case .battery:
-            return "Low Battery"
+            return String(localized: "Low Battery")
         case .batteryDrop:
-            return "Battery Drop"
+            return String(localized: "Battery Drop")
         case .recBolus:
-            return "Rec. Bolus"
+            return String(localized: "Rec. Bolus")
         case .overrideStart:
-            return "Override Started"
+            return String(localized: "Override Started")
         case .overrideEnd:
-            return "Override Ended"
+            return String(localized: "Override Ended")
         case .tempTargetStart:
-            return "Temp Target Started"
+            return String(localized: "Temp Target Started")
         case .tempTargetEnd:
-            return "Temp Target Ended"
+            return String(localized: "Temp Target Ended")
         case .buildExpire:
-            return "Looping app expiration"
+            return String(localized: "Looping app expiration")
         case .dbSize:
-            return "Nightscout Database Size"
+            return String(localized: "Nightscout Database Size")
         }
     }
 }

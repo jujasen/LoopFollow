@@ -24,8 +24,8 @@ struct GeneralAlarmsStepView: View {
             } header: {
                 OnboardingStepHeader(
                     systemImage: "slider.horizontal.3",
-                    title: "Alarm basics",
-                    subtitle: "Set when your day and night begin, and how alarm sound behaves. You can fine-tune everything later in the Menu."
+                    title: String(localized: "Alarm basics"),
+                    subtitle: String(localized: "Set when your day and night begin, and how alarm sound behaves. You can fine-tune everything later in the Menu.")
                 )
                 .textCase(nil)
                 .padding(.bottom, 8)

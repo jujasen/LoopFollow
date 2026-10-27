@@ -245,7 +245,7 @@ private struct LockScreenLiveActivityView: View {
 
             Text(LAAppGroupSettings.showDisplayName()
                 ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
-                : "Last Update: \(LAFormat.updated(s))")
+                : String(localized: "Last Update: \(LAFormat.updated(s))"))
                 .font(.system(size: 11, weight: .regular, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.65))
@@ -337,11 +337,11 @@ private struct ChartLockScreenView: View {
 
                 Divider().overlay(Color.white.opacity(0.25))
 
-                ChartRowMetric(label: "IOB", value: LAFormat.iob(s))
+                ChartRowMetric(label: String(localized: "IOB"), value: LAFormat.iob(s))
 
                 Divider().overlay(Color.white.opacity(0.25))
 
-                ChartRowMetric(label: "at", value: LAFormat.updated(s))
+                ChartRowMetric(label: String(localized: "at", comment: "Live Activity chart row: time of last reading"), value: LAFormat.updated(s))
             }
             .frame(height: 34)
         }

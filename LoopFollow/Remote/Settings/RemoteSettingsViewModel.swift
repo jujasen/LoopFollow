@@ -209,7 +209,7 @@ class RemoteSettingsViewModel: ObservableObject {
                 self.isTrioDevice = false
                 LogManager.shared.log(category: .apns, message: "Loop APNS QR code scanned: \(LogRedactor.fingerprint(code))")
             case let .failure(error):
-                self.loopAPNSErrorMessage = "Scanning failed: \(error.localizedDescription)"
+                self.loopAPNSErrorMessage = String(localized: "Scanning failed: \(error.localizedDescription)")
             }
             self.isShowingLoopAPNSScanner = false
         }

@@ -81,7 +81,7 @@ struct UnitsConfigurationView: View {
 
                 if rangeMode == .custom {
                     BGPicker(
-                        title: "Low",
+                        title: String(localized: "Low", comment: "Range limit: low glucose"),
                         range: 40 ... 120,
                         value: $lowValue
                     )
@@ -91,7 +91,7 @@ struct UnitsConfigurationView: View {
                         Observable.shared.chartSettingsChanged.value = true
                     }
                     BGPicker(
-                        title: "High",
+                        title: String(localized: "High", comment: "Range limit: high glucose"),
                         range: 120 ... 400,
                         value: $highValue
                     )

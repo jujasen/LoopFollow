@@ -1270,8 +1270,8 @@ final class LiveActivityManager {
 
     private func scheduleRenewalFailedNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Live Activity Expiring"
-        content.body = "Live Activity will expire soon. Open LoopFollow to restart."
+        content.title = String(localized: "Live Activity Expiring")
+        content.body = String(localized: "Live Activity will expire soon. Open LoopFollow to restart.")
         content.sound = .default
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(
@@ -1295,8 +1295,8 @@ final class LiveActivityManager {
 
     private func scheduleApnsCredentialsMissingNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Live Activity Setup Needed"
-        content.body = "APNs credentials are missing or invalid. Configure them in Settings → APN."
+        content.title = String(localized: "Live Activity Setup Needed")
+        content.body = String(localized: "APNs credentials are missing or invalid. Configure them in Settings → APN.")
         content.sound = .default
         let request = UNNotificationRequest(
             identifier: LiveActivityManager.apnsCredentialsNotificationID,
@@ -1308,8 +1308,8 @@ final class LiveActivityManager {
 
     private func schedulePushToStartTokenMissingNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Live Activity Could Not Start"
-        content.body = "Live Activity could not start — try again in a moment."
+        content.title = String(localized: "Live Activity Could Not Start")
+        content.body = String(localized: "Live Activity could not start — try again in a moment.")
         content.sound = .default
         let request = UNNotificationRequest(
             identifier: LiveActivityManager.pushToStartTokenNotificationID,

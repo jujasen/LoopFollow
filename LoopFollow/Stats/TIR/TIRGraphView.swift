@@ -47,7 +47,7 @@ struct TIRGraphView: View {
     var body: some View {
         Chart(slices) { slice in
             BarMark(
-                x: .value("period", slice.period.rawValue),
+                x: .value("period", slice.period.displayName),
                 y: .value("pct", slice.value),
                 width: .ratio(0.6)
             )

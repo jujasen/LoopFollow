@@ -19,14 +19,14 @@ struct CompletionStepView: View {
 
     private let gems: [Gem] = [
         Gem(icon: "person.crop.square",
-            title: "Contact image",
-            detail: "Show your glucose on your Apple Watch face through a contact."),
+            title: String(localized: "Contact image"),
+            detail: String(localized: "Show your glucose on your Apple Watch face through a contact.")),
         Gem(icon: "bell.badge",
-            title: "Custom alarms",
-            detail: "Build your own alarms beyond the recommended set."),
+            title: String(localized: "Custom alarms"),
+            detail: String(localized: "Build your own alarms beyond the recommended set.")),
         Gem(icon: "dot.radiowaves.left.and.right",
-            title: "Remote commands",
-            detail: "Send carbs, boluses, and temp targets to Trio or Loop."),
+            title: String(localized: "Remote commands"),
+            detail: String(localized: "Send carbs, boluses, and temp targets to Trio or Loop.")),
     ]
 
     var body: some View {

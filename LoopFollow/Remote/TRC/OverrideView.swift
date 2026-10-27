@@ -38,7 +38,7 @@ struct OverrideView: View {
             VStack {
                 if device.value != "Trio" {
                     ErrorMessageView(
-                        message: "Remote commands are currently only available for Trio."
+                        message: String(localized: "Remote commands are currently only available for Trio.")
                     )
                 } else {
                     Form {
@@ -156,13 +156,13 @@ struct OverrideView: View {
                 case .statusFailure:
                     return Alert(
                         title: Text("Error"),
-                        message: Text(statusMessage ?? "An error occurred."),
+                        message: Text(statusMessage ?? String(localized: "An error occurred.")),
                         dismissButton: .default(Text("OK"))
                     )
                 case .validation:
                     return Alert(
                         title: Text("Validation Error"),
-                        message: Text(alertMessage ?? "Invalid input."),
+                        message: Text(alertMessage ?? String(localized: "Invalid input.")),
                         dismissButton: .default(Text("OK"))
                     )
                 case .none:
@@ -181,11 +181,11 @@ struct OverrideView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Override command sent successfully."
+                    self.statusMessage = String(localized: "Override command sent successfully.")
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendOverridePushNotification succeeded for override: \(override.name)")
                 } else {
-                    self.statusMessage = errorMessage ?? "Failed to send override command."
+                    self.statusMessage = errorMessage ?? String(localized: "Failed to send override command.")
                     self.alertType = .statusFailure
                     LogManager.shared.log(category: .apns, message: "sendOverridePushNotification failed for override: \(override.name). Error: \(errorMessage ?? "unknown error")")
                 }
@@ -201,11 +201,11 @@ struct OverrideView: View {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {
-                    self.statusMessage = "Cancel override command sent successfully."
+                    self.statusMessage = String(localized: "Cancel override command sent successfully.")
                     self.alertType = .statusSuccess
                     LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification succeeded")
                 } else {
-                    self.statusMessage = errorMessage ?? "Failed to send cancel override command."
+                    self.statusMessage = errorMessage ?? String(localized: "Failed to send cancel override command.")
                     self.alertType = .statusFailure
                     LogManager.shared.log(category: .apns, message: "sendCancelOverridePushNotification failed. Error: \(errorMessage ?? "unknown error")")
                 }

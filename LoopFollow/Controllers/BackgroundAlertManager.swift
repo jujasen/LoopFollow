@@ -40,7 +40,7 @@ class BackgroundAlertManager {
     private var isAlertScheduled: Bool = false
 
     /// Title prefix for all background refresh notifications.
-    private let notificationTitlePrefix = "LoopFollow Background Refresh"
+    private let notificationTitlePrefix = String(localized: "LoopFollow Background Refresh")
 
     /// Timestamp of the last scheduled background alert.
     private var lastScheduleDate: Date?
@@ -87,22 +87,22 @@ class BackgroundAlertManager {
                 identifier: BackgroundAlertIdentifier.sixMin.rawValue,
                 timeInterval: BackgroundAlertDuration.sixMinutes.rawValue,
                 body: isBluetoothActive
-                    ? "App inactive for 6 minutes. Verify Bluetooth connectivity."
-                    : "App inactive for 6 minutes. Open to resume."
+                    ? String(localized: "App inactive for 6 minutes. Verify Bluetooth connectivity.")
+                    : String(localized: "App inactive for 6 minutes. Open to resume.")
             ),
             BackgroundAlert(
                 identifier: BackgroundAlertIdentifier.twelveMin.rawValue,
                 timeInterval: BackgroundAlertDuration.twelveMinutes.rawValue,
                 body: isBluetoothActive
-                    ? "App inactive for 12 minutes. Verify Bluetooth connectivity."
-                    : "App inactive for 12 minutes. Open to resume."
+                    ? String(localized: "App inactive for 12 minutes. Verify Bluetooth connectivity.")
+                    : String(localized: "App inactive for 12 minutes. Open to resume.")
             ),
             BackgroundAlert(
                 identifier: BackgroundAlertIdentifier.eighteenMin.rawValue,
                 timeInterval: BackgroundAlertDuration.eighteenMinutes.rawValue,
                 body: isBluetoothActive
-                    ? "App inactive for 18 minutes. Verify Bluetooth connectivity."
-                    : "App inactive for 18 minutes. Open to resume."
+                    ? String(localized: "App inactive for 18 minutes. Verify Bluetooth connectivity.")
+                    : String(localized: "App inactive for 18 minutes. Open to resume.")
             ),
         ]
 

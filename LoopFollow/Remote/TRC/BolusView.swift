@@ -69,7 +69,7 @@ struct BolusView: View {
                     recommendedBlocks(now: context.date)
 
                     if !quickPickBoluses.quickPickBoluses.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: "Quick-Pick Boluses", infoText: QuickPickSectionHeader.bolusInfoText)) {
+                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Boluses"), infoText: QuickPickSectionHeader.bolusInfoText)) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
                                     ForEach(quickPickBoluses.quickPickBoluses) { bolus in
@@ -94,7 +94,7 @@ struct BolusView: View {
 
                     Section {
                         HKQuantityInputView(
-                            label: "Bolus Amount",
+                            label: String(localized: "Bolus Amount"),
                             quantity: $bolusAmount,
                             unit: .internationalUnit(),
                             maxLength: 5,
@@ -156,7 +156,7 @@ struct BolusView: View {
                         title: Text("Confirm Bolus"),
                         message: Text("Are you sure you want to send \(InsulinFormatter.shared.string(bolusAmount)) U?"),
                         primaryButton: .default(Text("Confirm"), action: {
-                            AuthService.authenticate(reason: "Confirm your identity to send bolus.") { result in
+                            AuthService.authenticate(reason: String(localized: "Confirm your identity to send bolus.")) { result in
                                 DispatchQueue.main.async {
                                     switch result {
                                     case .success:
@@ -166,7 +166,7 @@ struct BolusView: View {
                                         self.alertType = .validation
                                         self.showAlert = true
                                     case .failed:
-                                        self.alertMessage = "Authentication failed"
+                                        self.alertMessage = String(localized: "Authentication failed")
                                         self.alertType = .validation
                                         self.showAlert = true
                                     case .canceled:
@@ -195,7 +195,7 @@ struct BolusView: View {
                 case .validation:
                     return Alert(
                         title: Text("Validation Error"),
-                        message: Text(alertMessage ?? "Invalid input."),
+                        message: Text(alertMessage ?? String(localized: "Invalid input.")),
                         dismissButton: .default(Text("OK"))
                     )
                 case .oldCalculationWarning:
@@ -241,7 +241,7 @@ struct BolusView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("\(InsulinFormatter.shared.string(steppedRec))U")
-                                    Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
+                                    Text(mins == 1 ? String(localized: "Calculated 1 minute ago") : String(localized: "Calculated \(mins) minutes ago"))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -281,7 +281,7 @@ struct BolusView: View {
         if isStale12 { return }
         if isStale5 {
             let mins = Int(ageSec / 60)
-            alertMessage = "This recommended bolus was calculated \(mins) minutes ago. New treatments may have occurred since then. Proceed with caution."
+            alertMessage = String(localized: "This recommended bolus was calculated \(mins) minutes ago. New treatments may have occurred since then. Proceed with caution.")
             alertType = .oldCalculationWarning
             showAlert = true
         } else {
@@ -305,9 +305,7 @@ struct BolusView: View {
 
     private func presentableMinutesFormat(timeInterval: TimeInterval) -> String {
         let minutes = max(0, Int(timeInterval / 60))
-        var s = "\(minutes) minute"
-        if minutes == 0 || minutes > 1 { s += "s" }
-        return s
+        return minutes == 1 ? String(localized: "1 minute") : String(localized: "\(minutes) minutes")
     }
 
     // MARK: - Send
@@ -322,7 +320,7 @@ struct BolusView: View {
                     if sentUnits > 0 {
                         QuickPickBolusesManager.shared.recordBolus(units: sentUnits)
                     }
-                    statusMessage = "Bolus command sent successfully."
+                    statusMessage = String(localized: "Bolus command sent successfully.")
                     LogManager.shared.log(
                         category: .apns,
                         message: "sendBolusPushNotification succeeded - Bolus: \(InsulinFormatter.shared.string(bolusAmount)) U"
@@ -330,7 +328,7 @@ struct BolusView: View {
                     bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
                     alertType = .statusSuccess
                 } else {
-                    statusMessage = errorMessage ?? "Failed to send bolus command."
+                    statusMessage = errorMessage ?? String(localized: "Failed to send bolus command.")
                     LogManager.shared.log(
                         category: .apns,
                         message: "sendBolusPushNotification failed with error: \(errorMessage ?? "unknown error")"

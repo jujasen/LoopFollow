@@ -27,19 +27,17 @@ struct DataAvailabilityInfo {
 
         var description: String {
             switch self {
-            case .excellent: return "Excellent"
-            case .good: return "Good"
-            case .fair: return "Fair"
-            case .poor: return "Poor"
+            case .excellent: return String(localized: "Excellent")
+            case .good: return String(localized: "Good")
+            case .fair: return String(localized: "Fair")
+            case .poor: return String(localized: "Poor")
             }
         }
     }
 
     var displayText: String {
-        return String(format: "%.1f%% (%d/%d readings)",
-                      coveragePercentage,
-                      actualReadings,
-                      totalExpectedReadings)
+        let percent = String(format: "%.1f%%", coveragePercentage)
+        return String(localized: "\(percent) (\(actualReadings)/\(totalExpectedReadings) readings)")
     }
 }
 

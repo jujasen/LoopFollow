@@ -81,15 +81,15 @@ struct CalendarSettingsView: View {
     /// Returns array of “%TOKEN% : Explanation” strings used in the cheat-sheet.
     private var variableDescriptions: [String] {
         [
-            "%BG% : Blood-glucose reading",
-            "%DIRECTION% : Dexcom trend arrow",
-            "%DELTA% : Difference from last reading",
-            "%IOB% : Insulin-on-Board",
-            "%COB% : Carbs-on-Board",
-            "%BASAL% : Current basal U/h",
-            "%LOOP% : Loop status symbol",
-            "%OVERRIDE% : Active override %",
-            "%MINAGO% : Minutes since last reading",
+            "%BG% : " + String(localized: "Blood-glucose reading"),
+            "%DIRECTION% : " + String(localized: "Dexcom trend arrow"),
+            "%DELTA% : " + String(localized: "Difference from last reading"),
+            "%IOB% : " + String(localized: "Insulin-on-Board"),
+            "%COB% : " + String(localized: "Carbs-on-Board"),
+            "%BASAL% : " + String(localized: "Current basal U/h"),
+            "%LOOP% : " + String(localized: "Loop status symbol"),
+            "%OVERRIDE% : " + String(localized: "Active override %"),
+            "%MINAGO% : " + String(localized: "Minutes since last reading"),
         ]
     }
 

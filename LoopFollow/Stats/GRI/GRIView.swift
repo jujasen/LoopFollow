@@ -105,15 +105,15 @@ struct GRIView: View {
 
     private func griZone(_ gri: Double) -> String {
         if gri <= 20 {
-            return "Zone A"
+            return String(localized: "Zone A")
         } else if gri <= 40 {
-            return "Zone B"
+            return String(localized: "Zone B")
         } else if gri <= 60 {
-            return "Zone C"
+            return String(localized: "Zone C")
         } else if gri <= 80 {
-            return "Zone D"
+            return String(localized: "Zone D")
         } else {
-            return "Zone E"
+            return String(localized: "Zone E")
         }
     }
 }

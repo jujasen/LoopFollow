@@ -230,14 +230,14 @@ final class BGChartModel: ObservableObject {
     /// "Carbs 🍕", then the dish's name when a favorite food or a meal estimate gave one, then
     /// grams and time — one line each, so a stacked pill still reads "Carbs 🍕 Pizza 30g 12:30".
     static func carbPillText(food: CarbFoodLabel, grams: Int, time: String) -> String {
-        let heading = food.emoji.isEmpty ? "Carbs" : "Carbs \(food.emoji)"
+        let heading = food.emoji.isEmpty ? String(localized: "Carbs", comment: "Chart pill heading") : String(localized: "Carbs \(food.emoji)", comment: "Chart pill heading with food emoji")
         return [heading, food.name, "\(grams)g", time].filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
     /// "Later carbs 🥛", the dish's name, grams, then the window Loop may add it in
     /// ("21:30–23:00"). Mirrors `carbPillText`.
     static func plannedCarbPillText(food: CarbFoodLabel, grams: Int, window: (due: String, expires: String)) -> String {
-        let heading = food.emoji.isEmpty ? "Later carbs" : "Later carbs \(food.emoji)"
+        let heading = food.emoji.isEmpty ? String(localized: "Later carbs", comment: "Chart pill heading: planned carbs") : String(localized: "Later carbs \(food.emoji)", comment: "Chart pill heading: planned carbs with food emoji")
         return [heading, food.name, "\(grams)g", "\(window.due)–\(window.expires)"].filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
@@ -255,19 +255,19 @@ final class BGChartModel: ObservableObject {
         {
             var actionParts: [String] = []
             if let bolusAmount = json["bolus-entry"] as? Double {
-                actionParts.append("Bolus: \(bolusAmount) U")
+                actionParts.append(String(localized: "Bolus: \(bolusAmount) U"))
             }
             if let carbsAmount = json["carbs-entry"] as? Double {
-                actionParts.append("Carbs: \(carbsAmount) g")
+                actionParts.append(String(localized: "Carbs: \(carbsAmount) g"))
             }
             if let absorptionTime = json["absorption-time"] as? Double {
-                actionParts.append("Absorption: \(absorptionTime) hrs")
+                actionParts.append(String(localized: "Absorption: \(absorptionTime) hrs"))
             }
             if let otp = json["otp"] as? String {
                 actionParts.append("OTP: \(otp)")
             }
             if let enteredBy = json["entered-by"] as? String {
-                actionParts.append("From: \(enteredBy)")
+                actionParts.append(String(localized: "From: \(enteredBy)"))
             }
             if !actionParts.isEmpty {
                 actionContext = " [" + actionParts.joined(separator: ", ") + "]"
@@ -477,7 +477,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: String(localized: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: bolus, dose, time")
             )
         }
         carbs = Self.spread((showCarbs ? vc.carbData : []).map {
@@ -531,17 +531,17 @@ final class BGChartModel: ObservableObject {
                 value: Double($0.sgv),
                 sgv: Double($0.sgv),
                 label: "",
-                pillText: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: String(localized: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: BG check, value, time")
             )
         }
         suspends = (showOtherTreatments ? vc.suspendGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Suspend\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: String(localized: "Suspend\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: pump suspended, time"))
         }
         resumes = (showOtherTreatments ? vc.resumeGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: String(localized: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: pump resumed, time"))
         }
         sensorStarts = (showOtherTreatments ? vc.sensorStartGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: String(localized: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: sensor start, time"))
         }
         notes = (showOtherTreatments ? vc.noteGraphData : []).map {
             TreatmentPoint(
@@ -579,14 +579,14 @@ final class BGChartModel: ObservableObject {
         let yBottom = maxBG - 25
         overrides = (showOtherTreatments ? vc.overrideGraphData : []).map {
             let overrideName = $0.reason.trimmingCharacters(in: .whitespacesAndNewlines)
-            let displayName = overrideName.isEmpty ? "Override" : overrideName
+            let displayName = overrideName.isEmpty ? String(localized: "Override") : overrideName
             return BandRect(
                 start: Date(timeIntervalSince1970: $0.date),
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yBottom,
                 yTop: yTop,
                 label: displayName,
-                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: String(localized: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: override, name, time")
             )
         }
         tempTargets = (showOtherTreatments ? vc.tempTargetGraphData : []).map {
@@ -599,8 +599,8 @@ final class BGChartModel: ObservableObject {
                 end: Date(timeIntervalSince1970: $0.endDate),
                 yBottom: yCenter - 5,
                 yTop: yCenter + 5,
-                label: "Temp Target",
-                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                label: String(localized: "Temp Target"),
+                pillText: String(localized: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: temp target, value, time")
             )
         }
 

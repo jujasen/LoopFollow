@@ -53,7 +53,7 @@ struct NightscoutSettingsView: View {
             HStack {
                 Text("Access Token")
                 TogglableSecureInput(
-                    placeholder: "Token or API secret",
+                    placeholder: String(localized: "Token or API secret"),
                     text: $viewModel.nightscoutToken,
                     style: .singleLine,
                     textContentType: .password

@@ -36,25 +36,25 @@ class LoopAPNSService {
         var errorDescription: String? {
             switch self {
             case .invalidConfiguration:
-                return "Loop APNS Configuration not valid"
+                return String(localized: "Loop APNS Configuration not valid")
             case .jwtError:
-                return "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID"
+                return String(localized: "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID")
             case .networkError:
-                return "Network error occurred"
+                return String(localized: "Network error occurred")
             case .invalidResponse:
-                return "Invalid response from server"
+                return String(localized: "Invalid response from server")
             case .noDeviceToken:
-                return "No device token found in profile"
+                return String(localized: "No device token found in profile")
             case .noBundleIdentifier:
-                return "No bundle identifier found in profile"
+                return String(localized: "No bundle identifier found in profile")
             case .unauthorized:
-                return "Unauthorized - check your API secret"
+                return String(localized: "Unauthorized - check your API secret")
             case .deviceTokenNotConfigured:
-                return "Device token not configured"
+                return String(localized: "Device token not configured")
             case .bundleIdentifierNotConfigured:
-                return "Bundle identifier not configured"
+                return String(localized: "Bundle identifier not configured")
             case .rateLimited:
-                return "Too many requests - please wait a few minutes before trying again"
+                return String(localized: "Too many requests - please wait a few minutes before trying again")
             }
         }
     }
@@ -128,7 +128,7 @@ class LoopAPNSService {
     ///   - completion: Completion handler with success status and error message
     func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
-            let errorMessage = "Loop APNS Configuration not valid"
+            let errorMessage = String(localized: "Loop APNS Configuration not valid")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -202,7 +202,7 @@ class LoopAPNSService {
     ///   - completion: Completion handler with success status and error message
     func sendBolusViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
-            let errorMessage = "Loop APNS Configuration not valid"
+            let errorMessage = String(localized: "Loop APNS Configuration not valid")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -267,7 +267,7 @@ class LoopAPNSService {
     ///   - completion: Completion handler with success status and error message
     func sendTherapySettingsViaAPNS(therapySettings: [String: Any], otp: String, completion: @escaping (Bool, String?) -> Void) {
         guard validateSetup() else {
-            let errorMessage = "Loop APNS Configuration not valid"
+            let errorMessage = String(localized: "Loop APNS Configuration not valid")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -329,26 +329,26 @@ class LoopAPNSService {
         // Validate keyId (should be 10 alphanumeric characters)
         let keyIdPattern = "^[A-Z0-9]{10}$"
         if !matchesRegex(keyId, pattern: keyIdPattern) {
-            errors.append("APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters.")
+            errors.append(String(localized: "APNS Key ID (\(keyId)) must be 10 uppercase alphanumeric characters."))
         }
 
         // Validate teamId (should be 10 alphanumeric characters)
         let teamIdPattern = "^[A-Z0-9]{10}$"
         if !matchesRegex(teamId, pattern: teamIdPattern) {
-            errors.append("Team ID (\(teamId)) must be 10 uppercase alphanumeric characters.")
+            errors.append(String(localized: "Team ID (\(teamId)) must be 10 uppercase alphanumeric characters."))
         }
 
         // Validate apnsKey (should contain the BEGIN and END PRIVATE KEY markers)
         if !apnsKey.contains("-----BEGIN PRIVATE KEY-----") || !apnsKey.contains("-----END PRIVATE KEY-----") {
-            errors.append("APNS Key must be a valid PEM-formatted private key.")
+            errors.append(String(localized: "APNS Key must be a valid PEM-formatted private key."))
         } else {
             // Validate that the key data between the markers is valid Base64
             if let keyData = extractKeyData(from: apnsKey) {
                 if Data(base64Encoded: keyData) == nil {
-                    errors.append("APNS Key contains invalid Base64 key data.")
+                    errors.append(String(localized: "APNS Key contains invalid Base64 key data."))
                 }
             } else {
-                errors.append("APNS Key has invalid formatting.")
+                errors.append(String(localized: "APNS Key has invalid formatting."))
             }
         }
 
@@ -369,10 +369,12 @@ class LoopAPNSService {
     /// Provides simple environment guidance for APNS configuration
     /// - Returns: String with simple guidance to try opposite setting
     private func getEnvironmentGuidance() -> String {
-        let currentSetting = storage.productionEnvironment.value ? "ON" : "OFF"
-        let trySetting = storage.productionEnvironment.value ? "OFF" : "ON"
+        let on = String(localized: "ON", comment: "Production Environment toggle state")
+        let off = String(localized: "OFF", comment: "Production Environment toggle state")
+        let currentSetting = storage.productionEnvironment.value ? on : off
+        let trySetting = storage.productionEnvironment.value ? off : on
 
-        return "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings."
+        return String(localized: "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings.")
     }
 
     /// Sends an APNS notification
@@ -394,7 +396,7 @@ class LoopAPNSService {
     ) {
         // Validate credentials first
         if let validationErrors = validateCredentials() {
-            let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
+            let errorMessage = String(localized: "Credential validation failed: \(validationErrors.joined(separator: ", "))")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -402,7 +404,7 @@ class LoopAPNSService {
 
         // Create JWT token for APNS authentication
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
-            let errorMessage = "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct."
+            let errorMessage = String(localized: "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct.")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -412,7 +414,7 @@ class LoopAPNSService {
         let isProduction = storage.productionEnvironment.value
         let apnsURL = isProduction ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com"
         guard let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)") else {
-            let errorMessage = "Failed to construct APNs URL"
+            let errorMessage = String(localized: "Failed to construct APNs URL")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -464,7 +466,7 @@ class LoopAPNSService {
 
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
+                    let errorMessage = String(localized: "Failed to send push notification: \(error.localizedDescription)")
                     LogManager.shared.log(category: .apns, message: errorMessage)
                     completion(false, errorMessage)
                     return
@@ -486,49 +488,49 @@ class LoopAPNSService {
                         completion(true, nil)
                     case 400:
                         let environmentGuidance = self.getEnvironmentGuidance()
-                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)"
+                        let errorMessage = String(localized: "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)")
                         LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
                         completion(false, errorMessage)
                     case 403:
                         JWTManager.shared.invalidateCache()
-                        let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
                         completion(false, errorMessage)
                     case 404:
-                        let errorMessage = "Invalid request: The :path value was incorrect. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Invalid request: The :path value was incorrect. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 404: \(responseBodyMessage)")
                         completion(false, errorMessage)
                     case 405:
-                        let errorMessage = "Invalid request: Only POST requests are supported. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Invalid request: Only POST requests are supported. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 405: \(responseBodyMessage)")
                         completion(false, errorMessage)
                     case 410:
-                        let errorMessage = "The device token is no longer active for the topic. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "The device token is no longer active for the topic. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 410: Device token is invalid or expired")
                         completion(false, errorMessage)
                     case 413:
-                        let errorMessage = "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 413: \(responseBodyMessage)")
                         completion(false, errorMessage)
                     case 429:
-                        let errorMessage = "Too many requests. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Too many requests. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 429: Rate limited - wait before retrying")
                         completion(false, errorMessage)
                     case 500:
-                        let errorMessage = "Internal server error at APNs. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Internal server error at APNs. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 500: \(responseBodyMessage)")
                         completion(false, errorMessage)
                     case 503:
-                        let errorMessage = "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error 503: \(responseBodyMessage)")
                         completion(false, errorMessage)
                     default:
-                        let errorMessage = "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)"
+                        let errorMessage = String(localized: "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)")
                         LogManager.shared.log(category: .apns, message: "APNS error \(httpResponse.statusCode): \(responseBodyMessage)")
                         completion(false, errorMessage)
                     }
                 } else {
-                    let errorMessage = "Failed to get a valid HTTP response."
+                    let errorMessage = String(localized: "Failed to get a valid HTTP response.")
                     LogManager.shared.log(category: .apns, message: errorMessage)
                     completion(false, errorMessage)
                 }
@@ -536,7 +538,7 @@ class LoopAPNSService {
             task.resume()
 
         } catch {
-            let errorMessage = "Failed to serialize APNS payload: \(error.localizedDescription)"
+            let errorMessage = String(localized: "Failed to serialize APNS payload: \(error.localizedDescription)")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
         }
@@ -704,7 +706,7 @@ class LoopAPNSService {
     func sendOverrideNotification(presetName: String, duration: TimeInterval? = nil, completion: @escaping (Bool, String?) -> Void) {
         let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
-            let errorMessage = "Device token not configured"
+            let errorMessage = String(localized: "Device token not configured")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -712,7 +714,7 @@ class LoopAPNSService {
 
         let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
-            let errorMessage = "Bundle identifier not configured"
+            let errorMessage = String(localized: "Bundle identifier not configured")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -776,7 +778,7 @@ class LoopAPNSService {
     func sendCancelOverrideNotification(completion: @escaping (Bool, String?) -> Void) {
         let deviceToken = Storage.shared.deviceToken.value
         guard !deviceToken.isEmpty else {
-            let errorMessage = "Device token not configured"
+            let errorMessage = String(localized: "Device token not configured")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -784,7 +786,7 @@ class LoopAPNSService {
 
         let bundleIdentifier = Storage.shared.bundleId.value
         guard !bundleIdentifier.isEmpty else {
-            let errorMessage = "Bundle identifier not configured"
+            let errorMessage = String(localized: "Bundle identifier not configured")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
