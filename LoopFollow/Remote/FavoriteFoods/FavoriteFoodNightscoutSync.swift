@@ -161,11 +161,15 @@ enum FavoriteFoodSyncDocument {
 
     // MARK: - Helpers
 
+    /// Only finite numbers: "inf" or "nan" from Nightscout would crash later Int conversions.
     private static func number(_ value: Any?) -> Double? {
-        if let double = value as? Double { return double }
-        if let int = value as? Int { return Double(int) }
-        if let string = value as? String { return Double(string) }
-        return nil
+        let number: Double?
+        if let double = value as? Double { number = double }
+        else if let int = value as? Int { number = Double(int) }
+        else if let string = value as? String { number = Double(string) }
+        else { number = nil }
+        guard let number, number.isFinite else { return nil }
+        return number
     }
 
     private static func date(from value: Any?) -> Date? {

@@ -56,11 +56,16 @@ struct PlannedCarb: Equatable {
             .sorted { $0.dueDate < $1.dueDate }
     }
 
+    /// Only finite numbers: "inf" or "nan" from Nightscout would crash the Int conversions
+    /// here and in the chart.
     private static func number(_ value: Any?) -> Double? {
-        if let double = value as? Double { return double }
-        if let int = value as? Int { return Double(int) }
-        if let string = value as? String { return Double(string) }
-        return nil
+        let number: Double?
+        if let double = value as? Double { number = double }
+        else if let int = value as? Int { number = Double(int) }
+        else if let string = value as? String { number = Double(string) }
+        else { number = nil }
+        guard let number, number.isFinite, abs(number) < 1_000_000 else { return nil }
+        return number
     }
 }
 
