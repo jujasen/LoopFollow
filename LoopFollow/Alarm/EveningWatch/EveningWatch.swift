@@ -199,8 +199,8 @@ enum EveningWatch {
 
         guard glucose >= settings.glucose else { return decision(.belowLimit) }
         guard isPersistent(input.glucose, latest: latest, settings: settings) else { return decision(.notPersistent) }
-        if let change = change(input.glucose, minutes: 15), change < Rule.falling15 { return decision(.falling, value: change) }
-        if let change = change(input.glucose, minutes: 30), change < Rule.falling30 { return decision(.falling, value: change) }
+        if let delta = change(input.glucose, minutes: 15), delta < Rule.falling15 { return decision(.falling, value: delta) }
+        if let delta = change(input.glucose, minutes: 30), delta < Rule.falling30 { return decision(.falling, value: delta) }
         if input.glucose.contains(where: { latest.date.timeIntervalSince($0.date) <= Rule.lowLookback && Double($0.sgv) < Rule.lowFloor }) {
             return decision(.recentLow)
         }
@@ -229,8 +229,8 @@ enum EveningWatch {
     static func scale(glucose: Double, at date: Date, calendar: Calendar = .current) -> Double {
         var scale = 1.0
         if glucose < Rule.smallerBelow { scale *= Rule.smaller }
-        let minutes = minutes(date, calendar: calendar)
-        if minutes >= Rule.lateFrom || minutes < 6 * 60 { scale *= Rule.smaller }
+        let minute = minutes(date, calendar: calendar)
+        if minute >= Rule.lateFrom || minute < 6 * 60 { scale *= Rule.smaller }
         return scale
     }
 
@@ -342,12 +342,12 @@ enum EveningWatch {
     }
 
     static func isInWindow(_ date: Date, settings: Settings, calendar: Calendar = .current) -> Bool {
-        let minutes = minutes(date, calendar: calendar)
+        let minute = minutes(date, calendar: calendar)
         if settings.start == settings.end { return true }
         if settings.start < settings.end {
-            return minutes >= settings.start && minutes < settings.end
+            return minute >= settings.start && minute < settings.end
         }
-        return minutes >= settings.start || minutes < settings.end
+        return minute >= settings.start || minute < settings.end
     }
 
     /// The start of the window `date` is in, or of the last one before it.

@@ -168,11 +168,11 @@ final class AIBolusSuggestionStore: ObservableObject {
         if all != suggestions { suggestions = all }
 
         let fresh = all.filter { notified[$0.id] == nil && dismissed[$0.id] == nil && $0.expiresAt > now }
-        var notified = self.notified.filter { now.timeIntervalSince($0.value) < Self.memory }
+        var announced = notified.filter { now.timeIntervalSince($0.value) < Self.memory }
         for suggestion in fresh {
-            notified[suggestion.id] = now
+            announced[suggestion.id] = now
         }
-        if notified != self.notified { setNotified(notified) }
+        if announced != notified { setNotified(announced) }
 
         let keptDismissed = dismissed.filter { now.timeIntervalSince($0.value) < Self.memory }
         if keptDismissed != dismissed { setDismissed(keptDismissed) }
