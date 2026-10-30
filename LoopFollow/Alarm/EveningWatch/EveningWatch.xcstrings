@@ -1,0 +1,556 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "Evening Watch": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kveldsvakt"
+          }
+        }
+      }
+    },
+    "🌙 Evening watch: %@ U?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🌙 Kveldsvakt: %@ E?"
+          }
+        }
+      }
+    },
+    "%1$@ and not falling for %2$@ min, no dose or meal for a while, %3$@ U on board.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ og har ikke falt på %2$@ min, ingen dose eller mat på en stund, %3$@ E om bord."
+          }
+        }
+      }
+    },
+    "%1$@ and not falling for %2$@ min, no dose or meal for a while.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ og har ikke falt på %2$@ min, ingen dose eller mat på en stund."
+          }
+        }
+      }
+    },
+    "Review": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se over"
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke nå"
+          }
+        }
+      }
+    },
+    "Done for tonight": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferdig for i kveld"
+          }
+        }
+      }
+    },
+    "Nothing is sent until you confirm on the bolus screen.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingenting sendes før du bekrefter på bolusskjermen."
+          }
+        }
+      }
+    },
+    "Give it in Loop, or set up remote control to send it from here.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gi den i Loop, eller sett opp fjernstyring for å sende den herfra."
+          }
+        }
+      }
+    },
+    "No recent glucose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen fersk BS"
+          }
+        }
+      }
+    },
+    "Under the limit": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under grensen"
+          }
+        }
+      }
+    },
+    "Not high for long enough yet": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke høy lenge nok ennå"
+          }
+        }
+      }
+    },
+    "Falling (%@)": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faller (%@)"
+          }
+        }
+      }
+    },
+    "Was under %@ in the last 90 min": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Var under %@ siste 90 min"
+          }
+        }
+      }
+    },
+    "Meal at %1$@, waits until %2$@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mat kl. %1$@, venter til %2$@"
+          }
+        }
+      }
+    },
+    "Dose at %1$@, waits until %2$@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dose kl. %1$@, venter til %2$@"
+          }
+        }
+      }
+    },
+    "Suggested at %1$@, waits until %2$@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foreslo kl. %1$@, venter til %2$@"
+          }
+        }
+      }
+    },
+    "Three suggestions tonight already": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allerede tre forslag i kveld"
+          }
+        }
+      }
+    },
+    "%@ U on board": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ E om bord"
+          }
+        }
+      }
+    },
+    "Dose under 0.1 U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosen ble under 0,1 E"
+          }
+        }
+      }
+    },
+    "Suggested %@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foreslo %@ E"
+          }
+        }
+      }
+    },
+    "Suggestion waiting": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forslaget venter"
+          }
+        }
+      }
+    },
+    "Came down by itself, suggestion withdrawn": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kom ned av seg selv, forslaget trukket"
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venter"
+          }
+        }
+      }
+    },
+    "Given %@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gitt %@ E"
+          }
+        }
+      }
+    },
+    "Declined": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avslått"
+          }
+        }
+      }
+    },
+    "Not answered": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke besvart"
+          }
+        }
+      }
+    },
+    "Withdrawn": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trukket"
+          }
+        }
+      }
+    },
+    "Judged 3 h after": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vurderes 3 t etter"
+          }
+        }
+      }
+    },
+    "Too few readings to learn from": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For få målinger til å lære av"
+          }
+        }
+      }
+    },
+    "2 h: %1$@ · lowest %2$@ · dose %3$@ → %4$@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 t: %1$@ · lavest %2$@ · dose %3$@ → %4$@ E"
+          }
+        }
+      }
+    },
+    "In the evening, when glucose has stayed high for a while without falling and no dose or meal has been given lately, suggests a correction to send from here. It goes by glucose itself, not by Loop's forecast, and learns the dose from the suggestions that are given: smaller after a low, larger when glucose stays high. It never gives anything by itself.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Om kvelden, når BS har vært høy en stund uten å falle og ingen dose eller mat er gitt på en stund, foreslår den en korreksjon du kan sende herfra. Den går etter selve BS, ikke Loops prognose, og lærer dosen av forslagene som blir gitt: mindre etter en føling, større når BS blir liggende høy. Den gir aldri noe selv."
+          }
+        }
+      }
+    },
+    "Also waits 90 min after a meal, 60 min after a dose and 60 min between suggestions, at most three an evening, and never after a reading under %@ in the last 90 min.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venter også 90 min etter mat, 60 min etter en dose og 60 min mellom forslag, høyst tre per kveld, og aldri etter en måling under %@ siste 90 min."
+          }
+        }
+      }
+    },
+    "The dose before anything is learned. Under %1$@ and from %2$@ it is 30 %% smaller, and never over the maximum bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosen før noe er lært. Under %1$@ og fra kl. %2$@ blir den 30 %% mindre, og aldri over maks bolus."
+          }
+        }
+      }
+    },
+    "Suggestions": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forslag"
+          }
+        }
+      }
+    },
+    "No suggestions yet.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen forslag ennå."
+          }
+        }
+      }
+    },
+    "Evening": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kveld"
+          }
+        }
+      }
+    },
+    "Only between these times; the end may be after midnight.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare mellom disse klokkeslettene; slutten kan være etter midnatt."
+          }
+        }
+      }
+    },
+    "From": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fra"
+          }
+        }
+      }
+    },
+    "To": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Til"
+          }
+        }
+      }
+    },
+    "High Glucose Limit": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BS-grense"
+          }
+        }
+      }
+    },
+    "Suggests at or above this.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foreslår ved eller over denne."
+          }
+        }
+      }
+    },
+    "BG": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BS"
+          }
+        }
+      }
+    },
+    "Persistent": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varighet"
+          }
+        }
+      }
+    },
+    "Every reading over this long must be at most 1 mmol/L under the limit, without falling.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle målinger så lenge må være høyst 1 mmol/L under grensen, uten å falle."
+          }
+        }
+      }
+    },
+    "For": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I"
+          }
+        }
+      }
+    },
+    "Insulin on Board": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insulin om bord"
+          }
+        }
+      }
+    },
+    "No suggestion with this much insulin on board or more.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen forslag med så mye insulin om bord eller mer."
+          }
+        }
+      }
+    },
+    "Under": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under"
+          }
+        }
+      }
+    },
+    "Start Dose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startdose"
+          }
+        }
+      }
+    },
+    "Dose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dose"
+          }
+        }
+      }
+    },
+    "Learned dose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lært dose"
+          }
+        }
+      }
+    },
+    "Not yet": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke ennå"
+          }
+        }
+      }
+    },
+    "Start over from the start dose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begynn på nytt fra startdosen"
+          }
+        }
+      }
+    },
+    "What it has done": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hva den har gjort"
+          }
+        }
+      }
+    }
+  }
+}

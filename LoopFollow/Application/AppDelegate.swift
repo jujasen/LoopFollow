@@ -189,6 +189,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         AlarmManager.shared.handleNotificationAction(response.actionIdentifier)
 
+        if response.notification.request.content.categoryIdentifier == AlarmManager.eveningWatchCategory,
+           response.actionIdentifier == UNNotificationDefaultActionIdentifier || response.actionIdentifier == AlarmManager.eveningWatchReviewAction
+        {
+            // The evening watch: open the bolus screen filled in with its dose.
+            UIApplication.shared.topMost?.dismiss(animated: true)
+            Observable.shared.selectedTabIndex.value = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                AlarmManager.shared.reviewEveningWatch()
+            }
+        }
+
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
            let id = response.notification.request.content.userInfo[AIBolusSuggestionNotifier.userInfoKey] as? String
         {

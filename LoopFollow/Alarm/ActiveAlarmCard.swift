@@ -8,6 +8,15 @@ import SwiftUI
 struct ActiveAlarmCard: View {
     let alarm: Alarm
     @ObservedObject private var assessment = Observable.shared.pumpFailureAssessment
+    @ObservedObject private var eveningWatch = Storage.shared.eveningWatchState
+
+    private var title: String {
+        switch alarm.type {
+        case .pumpFailure: return PumpFailureText.title
+        case .eveningWatch: return EveningWatchText.title(eveningWatch.value.open)
+        default: return alarm.name
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -16,11 +25,17 @@ struct ActiveAlarmCard: View {
                     .font(.title2)
                     .foregroundColor(.red)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(alarm.type == .pumpFailure ? PumpFailureText.title : alarm.name)
+                    Text(title)
                         .font(.headline)
                         .fixedSize(horizontal: false, vertical: true)
                     if alarm.type == .pumpFailure {
                         Text(PumpFailureText.body(assessment.value))
+                            .font(.footnote)
+                            .lineLimit(4)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if alarm.type == .eveningWatch {
+                        Text(EveningWatchText.body(eveningWatch.value.open, settings: EveningWatch.Settings(alarm: alarm)))
                             .font(.footnote)
                             .lineLimit(4)
                             .fixedSize(horizontal: false, vertical: true)
@@ -31,6 +46,8 @@ struct ActiveAlarmCard: View {
 
             if alarm.type == .pumpFailure {
                 PumpFailureAlarmButtons(compact: true)
+            } else if alarm.type == .eveningWatch {
+                EveningWatchAlarmButtons(compact: true)
             } else {
                 Button {
                     AlarmManager.shared.performSnooze()

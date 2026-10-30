@@ -102,7 +102,9 @@ struct SnoozerView: View {
                 if let alarm = vm.activeAlarm {
                     VStack(spacing: 16) {
                         // Alarm name at the top
-                        Text(alarm.type == .pumpFailure ? PumpFailureText.title : alarm.name)
+                        Text(alarm.type == .pumpFailure ? PumpFailureText.title
+                            : alarm.type == .eveningWatch ? EveningWatchText.title(Storage.shared.eveningWatchState.value.open)
+                            : alarm.name)
                             .font(.system(size: 30, weight: .semibold))
                             .foregroundColor(.white)
                             .lineLimit(1)
@@ -113,6 +115,10 @@ struct SnoozerView: View {
 
                         if alarm.type == .pumpFailure {
                             PumpFailureAlarmButtons()
+                                .padding(.horizontal, 24)
+                                .padding(.bottom, 20)
+                        } else if alarm.type == .eveningWatch {
+                            EveningWatchAlarmButtons()
                                 .padding(.horizontal, 24)
                                 .padding(.bottom, 20)
                         } else {

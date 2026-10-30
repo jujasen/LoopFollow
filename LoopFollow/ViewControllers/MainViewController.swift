@@ -672,6 +672,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Not a numbered step, so it can't collide with upstream's numbering.
         Storage.shared.placeInsightTabOnce()
         Storage.shared.addPumpFailureAlarmOnce()
+        Storage.shared.addEveningWatchAlarmOnce()
     }
 
     @objc func appDidBecomeActive() {

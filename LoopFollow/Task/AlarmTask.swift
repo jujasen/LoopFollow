@@ -55,6 +55,7 @@ extension MainViewController {
                 dbSizePercentage: Observable.shared.dbSizePercentage.value
             )
             alarmData.pumpDelivery = self.pumpDeliveryCheck()
+            alarmData.eveningWatch = self.eveningWatchInput()
 
             let finalAlarmData: AlarmData
             if Observable.shared.debug.value {

@@ -120,6 +120,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         case missedBolusIgnoreUnderGrams, missedBolusIgnoreUnderBG
         case bolusCountThreshold, bolusWindowMinutes
         case sensorLifetimeDays
+        case eveningStartMinutes, eveningEndMinutes, eveningStartUnits
     }
 
     init(from decoder: Decoder) throws {
@@ -154,6 +155,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         bolusCountThreshold = try container.decodeIfPresent(Int.self, forKey: .bolusCountThreshold)
         bolusWindowMinutes = try container.decodeIfPresent(Int.self, forKey: .bolusWindowMinutes)
         sensorLifetimeDays = try container.decodeIfPresent(Int.self, forKey: .sensorLifetimeDays)
+        eveningStartMinutes = try container.decodeIfPresent(Int.self, forKey: .eveningStartMinutes)
+        eveningEndMinutes = try container.decodeIfPresent(Int.self, forKey: .eveningEndMinutes)
+        eveningStartUnits = try container.decodeIfPresent(Double.self, forKey: .eveningStartUnits)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -186,6 +190,9 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(bolusCountThreshold, forKey: .bolusCountThreshold)
         try container.encodeIfPresent(bolusWindowMinutes, forKey: .bolusWindowMinutes)
         try container.encodeIfPresent(sensorLifetimeDays, forKey: .sensorLifetimeDays)
+        try container.encodeIfPresent(eveningStartMinutes, forKey: .eveningStartMinutes)
+        try container.encodeIfPresent(eveningEndMinutes, forKey: .eveningEndMinutes)
+        try container.encodeIfPresent(eveningStartUnits, forKey: .eveningStartUnits)
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -217,6 +224,15 @@ struct Alarm: Identifiable, Codable, Equatable {
     // ─────────────────────────────────────────────────────────────
     /// CGM sensor lifetime in days (e.g. 10 for Dexcom G6, 15 for G7 15-day)
     var sensorLifetimeDays: Int?
+
+    // ─────────────────────────────────────────────────────────────
+    // Evening-watch fields ─
+    // ─────────────────────────────────────────────────────────────
+    /// The evening watch's window, minutes after midnight; the end may be after midnight.
+    var eveningStartMinutes: Int?
+    var eveningEndMinutes: Int?
+    /// The evening watch's dose before anything is learned.
+    var eveningStartUnits: Double?
 
     /// Function for when the alarm is triggered.
     /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
@@ -282,6 +298,13 @@ struct Alarm: Identifiable, Codable, Equatable {
                 title: PumpFailureText.title,
                 body: PumpFailureText.body(Observable.shared.pumpFailureAssessment.value),
                 category: AlarmManager.pumpFailureCategory
+            )
+        } else if type == .eveningWatch {
+            let suggestion = Storage.shared.eveningWatchState.value.open
+            AlarmManager.shared.sendNotification(
+                title: EveningWatchText.title(suggestion),
+                body: EveningWatchText.body(suggestion, settings: EveningWatch.Settings(alarm: self)),
+                category: AlarmManager.eveningWatchCategory
             )
         } else {
             AlarmManager.shared.sendNotification(
@@ -385,6 +408,17 @@ struct Alarm: Identifiable, Codable, Equatable {
             threshold = 180
             persistentMinutes = 30
             snoozeDuration = 60
+        case .eveningWatch:
+            /// See `EveningWatch`: tuned on 30 evenings of a child's Loop data.
+            soundFile = .chimesGlassy
+            aboveBG = 198
+            persistentMinutes = 30
+            threshold = 1.5
+            eveningStartMinutes = 19 * 60 + 30
+            eveningEndMinutes = 30
+            eveningStartUnits = 0.5
+            snoozeDuration = 30
+            repeatSoundOption = .never
         case .overrideStart:
             soundFile = .endingReached
             repeatSoundOption = .never
@@ -427,7 +461,7 @@ extension AlarmType {
         switch self {
         case .low, .high, .fastDrop, .fastRise, .missedReading, .temporary:
             return .glucose
-        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus, .pumpFailure:
+        case .iob, .cob, .missedBolus, .futureCarbs, .recBolus, .pumpFailure, .eveningWatch:
             return .insulin
         case .battery, .batteryDrop, .pump, .pumpBattery, .pumpChange,
              .sensorChange, .notLooping, .buildExpire, .dbSize:
@@ -448,6 +482,7 @@ extension AlarmType {
         case .cob: return "fork.knife"
         case .missedBolus: return "exclamationmark.arrow.triangle.2.circlepath"
         case .pumpFailure: return "drop.triangle"
+        case .eveningWatch: return "moon.stars"
         case .futureCarbs: return "clock.arrow.circlepath"
         case .recBolus: return "bolt.horizontal"
         case .battery: return "battery.25"
@@ -478,6 +513,7 @@ extension AlarmType {
         case .cob: return "High carbs-on-board."
         case .missedBolus: return "Carbs without bolus."
         case .pumpFailure: return "Insulin given but glucose keeps rising."
+        case .eveningWatch: return "Suggests a correction when evening glucose stays high."
         case .futureCarbs: return "Reminder when future carbs are due."
         case .recBolus: return "Recommended bolus issued."
         case .battery: return "Phone battery low."

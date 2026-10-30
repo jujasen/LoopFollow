@@ -243,6 +243,8 @@ struct AlarmSelectionRow: View {
             return String(localized: "Nightscout Database Size")
         case .pumpFailure:
             return String(localized: "Pump Delivery Alert")
+        case .eveningWatch:
+            return EveningWatchText.name
         }
     }
 }

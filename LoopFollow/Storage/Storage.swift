@@ -248,6 +248,10 @@ class Storage {
     var pumpFailureAlarmAdded = StorageValue<Bool>(key: "pumpFailureAlarmAdded", defaultValue: false)
     /// «Jeg har sjekket» on the pump-delivery alert; see PumpFailureAcknowledgement.
     var pumpFailureAcknowledgement = StorageValue<PumpFailureAcknowledgement?>(key: "pumpFailureAcknowledgement", defaultValue: nil)
+    /// Set once the evening watch has been added to the alarm list.
+    var eveningWatchAlarmAdded = StorageValue<Bool>(key: "eveningWatchAlarmAdded", defaultValue: false)
+    /// The evening watch's suggestions, the dose it has learned and what it found; see EveningWatch.
+    var eveningWatchState = StorageValue<EveningWatch.State>(key: "eveningWatchState", defaultValue: .init())
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 

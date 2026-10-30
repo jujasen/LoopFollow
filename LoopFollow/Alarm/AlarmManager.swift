@@ -36,6 +36,7 @@ class AlarmManager {
             FutureCarbsCondition.self,
             DBSizeCondition.self,
             PumpFailureCondition.self,
+            EveningWatchCondition.self,
         ]
     ) {
         var dict = [AlarmType: AlarmCondition]()
@@ -224,6 +225,59 @@ class AlarmManager {
         }
     }
 
+    // MARK: - Evening watch
+
+    /// «Se over»: quiet while the bolus screen, filled in with the suggestion, is open.
+    func reviewEveningWatch(now: Date = Date()) {
+        guard let suggestion = Storage.shared.eveningWatchState.value.open else { return }
+        snoozeEveningWatch(until: now.addingTimeInterval(EveningWatch.Rule.lifetime))
+        EveningWatchReview.shared.reviewing = suggestion
+        LogManager.shared.log(category: .alarm, message: "Evening watch: reviewing \(suggestion.units) U")
+    }
+
+    /// Sent from the bolus screen: quiet until Nightscout has the bolus and the watch has seen it.
+    func eveningWatchSent(now: Date = Date()) {
+        snoozeEveningWatch(until: now.addingTimeInterval(EveningWatch.Rule.bolusGap))
+    }
+
+    /// «Ikke nå» keeps it quiet for 30 minutes, «Ferdig for i kveld» to the end of the evening.
+    func declineEveningWatch(forTonight: Bool = false, now: Date = Date()) {
+        var state = Storage.shared.eveningWatchState.value
+        for index in state.suggestions.indices where state.suggestions[index].state == .open {
+            state.suggestions[index].state = .declined
+            state.suggestions[index].closedAt = now
+        }
+        Storage.shared.eveningWatchState.value = state
+        let until = forTonight
+            ? EveningWatch.windowEnd(after: now, settings: .current)
+            : now.addingTimeInterval(30 * 60)
+        LogManager.shared.log(category: .alarm, message: "Evening watch declined until \(until)")
+        snoozeEveningWatch(until: until)
+    }
+
+    private func snoozeEveningWatch(until: Date) {
+        var alarms = Storage.shared.alarms.value
+        for idx in alarms.indices where alarms[idx].type == .eveningWatch {
+            alarms[idx].snoozedUntil = until
+        }
+        Storage.shared.alarms.value = alarms
+        // Also when the app was opened from the notification and no alarm is active in memory yet.
+        if let id = Observable.shared.currentAlarm.value,
+           alarms.first(where: { $0.id == id })?.type != .eveningWatch
+        {
+            return
+        }
+        Observable.shared.alarmSoundPlaying.value = false
+        stopAlarm()
+        let center = UNUserNotificationCenter.current()
+        center.getDeliveredNotifications { delivered in
+            let ids = delivered
+                .filter { $0.request.content.categoryIdentifier == Self.eveningWatchCategory }
+                .map(\.request.identifier)
+            center.removeDeliveredNotifications(withIdentifiers: ids)
+        }
+    }
+
     // MARK: - Notifications
 
     static let alarmCategory = "category"
@@ -231,6 +285,9 @@ class AlarmManager {
     static let snoozeAction = "snooze"
     static let pumpFailureAcknowledgeAction = "pumpFailure.acknowledge"
     static let pumpFailureSnoozeAction = "pumpFailure.snooze1h"
+    static let eveningWatchCategory = "eveningWatch"
+    static let eveningWatchReviewAction = "eveningWatch.review"
+    static let eveningWatchNotNowAction = "eveningWatch.notNow"
 
     /// Every category the app posts with. Setting categories replaces all of them,
     /// so they are always registered together.
@@ -242,7 +299,10 @@ class AlarmManager {
         let acknowledge = UNNotificationAction(identifier: pumpFailureAcknowledgeAction, title: PumpFailureText.acknowledgeTitle, options: [])
         let snoozeHour = UNNotificationAction(identifier: pumpFailureSnoozeAction, title: PumpFailureText.snoozeHourTitle, options: [])
         let pumpFailure = UNNotificationCategory(identifier: pumpFailureCategory, actions: [acknowledge, snoozeHour], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([background, alarm, pumpFailure])
+        let review = UNNotificationAction(identifier: eveningWatchReviewAction, title: EveningWatchText.review, options: .foreground)
+        let notNow = UNNotificationAction(identifier: eveningWatchNotNowAction, title: EveningWatchText.notNow, options: [])
+        let eveningWatch = UNNotificationCategory(identifier: eveningWatchCategory, actions: [review, notNow], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([background, alarm, pumpFailure, eveningWatch])
     }
 
     /// Handles a tap on a notification action; true when it was an alarm action.
@@ -255,6 +315,8 @@ class AlarmManager {
             acknowledgePumpFailure()
         case Self.pumpFailureSnoozeAction:
             snoozePumpFailure()
+        case Self.eveningWatchNotNowAction:
+            declineEveningWatch()
         default:
             return false
         }

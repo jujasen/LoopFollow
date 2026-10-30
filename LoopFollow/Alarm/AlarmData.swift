@@ -27,4 +27,6 @@ struct AlarmData: Codable {
     let dbSizePercentage: Double?
     /// Glucose, insulin and carbs for `PumpFailureCondition`; nil without a profile.
     var pumpDelivery: PumpDeliveryCheck? = nil
+    /// Glucose, manual boluses and carbs for `EveningWatchCondition`.
+    var eveningWatch: EveningWatch.Input? = nil
 }

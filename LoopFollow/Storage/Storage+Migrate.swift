@@ -244,4 +244,16 @@ extension Storage {
         alarm.name = String(localized: "Pump Delivery Alert", table: "PumpFailure", comment: "Name of the pump-delivery alert in the alarm list")
         alarms.value.append(alarm)
     }
+
+    // MARK: - Evening watch
+
+    /// Adds the evening watch, switched on, once. Deleting it afterwards sticks.
+    func addEveningWatchAlarmOnce() {
+        guard !eveningWatchAlarmAdded.value else { return }
+        eveningWatchAlarmAdded.value = true
+        guard !alarms.value.contains(where: { $0.type == .eveningWatch }) else { return }
+        var alarm = Alarm(type: .eveningWatch)
+        alarm.name = EveningWatchText.name
+        alarms.value.append(alarm)
+    }
 }
