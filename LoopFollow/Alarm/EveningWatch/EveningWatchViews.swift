@@ -3,14 +3,8 @@
 
 import SwiftUI
 
-/// The suggestion whose bolus screen is open.
-final class EveningWatchReview: ObservableObject {
-    static let shared = EveningWatchReview()
-
-    @Published var reviewing: EveningWatch.Suggestion?
-}
-
-/// «Se over», «Ikke nå» and «Ferdig for i kveld» for the evening watch.
+/// «Se over», «Ikke nå» and «Avslå» on the evening watch's alarm. Only the alarm goes quiet; the
+/// suggestion stays on the main screen until it is answered.
 struct EveningWatchAlarmButtons: View {
     var compact: Bool = false
     @ObservedObject private var remoteType = Storage.shared.remoteType
@@ -32,7 +26,7 @@ struct EveningWatchAlarmButtons: View {
                 }
 
                 Button {
-                    AlarmManager.shared.declineEveningWatch()
+                    AlarmManager.shared.quietEveningWatch()
                 } label: {
                     label(EveningWatchText.notNow)
                 }
@@ -40,11 +34,10 @@ struct EveningWatchAlarmButtons: View {
             }
             .tint(.indigo)
 
-            Button(EveningWatchText.doneForTonight) {
-                AlarmManager.shared.declineEveningWatch(forTonight: true)
+            Button(EveningWatchText.decline, role: .destructive) {
+                AlarmManager.shared.declineEveningWatch()
             }
             .font(compact ? .subheadline : .headline)
-            .tint(.indigo)
 
             Text(canReview ? EveningWatchText.reviewHint : EveningWatchText.noRemoteHint)
                 .font(.caption)
@@ -60,63 +53,53 @@ struct EveningWatchAlarmButtons: View {
     }
 }
 
-/// The suggestions of the last two weeks and what the watch found at each reading of the last
-/// evenings, newest first.
+/// Tonight's doses and suggestions from Loop, then what it found at each change, newest first.
 struct EveningWatchLogView: View {
-    @ObservedObject private var state = Storage.shared.eveningWatchState
+    @ObservedObject private var log = Storage.shared.eveningWatchLog
 
     var body: some View {
         List {
-            Section(String(localized: "Suggestions", table: "EveningWatch", comment: "Evening watch log section")) {
-                if state.value.suggestions.isEmpty {
-                    Text(String(localized: "No suggestions yet.", table: "EveningWatch", comment: "Evening watch log, empty"))
-                        .foregroundColor(.secondary)
-                }
-                ForEach(state.value.suggestions.reversed()) { suggestion in
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack {
-                            Text(suggestion.date.formatted(.dateTime.weekday(.abbreviated).day().hour().minute()))
-                            Spacer()
-                            Text("\(EveningWatchText.units(suggestion.units)) \(String(localized: "U"))")
-                                .bold()
-                        }
-                        Text("\(EveningWatchText.glucose(suggestion.glucose)) · \(EveningWatchText.state(suggestion))")
-                            .font(.footnote)
-                        if let outcome = EveningWatchText.outcome(suggestion) {
-                            Text(outcome)
+            if let log = log.value {
+                Section(log.date.formatted(.dateTime.weekday(.wide).day().month())) {
+                    if log.actions.isEmpty {
+                        Text(String(localized: "Nothing given or suggested yet.", table: "EveningWatch", comment: "Evening watch log, empty evening"))
+                            .foregroundColor(.secondary)
+                    }
+                    ForEach(log.actions.reversed()) { action in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(EveningWatchText.time(action.date)).monospacedDigit()
+                                Text(EveningWatchText.unitsWithUnit(action.givenUnits ?? action.units)).bold()
+                                Spacer()
+                                Text(EveningWatchText.state(action))
+                                    .foregroundColor(action.state == "failed" ? .orange : .secondary)
+                            }
+                            Text(EveningWatchText.describe(action))
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                         }
                     }
                 }
-            }
-
-            ForEach(evenings, id: \.start) { evening in
-                Section(evening.start.formatted(.dateTime.weekday(.wide).day().month())) {
-                    ForEach(Array(evening.decisions.enumerated()), id: \.offset) { _, decision in
+                Section(String(localized: "Each change", table: "EveningWatch", comment: "Evening watch log section: what it found")) {
+                    ForEach(Array(log.entries.reversed().enumerated()), id: \.offset) { _, entry in
                         HStack(alignment: .firstTextBaseline) {
-                            Text(EveningWatchText.time(decision.date))
+                            Text(EveningWatchText.time(entry.date))
                                 .monospacedDigit()
                                 .foregroundColor(.secondary)
-                            Text(decision.glucose.map { Localizer.formatQuantity($0) } ?? "–")
+                            Text(entry.glucose.map(EveningWatchText.mmol) ?? "–")
                                 .monospacedDigit()
                                 .frame(minWidth: 36, alignment: .trailing)
-                            Text(EveningWatchText.decision(decision))
-                                .foregroundColor(decision.kind == .suggested ? .indigo : .primary)
+                            Text(EveningWatchText.decision(entry))
+                                .foregroundColor(entry.kind == "suggested" || entry.kind == "dosed" ? .indigo : .primary)
                         }
                         .font(.footnote)
                     }
                 }
+            } else {
+                Text(String(localized: "No log from Loop yet tonight.", table: "EveningWatch", comment: "Evening watch log, none from Loop"))
+                    .foregroundColor(.secondary)
             }
         }
         .navigationTitle(EveningWatchText.name)
-    }
-
-    private var evenings: [(start: Date, decisions: [EveningWatch.Decision])] {
-        let settings = EveningWatch.Settings.current
-        let grouped = Dictionary(grouping: state.value.decisions) { EveningWatch.windowStart(before: $0.date, settings: settings) }
-        return grouped
-            .map { (start: $0.key, decisions: $0.value.sorted { $0.date > $1.date }) }
-            .sorted { $0.start > $1.start }
     }
 }

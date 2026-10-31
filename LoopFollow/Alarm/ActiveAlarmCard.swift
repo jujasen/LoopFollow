@@ -8,12 +8,12 @@ import SwiftUI
 struct ActiveAlarmCard: View {
     let alarm: Alarm
     @ObservedObject private var assessment = Observable.shared.pumpFailureAssessment
-    @ObservedObject private var eveningWatch = Storage.shared.eveningWatchState
+    @ObservedObject private var suggestions = AIBolusSuggestionStore.shared
 
     private var title: String {
         switch alarm.type {
         case .pumpFailure: return PumpFailureText.title
-        case .eveningWatch: return EveningWatchText.title(eveningWatch.value.open)
+        case .eveningWatch: return EveningWatchText.title(suggestions.openEveningWatch())
         default: return alarm.name
         }
     }
@@ -34,8 +34,8 @@ struct ActiveAlarmCard: View {
                             .lineLimit(4)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    if alarm.type == .eveningWatch {
-                        Text(EveningWatchText.body(eveningWatch.value.open, settings: EveningWatch.Settings(alarm: alarm)))
+                    if alarm.type == .eveningWatch, let open = suggestions.openEveningWatch() {
+                        Text(open.reason)
                             .font(.footnote)
                             .lineLimit(4)
                             .fixedSize(horizontal: false, vertical: true)

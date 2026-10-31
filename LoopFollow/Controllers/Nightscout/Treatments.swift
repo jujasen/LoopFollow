@@ -48,6 +48,7 @@ extension MainViewController {
         var carbs: [[String: AnyObject]] = []
         var plannedCarbs: [[String: AnyObject]] = []
         var aiBolusSuggestions: [[String: AnyObject]] = []
+        var eveningWatchLogs: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
@@ -82,6 +83,9 @@ extension MainViewController {
             case AIBolusSuggestion.eventType:
                 // A suggestion from Loop's meal watch, not a dose.
                 aiBolusSuggestions.append(entry)
+            case EveningWatch.logEventType:
+                // Loop's evening watch log for tonight, not a treatment.
+                eveningWatchLogs.append(entry)
             case PlannedCarb.eventType:
                 // Not carbs yet: kept apart so it never counts toward today's carbs or COB.
                 plannedCarbs.append(entry)
@@ -149,6 +153,7 @@ extension MainViewController {
             }
         }
         processNSAIBolusSuggestions(entries: aiBolusSuggestions)
+        processNSEveningWatch(logs: eveningWatchLogs, notes: note)
         if plannedCarbs.count > 0 {
             processNSPlannedCarbs(entries: plannedCarbs)
         } else {

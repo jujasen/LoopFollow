@@ -161,6 +161,9 @@ final class ProfileManager {
         }
 
         loopTherapySettings = LoopTherapySettings(profileData.loopSettings)
+        if Storage.shared.eveningWatchLoopSettings.value != profileData.loopSettings?.eveningWatch {
+            Storage.shared.eveningWatchLoopSettings.value = profileData.loopSettings?.eveningWatch
+        }
         insulinCurve = Self.insulinCurve(profileData.loopSettings)
 
         if let trioOverrides = profileData.trioOverrides {

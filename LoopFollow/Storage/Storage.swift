@@ -250,8 +250,11 @@ class Storage {
     var pumpFailureAcknowledgement = StorageValue<PumpFailureAcknowledgement?>(key: "pumpFailureAcknowledgement", defaultValue: nil)
     /// Set once the evening watch has been added to the alarm list.
     var eveningWatchAlarmAdded = StorageValue<Bool>(key: "eveningWatchAlarmAdded", defaultValue: false)
-    /// The evening watch's suggestions, the dose it has learned and what it found; see EveningWatch.
-    var eveningWatchState = StorageValue<EveningWatch.State>(key: "eveningWatchState", defaultValue: .init())
+    /// Loop's evening watch: its settings from the profile, tonight's log, and the automatic
+    /// doses already announced.
+    var eveningWatchLoopSettings = StorageValue<EveningWatch.LoopSettings?>(key: "eveningWatchLoopSettings", defaultValue: nil)
+    var eveningWatchLog = StorageValue<EveningWatch.Log?>(key: "eveningWatchLog", defaultValue: nil)
+    var eveningWatchAnnounced = StorageValue<[String]>(key: "eveningWatchAnnounced", defaultValue: [])
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
 

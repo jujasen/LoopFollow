@@ -227,32 +227,31 @@ class AlarmManager {
 
     // MARK: - Evening watch
 
-    /// «Se over»: quiet while the bolus screen, filled in with the suggestion, is open.
+    /// «Se over»: the bolus screen filled in with the suggestion; the alarm is quiet meanwhile.
     func reviewEveningWatch(now: Date = Date()) {
-        guard let suggestion = Storage.shared.eveningWatchState.value.open else { return }
-        snoozeEveningWatch(until: now.addingTimeInterval(EveningWatch.Rule.lifetime))
-        EveningWatchReview.shared.reviewing = suggestion
-        LogManager.shared.log(category: .alarm, message: "Evening watch: reviewing \(suggestion.units) U")
+        guard let open = AIBolusSuggestionStore.shared.openEveningWatch(now: now) else { return }
+        snoozeEveningWatch(until: now.addingTimeInterval(20 * 60))
+        AIBolusSuggestionStore.shared.review(id: open.id)
+        LogManager.shared.log(category: .alarm, message: "Evening watch: reviewing \(open.units) U")
     }
 
-    /// Sent from the bolus screen: quiet until Nightscout has the bolus and the watch has seen it.
+    /// Sent from the bolus screen: quiet until Loop has the bolus and closes the suggestion.
     func eveningWatchSent(now: Date = Date()) {
-        snoozeEveningWatch(until: now.addingTimeInterval(EveningWatch.Rule.bolusGap))
+        snoozeEveningWatch(until: now.addingTimeInterval(60 * 60))
     }
 
-    /// «Ikke nå» keeps it quiet for 30 minutes, «Ferdig for i kveld» to the end of the evening.
-    func declineEveningWatch(forTonight: Bool = false, now: Date = Date()) {
-        var state = Storage.shared.eveningWatchState.value
-        for index in state.suggestions.indices where state.suggestions[index].state == .open {
-            state.suggestions[index].state = .declined
-            state.suggestions[index].closedAt = now
+    /// «Ikke nå»: the alarm is quiet for 30 minutes; the suggestion stays on the main screen.
+    func quietEveningWatch(now: Date = Date()) {
+        snoozeEveningWatch(until: now.addingTimeInterval(30 * 60))
+    }
+
+    /// «Avslå»: declined here and, through Nightscout, in Loop.
+    func declineEveningWatch(now: Date = Date()) {
+        for suggestion in AIBolusSuggestionStore.shared.visible(now: now) where suggestion.isEveningWatch {
+            AIBolusSuggestionStore.shared.dismiss(suggestion, at: now)
         }
-        Storage.shared.eveningWatchState.value = state
-        let until = forTonight
-            ? EveningWatch.windowEnd(after: now, settings: .current)
-            : now.addingTimeInterval(30 * 60)
-        LogManager.shared.log(category: .alarm, message: "Evening watch declined until \(until)")
-        snoozeEveningWatch(until: until)
+        LogManager.shared.log(category: .alarm, message: "Evening watch suggestion declined")
+        snoozeEveningWatch(until: now.addingTimeInterval(60))
     }
 
     private func snoozeEveningWatch(until: Date) {
@@ -316,7 +315,7 @@ class AlarmManager {
         case Self.pumpFailureSnoozeAction:
             snoozePumpFailure()
         case Self.eveningWatchNotNowAction:
-            declineEveningWatch()
+            quietEveningWatch()
         default:
             return false
         }

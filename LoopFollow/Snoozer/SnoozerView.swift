@@ -103,7 +103,7 @@ struct SnoozerView: View {
                     VStack(spacing: 16) {
                         // Alarm name at the top
                         Text(alarm.type == .pumpFailure ? PumpFailureText.title
-                            : alarm.type == .eveningWatch ? EveningWatchText.title(Storage.shared.eveningWatchState.value.open)
+                            : alarm.type == .eveningWatch ? EveningWatchText.title(AIBolusSuggestionStore.shared.openEveningWatch())
                             : alarm.name)
                             .font(.system(size: 30, weight: .semibold))
                             .foregroundColor(.white)

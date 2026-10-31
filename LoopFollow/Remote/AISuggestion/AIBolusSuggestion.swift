@@ -17,6 +17,10 @@
 //
 // It carries no insulin or carbs fields, so nothing counts it as a treatment. Loop deletes it
 // when it is given, declined on Walter's phone, or lapses.
+//
+// The evening watch's suggestions are the same treatment with `source: "eveningWatch"` and
+// `trigger`; they stay until answered. Declining one here deletes it from Nightscout, which Loop
+// takes as declined (see `EveningWatch`).
 
 import Foundation
 import UserNotifications
@@ -35,6 +39,12 @@ struct AIBolusSuggestion: Equatable, Identifiable {
     var mealName: String?
     var mealDate: Date?
     var mealCarbs: Double?
+    /// "eveningWatch" for the evening watch; nil for the meal watch.
+    var source: String?
+    /// The treatment's Nightscout `_id`, for declining it in Loop.
+    var nsID: String?
+
+    var isEveningWatch: Bool { source == EveningWatch.source }
 
     /// Reads one treatment. Nil when it is another kind, misses its id, amount or expiry, has an
     /// amount that is not a positive finite number, or has lapsed.
@@ -59,9 +69,11 @@ struct AIBolusSuggestion: Equatable, Identifiable {
         mealName = (entry["mealName"] as? String).flatMap { $0.isEmpty ? nil : $0 }
         mealDate = (entry["mealDate"] as? String).flatMap(NightscoutUtils.parseDate)
         mealCarbs = Self.number(entry["mealCarbs"])
+        source = entry["source"] as? String
+        nsID = entry["_id"] as? String
     }
 
-    init(id: String, date: Date, expiresAt: Date, units: Double, reason: String, foodType: String? = nil, mealName: String? = nil) {
+    init(id: String, date: Date, expiresAt: Date, units: Double, reason: String, foodType: String? = nil, mealName: String? = nil, source: String? = nil, nsID: String? = nil) {
         self.id = id
         self.date = date
         self.expiresAt = expiresAt
@@ -69,6 +81,8 @@ struct AIBolusSuggestion: Equatable, Identifiable {
         self.reason = reason
         self.foodType = foodType
         self.mealName = mealName
+        self.source = source
+        self.nsID = nsID
     }
 
     /// The open suggestions, oldest first, one per id (the newest copy if Nightscout has two).
@@ -104,8 +118,11 @@ enum AIBolusSuggestionText {
         Localizer.formatToLocalizedString(units, maxFractionDigits: 2)
     }
 
-    /// "✨ Forslag: 0,4 E til 🥛 Melk"
+    /// "✨ Forslag: 0,4 E til 🥛 Melk", or "🌙 Kveldsvakt: 0,35 E?"
     static func title(_ suggestion: AIBolusSuggestion) -> String {
+        if suggestion.isEveningWatch {
+            return EveningWatchText.title(units: suggestion.units)
+        }
         let meal = suggestion.meal
         guard !meal.isEmpty else {
             return String(format: String(localized: "✨ Suggestion: %@ U", table: "AIBolusSuggestion", comment: "AI bolus suggestion without a meal name (1: units)"), units(suggestion.units))
@@ -113,9 +130,12 @@ enum AIBolusSuggestionText {
         return String(format: String(localized: "✨ Suggestion: %1$@ U for %2$@", table: "AIBolusSuggestion", comment: "AI bolus suggestion (1: units)(2: the meal)"), units(suggestion.units), meal)
     }
 
-    /// "Faller bort kl. 21:40"
+    /// "Faller bort kl. 21:40"; the evening watch's stay until answered.
     static func lapses(_ suggestion: AIBolusSuggestion) -> String {
-        String(format: String(localized: "Lapses at %@", table: "AIBolusSuggestion", comment: "When an AI bolus suggestion lapses (1: time)"), suggestion.expiresAt.formatted(date: .omitted, time: .shortened))
+        if suggestion.isEveningWatch {
+            return EveningWatchText.staysHint
+        }
+        return String(format: String(localized: "Lapses at %@", table: "AIBolusSuggestion", comment: "When an AI bolus suggestion lapses (1: time)"), suggestion.expiresAt.formatted(date: .omitted, time: .shortened))
     }
 
     static var review: String {
@@ -161,6 +181,11 @@ final class AIBolusSuggestionStore: ObservableObject {
 
     var hasOpenSuggestion: Bool { !visible().isEmpty }
 
+    /// The evening watch's newest open suggestion, for its alarm.
+    func openEveningWatch(now: Date = Date()) -> EveningWatch.Open? {
+        visible(now: now).last { $0.isEveningWatch }.map { EveningWatch.Open(id: $0.id, units: $0.units, reason: $0.reason) }
+    }
+
     /// Takes what Nightscout has now and returns the suggestions seen for the first time,
     /// which are then counted as announced.
     @discardableResult
@@ -188,12 +213,40 @@ final class AIBolusSuggestionStore: ObservableObject {
         return fresh
     }
 
-    /// «Avslå»: hides it on this phone. Loop is not told; it lapses there on its own.
+    /// «Avslå»: hides it on this phone and deletes it from Nightscout, which Loop's evening watch
+    /// takes as declined (the meal watch lets it lapse on its own). Without write access to
+    /// Nightscout it is only hidden here.
     func dismiss(_ suggestion: AIBolusSuggestion, at date: Date = Date()) {
+        hide(suggestion, at: date)
+        guard let nsID = suggestion.nsID else { return }
+        Task {
+            do {
+                try await Self.deleteTreatment(nsID)
+                LogManager.shared.log(category: .general, message: "AI bolus suggestion \(suggestion.id) declined in Nightscout")
+            } catch {
+                LogManager.shared.log(category: .general, message: "AI bolus suggestion \(suggestion.id) could not be declined in Nightscout: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Hides it on this phone only, as after sending its bolus: Loop closes it when the bolus comes.
+    func hide(_ suggestion: AIBolusSuggestion, at date: Date = Date()) {
         var dismissed = self.dismissed
         dismissed[suggestion.id] = date
         setDismissed(dismissed)
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [AIBolusSuggestionNotifier.identifier(suggestion.id)])
+    }
+
+    private static func deleteTreatment(_ nsID: String) async throws {
+        guard let url = NightscoutUtils.constructURL(baseURL: Storage.shared.url.value, token: Storage.shared.token.value, endpoint: "/api/v1/treatments/\(nsID)", parameters: [:]) else {
+            throw NightscoutUtils.NightscoutError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode), http.statusCode != 404 {
+            throw URLError(.userAuthenticationRequired)
+        }
     }
 
     /// Opens the bolus screen for it, now or as soon as it has been read.
@@ -227,6 +280,10 @@ enum AIBolusSuggestionNotifier {
     static func identifier(_ id: String) -> String { "aiBolusSuggestion-\(id)" }
 
     static func notify(_ suggestion: AIBolusSuggestion) {
+        // The evening watch's own alarm announces its suggestions, with its own buttons.
+        if suggestion.isEveningWatch, Storage.shared.alarms.value.contains(where: { $0.type == .eveningWatch && $0.isEnabled }) {
+            return
+        }
         let content = UNMutableNotificationContent()
         content.title = AIBolusSuggestionText.title(suggestion)
         content.body = suggestion.reason

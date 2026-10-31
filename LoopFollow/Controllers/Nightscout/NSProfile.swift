@@ -85,6 +85,8 @@ struct NSProfile: Decodable {
         let integralRetrospectiveCorrectionEnabled: Bool?
         /// The insulin curve Loop doses with; uploaded by the jujasen fork of Loop.
         let insulin: Insulin?
+        /// The evening watch's settings; uploaded by the jujasen fork of Loop.
+        let eveningWatch: EveningWatch.LoopSettings?
 
         struct Insulin: Decodable {
             let effectiveModel: String?

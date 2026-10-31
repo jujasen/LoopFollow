@@ -17,7 +17,6 @@ struct MainTabView: View {
     @ObservedObject private var currentAlarm = Observable.shared.currentAlarm
     @ObservedObject private var alarms = Storage.shared.alarms
     @ObservedObject private var aiSuggestions = AIBolusSuggestionStore.shared
-    @ObservedObject private var eveningWatchReview = EveningWatchReview.shared
 
     @State private var showTelemetryConsent = false
     @State private var showOnboarding = false
@@ -41,19 +40,17 @@ struct MainTabView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
             tabView
-                .sheet(item: $eveningWatchReview.reviewing) { suggestion in
-                    // The normal bolus screen, filled in with the evening watch's dose.
-                    LoopAPNSBolusView(prefilledUnits: suggestion.units) {
-                        AlarmManager.shared.eveningWatchSent()
-                    }
-                }
         }
         .animation(.easeInOut(duration: 0.25), value: activeBanner.value)
         .animation(.easeInOut(duration: 0.25), value: currentAlarm.value)
         .sheet(item: $aiSuggestions.reviewing) { suggestion in
             // The normal bolus screen, filled in with the suggestion; confirm and one-time code as always.
             LoopAPNSBolusView(prefilledUnits: suggestion.units) {
-                AIBolusSuggestionStore.shared.dismiss(suggestion)
+                // Sent: Loop closes the suggestion when the bolus comes, so it is only hidden here.
+                AIBolusSuggestionStore.shared.hide(suggestion)
+                if suggestion.isEveningWatch {
+                    AlarmManager.shared.eveningWatchSent()
+                }
             }
         }
     }
