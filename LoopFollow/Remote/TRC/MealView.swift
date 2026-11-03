@@ -35,6 +35,7 @@ struct MealView: View {
     @State private var selectedTime: Date? = nil
     @State private var isScheduling: Bool = false
     @State private var showFatProteinOrderBanner = false
+    @StateObject private var mealEstimate = MealEstimateModel()
 
     enum AlertType {
         case confirmMeal
@@ -157,6 +158,8 @@ struct MealView: View {
                         }
                     }
 
+                    MealEstimateSection(model: mealEstimate)
+
                     Section(header: Text("Schedule")) {
                         Toggle("Schedule for later", isOn: $isScheduling)
                         if isScheduling {
@@ -216,6 +219,9 @@ struct MealView: View {
                 }
                 .navigationTitle("Meal")
                 .navigationBarTitleDisplayMode(.inline)
+            }
+            .onReceive(mealEstimate.$estimate.compactMap { $0 }) { estimate in
+                applyEstimate(estimate)
             }
             .onAppear {
                 selectedTime = nil
@@ -406,6 +412,17 @@ struct MealView: View {
         if mealWithBolus.value, meal.bolus > 0 {
             let maxB = maxBolus.value.doubleValue(for: .internationalUnit())
             bolusAmount = HKQuantity(unit: .internationalUnit(), doubleValue: min(meal.bolus, maxB))
+        }
+    }
+
+    /// Fills in carbs — and fat and protein when they are shown — from an AI estimate. Nothing is
+    /// sent; the meal is reviewed and confirmed as usual.
+    private func applyEstimate(_ estimate: MealCarbEstimate) {
+        carbsFieldIsFocused = false
+        carbs = HKQuantity(unit: .gram(), doubleValue: estimate.roundedCarbs)
+        if mealWithFatProtein.value {
+            fat = HKQuantity(unit: .gram(), doubleValue: max(0, (estimate.fatGrams ?? 0).rounded()))
+            protein = HKQuantity(unit: .gram(), doubleValue: max(0, (estimate.proteinGrams ?? 0).rounded()))
         }
     }
 

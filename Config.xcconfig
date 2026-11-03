@@ -1,3 +1,8 @@
+// Anthropic API key for the AI meal estimate on the carb screen. Empty here; the build workflow
+// writes the ANTHROPIC_API_KEY secret into LoopFollowConfigOverride.xcconfig, which is included
+// below and wins. Without a key the meal estimate stays hidden.
+ANTHROPIC_API_KEY =
+
 #include? "LoopFollowConfigOverride.xcconfig"
 #include? "../../LoopFollowConfigOverride.xcconfig"
 #include? "LoopFollowDisplayNameConfig.xcconfig"

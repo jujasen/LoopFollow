@@ -1,0 +1,186 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "Describe the meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beskriv måltidet"
+          }
+        }
+      }
+    },
+    "AI estimate — check the numbers before you continue.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-anslag – sjekk tallene før du går videre."
+          }
+        }
+      }
+    },
+    "Add or correct something…": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til eller rett noe …"
+          }
+        }
+      }
+    },
+    "Update estimate": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdater beregning"
+          }
+        }
+      }
+    },
+    "E.g. fish gratin": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "F.eks. fiskegrateng"
+          }
+        }
+      }
+    },
+    "Estimate carbs": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beregn karbo"
+          }
+        }
+      }
+    },
+    "Remove photo": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern bilde"
+          }
+        }
+      }
+    },
+    "Take Photo": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta bilde"
+          }
+        }
+      }
+    },
+    "Choose Photos": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velg bilder"
+          }
+        }
+      }
+    },
+    "Add photo of the meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til bilde av måltidet"
+          }
+        }
+      }
+    },
+    "Stop estimate": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopp beregningen"
+          }
+        }
+      }
+    },
+    "Hide calculation": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjul utregning"
+          }
+        }
+      }
+    },
+    "Show calculation": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis utregning"
+          }
+        }
+      }
+    },
+    "Start over": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start på nytt"
+          }
+        }
+      }
+    },
+    "Sure": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikker"
+          }
+        }
+      }
+    },
+    "Fairly sure": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ganske sikker"
+          }
+        }
+      }
+    },
+    "Unsure": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usikker"
+          }
+        }
+      }
+    },
+    "The estimate could not be read. Try again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klarte ikke å lese beregningen. Prøv igjen."
+          }
+        }
+      }
+    }
+  }
+}

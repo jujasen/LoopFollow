@@ -27,6 +27,9 @@ struct LoopAPNSCarbsView: View {
     @State private var selectedPortionID: String?
     @State private var showFavoriteFoodPicker = false
     @State private var showAddFavoriteFood = false
+    /// The dish the AI estimate named, sent in `foodType` ("🍕 Pizza") while its emoji is chosen.
+    @State private var estimatedFood: CarbFoodLabel?
+    @StateObject private var mealEstimate = MealEstimateModel()
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
@@ -264,6 +267,9 @@ struct LoopAPNSCarbsView: View {
                             .buttonStyle(.plain)
                         }
                     }
+
+                    MealEstimateSection(model: mealEstimate)
+
                     // TOTP Blocking Warning Section
                     if isTOTPBlocked && showTOTPWarning {
                         Section {
@@ -435,6 +441,9 @@ struct LoopAPNSCarbsView: View {
                     selectedPortionID = nil
                 }
             }
+            .onReceive(mealEstimate.$estimate.compactMap { $0 }) { estimate in
+                applyEstimate(estimate)
+            }
             .onAppear {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
@@ -589,7 +598,7 @@ struct LoopAPNSCarbsView: View {
             type: .carbs,
             carbsAmount: carbsAmount.doubleValue(for: .gram()),
             absorptionTime: selectedAbsorptionTime,
-            foodType: CarbFoodLabel(emoji: foodType, name: selectedFavoriteFood?.name ?? "").foodType,
+            foodType: CarbFoodLabel(emoji: foodType, name: foodName).foodType,
             consumedDate: adjustedConsumedDate,
             otp: otpCode
         )
@@ -624,6 +633,31 @@ struct LoopAPNSCarbsView: View {
                 self.showAlert = true
             }
         }
+    }
+
+    /// The dish's name for `foodType`: the favorite's, or the AI estimate's while its emoji is
+    /// still the one chosen.
+    private var foodName: String {
+        if let selectedFavoriteFood {
+            return selectedFavoriteFood.name
+        }
+        if let estimatedFood, estimatedFood.emoji == foodType {
+            return estimatedFood.name
+        }
+        return ""
+    }
+
+    /// Fills in the fields from an AI estimate. Nothing is sent; the caregiver reviews and
+    /// confirms as with a typed entry.
+    private func applyEstimate(_ estimate: MealCarbEstimate) {
+        carbsFieldIsFocused = false
+        selectedFavoriteFoodID = nil
+        selectedPortionID = nil
+        carbsAmount = HKQuantity(unit: .gram(), doubleValue: estimate.roundedCarbs)
+        foodType = estimate.foodTypeEmoji
+        estimatedFood = CarbFoodLabel(emoji: estimate.foodTypeEmoji, name: estimate.name)
+        let components = FavoriteFoodAbsorption.components(estimate.absorptionTime)
+        setAbsorptionTime(hours: components.hours, minutes: components.minutes)
     }
 
     private func setAbsorptionTime(hours: Int, minutes: Int) {

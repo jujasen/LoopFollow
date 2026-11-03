@@ -227,6 +227,19 @@ jobs:
       - name: Sync clock
         run: sudo sntp -sS time.windows.com
 
+      # Build the Anthropic key into the app for the AI meal estimate on the carb screen.
+      # Without it the meal estimate stays hidden.
+      - name: Add Anthropic key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            printf '\nANTHROPIC_API_KEY = %s\n' "$ANTHROPIC_API_KEY" >> LoopFollowConfigOverride.xcconfig
+            echo "Anthropic key added"
+          else
+            echo "::warning::ANTHROPIC_API_KEY secret is not set; the AI meal estimate stays hidden"
+          fi
+
       # Build signed IPA file
       - name: Fastlane Build & Archive
         run: bundle exec fastlane build_LoopFollow
