@@ -27,6 +27,14 @@ struct AIBolusSuggestionCard: View {
 private struct AIBolusSuggestionRow: View {
     let suggestion: AIBolusSuggestion
     let canReview: Bool
+    @ObservedObject private var currentAlarm = Observable.shared.currentAlarm
+    @ObservedObject private var alarms = Storage.shared.alarms
+
+    /// The evening watch's alarm is sounding: «Ikke nå» quiets it, as on the alarm card.
+    private var eveningWatchSounding: Bool {
+        guard let id = currentAlarm.value else { return false }
+        return alarms.value.first(where: { $0.id == id })?.type == .eveningWatch
+    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -46,12 +54,29 @@ private struct AIBolusSuggestionRow: View {
             VStack(spacing: 6) {
                 if canReview {
                     Button(AIBolusSuggestionText.review) {
-                        AIBolusSuggestionStore.shared.reviewing = suggestion
+                        if suggestion.isEveningWatch {
+                            // Also quiets the evening watch's alarm while the bolus screen is open.
+                            AlarmManager.shared.reviewEveningWatch()
+                        } else {
+                            AIBolusSuggestionStore.shared.reviewing = suggestion
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                 }
+                if suggestion.isEveningWatch, eveningWatchSounding {
+                    Button(EveningWatchText.notNow) {
+                        AlarmManager.shared.quietEveningWatch()
+                    }
+                    .buttonStyle(.bordered)
+                }
                 Button(AIBolusSuggestionText.decline) {
-                    withAnimation { AIBolusSuggestionStore.shared.dismiss(suggestion) }
+                    withAnimation {
+                        if suggestion.isEveningWatch {
+                            AlarmManager.shared.declineEveningWatch()
+                        } else {
+                            AIBolusSuggestionStore.shared.dismiss(suggestion)
+                        }
+                    }
                 }
                 .buttonStyle(.bordered)
             }

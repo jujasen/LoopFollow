@@ -56,14 +56,16 @@ struct MainTabView: View {
     }
 
     /// The sounding alarm, unless the Snoozer tab — which has its own controls — is on screen.
+    /// The evening watch is left out on Home too: its suggestion card there has the same buttons.
     private var alarmForCard: Alarm? {
         guard let id = currentAlarm.value,
               let alarm = alarms.value.first(where: { $0.id == id })
         else { return nil }
         let items = orderedItems
         let index = selectedTab.value
-        if index >= 0, index < items.count, items[index] == .snoozer {
-            return nil
+        if index >= 0, index < items.count {
+            if items[index] == .snoozer { return nil }
+            if items[index] == .home, alarm.type == .eveningWatch { return nil }
         }
         return alarm
     }
