@@ -284,12 +284,16 @@ struct Alarm: Identifiable, Codable, Equatable {
                 category: AlarmManager.pumpFailureCategory
             )
         } else if type == .eveningWatch {
+            // An ordinary push notification: no alarm player, no forced volume, nothing
+            // on the lock screen that looks like music playing.
             let open = AIBolusSuggestionStore.shared.openEveningWatch()
             AlarmManager.shared.sendNotification(
                 title: EveningWatchText.title(open),
                 body: open?.reason ?? "",
-                category: AlarmManager.eveningWatchCategory
+                category: AlarmManager.eveningWatchCategory,
+                silent: !playSound
             )
+            return
         } else {
             AlarmManager.shared.sendNotification(
                 title: type.rawValue,

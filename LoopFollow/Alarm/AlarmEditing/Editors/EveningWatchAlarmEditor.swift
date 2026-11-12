@@ -47,7 +47,16 @@ struct EveningWatchAlarmEditor: View {
                 }
             }
 
-            AlarmAudioSection(alarm: $alarm)
+            Section(
+                header: Text(String(localized: "Notification", table: "EveningWatch", comment: "Section header: how the evening watch notifies")),
+                footer: Text(EveningWatchText.plainNotification)
+            ) {
+                AlarmEnumMenuPicker(
+                    title: String(localized: "Sound", table: "EveningWatch", comment: "Evening watch setting: when the notification makes a sound"),
+                    selection: $alarm.playSoundOption,
+                    allowed: PlaySoundOption.allowed(for: alarm.activeOption)
+                )
+            }
         }
     }
 

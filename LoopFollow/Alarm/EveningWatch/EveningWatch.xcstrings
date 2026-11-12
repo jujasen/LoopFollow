@@ -37,6 +37,18 @@
         }
       }
     },
+    "An ordinary notification with the phone's notification sound. It follows silent mode and Focus, and never plays as an alarm." : {
+      "comment" : "Footer under the evening watch's notification setting",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et vanlig varsel med telefonens varsellyd. Det følger lydløs-bryteren og Fokus, og spilles aldri som en alarm."
+          }
+        }
+      }
+    },
     "At most per evening" : {
       "comment" : "Evening watch setting",
       "extractionState" : "manual",
@@ -449,6 +461,18 @@
         }
       }
     },
+    "Notification" : {
+      "comment" : "Section header: how the evening watch notifies",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsel"
+          }
+        }
+      }
+    },
     "Off" : {
       "comment" : "Evening watch mode in Loop",
       "extractionState" : "manual",
@@ -516,6 +540,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hopp i sensoren"
+          }
+        }
+      }
+    },
+    "Sound" : {
+      "comment" : "Evening watch setting: when the notification makes a sound",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lyd"
           }
         }
       }
@@ -590,14 +626,14 @@
         }
       }
     },
-    "The evening watch runs in Loop on Walter's phone. In the evening, when glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode, gives it. This alarm sounds for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → Evening Watch." : {
+    "The evening watch runs in Loop on Walter's phone. In the evening, when glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode, gives it. You get a notification for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → Evening Watch." : {
       "comment" : "Explanation at the top of the evening watch settings",
       "extractionState" : "manual",
       "localizations" : {
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kveldsvakten kjører i Loop på Walters telefon. Når BS fortsetter å stige eller blir liggende høyt om kvelden, og ingenting er gitt eller spist på en stund, foreslår den en korreksjon – eller gir den selv i automatisk modus. Denne alarmen varsler om forslagene; forslaget står på hovedskjermen til du svarer. Innstillingene endres i Loop under Innstillinger → Kveldsvakt."
+            "value" : "Kveldsvakten kjører i Loop på Walters telefon. Når BS fortsetter å stige eller blir liggende høyt om kvelden, og ingenting er gitt eller spist på en stund, foreslår den en korreksjon – eller gir den selv i automatisk modus. Du får et varsel om forslagene; forslaget står på hovedskjermen til du svarer. Innstillingene endres i Loop under Innstillinger → Kveldsvakt."
           }
         }
       }

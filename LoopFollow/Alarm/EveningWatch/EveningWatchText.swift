@@ -74,7 +74,11 @@ enum EveningWatchText {
     // MARK: - Settings
 
     static var explanation: String {
-        String(localized: "The evening watch runs in Loop on Walter's phone. In the evening, when glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode, gives it. This alarm sounds for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → Evening Watch.", table: "EveningWatch", comment: "Explanation at the top of the evening watch settings")
+        String(localized: "The evening watch runs in Loop on Walter's phone. In the evening, when glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode, gives it. You get a notification for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → Evening Watch.", table: "EveningWatch", comment: "Explanation at the top of the evening watch settings")
+    }
+
+    static var plainNotification: String {
+        String(localized: "An ordinary notification with the phone's notification sound. It follows silent mode and Focus, and never plays as an alarm.", table: "EveningWatch", comment: "Footer under the evening watch's notification setting")
     }
 
     static func mode(_ mode: EveningWatch.LoopSettings.Mode?) -> String {
