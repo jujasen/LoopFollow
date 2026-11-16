@@ -87,6 +87,8 @@ struct NSProfile: Decodable {
         let insulin: Insulin?
         /// The evening watch's settings; uploaded by the jujasen fork of Loop.
         let eveningWatch: EveningWatch.LoopSettings?
+        /// Loop fetches remote commands from Nightscout; uploaded by the jujasen fork of Loop.
+        let remoteCommandInbox: Int?
 
         struct Insulin: Decodable {
             let effectiveModel: String?

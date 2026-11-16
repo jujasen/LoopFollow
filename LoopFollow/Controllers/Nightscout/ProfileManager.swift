@@ -165,6 +165,10 @@ final class ProfileManager {
             Storage.shared.eveningWatchLoopSettings.value = profileData.loopSettings?.eveningWatch
         }
         insulinCurve = Self.insulinCurve(profileData.loopSettings)
+        let inboxVersion = profileData.loopSettings?.remoteCommandInbox ?? 0
+        if Storage.shared.loopRemoteCommandInbox.value != inboxVersion {
+            Storage.shared.loopRemoteCommandInbox.value = inboxVersion
+        }
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in

@@ -60,6 +60,12 @@ struct MainHomeView: View {
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             }
 
+            // Remote commands sent from here, until Loop has said what became of them
+            if isNightscoutEnabled {
+                RemoteCommandCard()
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            }
+
             // Loop's AI bolus suggestions, with a button that opens the bolus screen filled in
             if isNightscoutEnabled {
                 AIBolusSuggestionCard()

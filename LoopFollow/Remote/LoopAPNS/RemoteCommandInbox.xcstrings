@@ -1,0 +1,436 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "%@\n\nIf you send %@ U now, both can be given. Send it anyway?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@\n\nSender du %2$@ E nå, kan begge bli gitt. Vil du sende likevel?"
+          }
+        }
+      }
+    },
+    "%@ withdrawn": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ trukket tilbake"
+          }
+        }
+      }
+    },
+    "%@: Loop can no longer give it": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: Loop kan ikke lenger gi den"
+          }
+        }
+      }
+    },
+    "A bolus is already on its way": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En bolus er allerede på vei"
+          }
+        }
+      }
+    },
+    "Bolus %@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolus %@ E"
+          }
+        }
+      }
+    },
+    "Cancel override": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avslutt overstyring"
+          }
+        }
+      }
+    },
+    "Carb entry change": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endring av karbo"
+          }
+        }
+      }
+    },
+    "Carbs %@ g": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbo %@ g"
+          }
+        }
+      }
+    },
+    "Delivery": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Levering"
+          }
+        }
+      }
+    },
+    "Don't send": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke send"
+          }
+        }
+      }
+    },
+    "Don't send again: this one is being given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke send på nytt: denne blir gitt nå."
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjul"
+          }
+        }
+      }
+    },
+    "If it is not in the graph, it was not given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvis den ikke vises i grafen, ble den ikke gitt."
+          }
+        }
+      }
+    },
+    "It may have been given. Check the graph before sending again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den kan ha blitt gitt. Sjekk grafen før du sender på nytt."
+          }
+        }
+      }
+    },
+    "Loop did not fetch it before %@ and will never give it now. Nothing was given; it is safe to send again. Is Loop running and online?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop hentet den ikke før kl. %@ og kommer aldri til å gi den nå. Ingenting ble gitt, og det er trygt å sende på nytt. Er Loop i gang og på nett?"
+          }
+        }
+      }
+    },
+    "Loop had not fetched it, so nothing was given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop hadde ikke hentet den, så ingenting ble gitt."
+          }
+        }
+      }
+    },
+    "Nightscout did not take the command: %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nightscout tok ikke imot kommandoen: %@"
+          }
+        }
+      }
+    },
+    "Nothing was given. Loop said: %@ It is safe to send again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingenting ble gitt. Loop sa: %@ Det er trygt å sende på nytt."
+          }
+        }
+      }
+    },
+    "Override %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overstyring %@"
+          }
+        }
+      }
+    },
+    "Push only: scan Loop's QR code again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare push: skann QR-koden fra Loop på nytt."
+          }
+        }
+      }
+    },
+    "Push only: the Nightscout token can't write. Use a token with the careportal role so commands can wait in Nightscout until Loop fetches them.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare push: Nightscout-tokenet har ikke skrivetilgang. Bruk et token med rollen careportal, så kommandoene kan vente i Nightscout til Loop henter dem."
+          }
+        }
+      }
+    },
+    "Push only: this Loop does not fetch commands from Nightscout yet. A command then only arrives when iOS delivers the push, which can wait until Loop is opened.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare push: denne Loop-versjonen henter ikke kommandoer fra Nightscout ennå. En kommando kommer da bare fram når iOS leverer pushen, og det kan vente til noen åpner Loop."
+          }
+        }
+      }
+    },
+    "Remote command": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjernkommando"
+          }
+        }
+      }
+    },
+    "Remote commands through Nightscout are not set up.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjernkommandoer via Nightscout er ikke satt opp."
+          }
+        }
+      }
+    },
+    "Send anyway": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send likevel"
+          }
+        }
+      }
+    },
+    "Sent at %@. Loop confirmed it.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt kl. %@. Loop har bekreftet den."
+          }
+        }
+      }
+    },
+    "Sent at %@. Loop fetches it on its next run (every 5 min), or at once if the push gets through. It can be given until %@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt kl. %1$@. Loop henter den på neste runde (hvert 5. minutt), eller med en gang hvis pushen kommer fram. Den kan gis til kl. %2$@."
+          }
+        }
+      }
+    },
+    "Settings change": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endring av innstillinger"
+          }
+        }
+      }
+    },
+    "The bolus is waiting for Loop in Nightscout. Loop fetches it within 5 minutes, or at once if the push gets through. The card on the main screen shows when it is given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolusen venter på Loop i Nightscout. Loop henter den innen 5 minutter, eller med en gang hvis pushen kommer fram. Kortet på Hjem viser når den er gitt."
+          }
+        }
+      }
+    },
+    "The pump did not confirm (%@). Check the pump and the graph before giving more.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pumpen bekreftet ikke (%@). Sjekk pumpen og grafen før du gir mer."
+          }
+        }
+      }
+    },
+    "This Loop can't confirm. It can be given until %@; watch the graph before sending again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne Loop-versjonen kan ikke bekrefte. Den kan gis til kl. %@. Følg med på grafen før du sender på nytt."
+          }
+        }
+      }
+    },
+    "Through Nightscout: Loop fetches commands on every run (every 5 minutes) and right away when the push gets through, and says what became of each.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Via Nightscout: Loop henter kommandoer på hver runde (hvert 5. minutt) og med en gang pushen kommer fram, og sier fra hvordan det gikk med hver av dem."
+          }
+        }
+      }
+    },
+    "Withdraw": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trekk tilbake"
+          }
+        }
+      }
+    },
+    "Withdrawn in LoopFollow": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trukket tilbake i LoopFollow"
+          }
+        }
+      }
+    },
+    "⌛ %@ never reached Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌛ %@ kom aldri fram til Loop"
+          }
+        }
+      }
+    },
+    "⏳ %@ sent as a push": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏳ %@ sendt som push"
+          }
+        }
+      }
+    },
+    "⏳ %@: waiting for Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏳ %@: venter på Loop"
+          }
+        }
+      }
+    },
+    "⚠️ %@: Loop started but has not answered": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ %@: Loop startet, men har ikke svart"
+          }
+        }
+      }
+    },
+    "⚠️ %@: unsure whether it was given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ %@: usikkert om den ble gitt"
+          }
+        }
+      }
+    },
+    "✅ %@ given at %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ %1$@ gitt kl. %2$@"
+          }
+        }
+      }
+    },
+    "❌ %@ not given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "❌ %@ ble ikke gitt"
+          }
+        }
+      }
+    },
+    "❌ %@ rejected by Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "❌ %@ avvist av Loop"
+          }
+        }
+      }
+    },
+    "💉 %@: Loop is giving it": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💉 %@: Loop gir den nå"
+          }
+        }
+      }
+    }
+  }
+}

@@ -14,6 +14,7 @@ struct LoopAPNSBolusView: View {
     @State private var alertType: AlertType = .success
 
     @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
+    @ObservedObject private var inbox = RemoteCommandInbox.shared
     @FocusState private var insulinFieldIsFocused: Bool
 
     // Add state for recommended bolus and warning
@@ -46,12 +47,21 @@ struct LoopAPNSBolusView: View {
         case error
         case confirmation
         case oldCalculationWarning
+        /// An earlier bolus may still be given: a second one could come on top of it.
+        case bolusOnTheWay
     }
 
     var body: some View {
         NavigationView {
             VStack {
                 Form {
+                    // What became of the last bolus sent from here
+                    if let last = inbox.visible().first(where: \.isBolus) {
+                        Section {
+                            RemoteCommandRow(command: last)
+                        }
+                    }
+
                     // Recommended bolus section
                     if let recommendedBolus = recommendedBolus, recommendedBolus > 0, let lastLoopTime = lastLoopTime {
                         let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
@@ -306,6 +316,15 @@ struct LoopAPNSBolusView: View {
                         },
                         secondaryButton: .cancel()
                     )
+                case .bolusOnTheWay:
+                    return Alert(
+                        title: Text(String(localized: "A bolus is already on its way", table: "RemoteCommandInbox")),
+                        message: Text(alertMessage),
+                        primaryButton: .destructive(Text(String(localized: "Send anyway", table: "RemoteCommandInbox"))) {
+                            authenticateAndSendInsulin()
+                        },
+                        secondaryButton: .cancel(Text(String(localized: "Don't send", table: "RemoteCommandInbox")))
+                    )
                 case .oldCalculationWarning:
                     return Alert(
                         title: Text("Old Calculation Warning"),
@@ -361,6 +380,14 @@ struct LoopAPNSBolusView: View {
         if insulinValue > maxBolus {
             alertMessage = String(localized: "Insulin amount (\(Localizer.formatToLocalizedString(insulinValue, maxFractionDigits: 2, minFractionDigits: 2))U) exceeds the maximum allowed (\(Localizer.formatToLocalizedString(maxBolus, maxFractionDigits: 2, minFractionDigits: 2))U). Please reduce the amount.")
             alertType = .error
+            showAlert = true
+            return
+        }
+
+        if let open = RemoteCommandInbox.shared.openBolus() {
+            let units = Localizer.formatToLocalizedString(insulinValue, maxFractionDigits: 2, minFractionDigits: 0)
+            alertMessage = String(format: String(localized: "%@\n\nIf you send %@ U now, both can be given. Send it anyway?", table: "RemoteCommandInbox", comment: "1: what became of the earlier bolus, 2: the new amount"), RemoteCommandText.title(open, now: Date()) + "\n" + RemoteCommandText.detail(open, now: Date()), units)
+            alertType = .bolusOnTheWay
             showAlert = true
             return
         }
@@ -421,7 +448,9 @@ struct LoopAPNSBolusView: View {
                     // Mark TOTP code as used
                     TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
                     self.onSent?()
-                    self.alertMessage = String(localized: "Insulin sent to Loop. Loop confirms when it is given, and LoopFollow warns you if Loop rejects it.")
+                    self.alertMessage = RemoteCommandInbox.shared.isAvailable
+                        ? String(localized: "The bolus is waiting for Loop in Nightscout. Loop fetches it within 5 minutes, or at once if the push gets through. The card on the main screen shows when it is given.", table: "RemoteCommandInbox")
+                        : String(localized: "Insulin sent to Loop. Loop confirms when it is given, and LoopFollow warns you if Loop rejects it.")
                     self.alertType = .success
                     LogManager.shared.log(
                         category: .apns,

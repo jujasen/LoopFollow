@@ -185,6 +185,11 @@ struct RemoteSettingsView: View {
 
                 // MARK: - Debug / Info
 
+                Section(header: Text(String(localized: "Delivery", table: "RemoteCommandInbox"))) {
+                    Text(RemoteCommandInbox.availabilityText)
+                        .font(.caption)
+                }
+
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
                     Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? String(localized: "Production") : String(localized: "Development"))")

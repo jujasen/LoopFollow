@@ -437,6 +437,34 @@ class LoopAPNSService {
     ///   - apnsKey: The APNS key
     ///   - payload: The notification payload
     ///   - completion: Completion handler with success status and error message
+    /// What the command does, for the status card ("Bolus 0,5 E").
+    static func summary(of payload: [String: Any]) -> (text: String, units: Double?) {
+        if let units = payload["bolus-entry"] as? Double {
+            return (RemoteCommandText.summary(bolusUnits: units), units)
+        }
+        if let grams = payload["carbs-entry"] as? Double {
+            return (String(format: String(localized: "Carbs %@ g", table: "RemoteCommandInbox", comment: "1: grams"), Localizer.formatToLocalizedString(grams, maxFractionDigits: 1, minFractionDigits: 0)), nil)
+        }
+        if let name = payload["override-name"] as? String {
+            return (String(format: String(localized: "Override %@", table: "RemoteCommandInbox", comment: "1: preset name"), name), nil)
+        }
+        if payload["cancel-temporary-override"] != nil {
+            return (String(localized: "Cancel override", table: "RemoteCommandInbox"), nil)
+        }
+        if payload["therapy-settings"] != nil {
+            return (String(localized: "Settings change", table: "RemoteCommandInbox"), nil)
+        }
+        if payload["carbs-edit"] != nil {
+            return (String(localized: "Carb entry change", table: "RemoteCommandInbox"), nil)
+        }
+        return (String(localized: "Remote command", table: "RemoteCommandInbox"), nil)
+    }
+
+    /// Sends a command the way this Loop can take it.
+    ///
+    /// With the inbox (the jujasen fork of Loop), the command waits in Nightscout, where Loop fetches
+    /// it on every run whether or not the push gets through, and answers there. The push then
+    /// carries no password, only the id, to make Loop look at once.
     private func sendAPNSNotification(
         deviceToken: String,
         bundleIdentifier: String,
@@ -444,6 +472,54 @@ class LoopAPNSService {
         apnsKey: String,
         teamId: String,
         payload: [String: Any],
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        let summary = Self.summary(of: payload)
+        let inbox = RemoteCommandInbox.shared
+
+        guard inbox.isAvailable else {
+            // A second bolus replaces a first one Apple has not delivered yet, so both can't arrive.
+            let collapseId = summary.units != nil ? "loopfollow-bolus" : nil
+            postToAPNs(deviceToken: deviceToken, bundleIdentifier: bundleIdentifier, keyId: keyId, apnsKey: apnsKey, teamId: teamId, payload: payload, collapseId: collapseId) { success, message in
+                if success {
+                    let expiration = (payload["expiration"] as? String).flatMap(NightscoutUtils.parseDate) ?? Date().addingTimeInterval(5 * 60)
+                    inbox.recordPushOnly(summary: summary.text, units: summary.units, expiration: expiration)
+                }
+                completion(success, message)
+            }
+            return
+        }
+
+        Task {
+            do {
+                let command = try await inbox.enqueue(pushPayload: payload, summary: summary.text, units: summary.units)
+                var nudge: [String: Any] = ["command-id": command.commandId]
+                if let alert = payload["alert"] {
+                    nudge["alert"] = alert
+                }
+                self.postToAPNs(deviceToken: deviceToken, bundleIdentifier: bundleIdentifier, keyId: keyId, apnsKey: apnsKey, teamId: teamId, payload: nudge, expiration: command.expiration, collapseId: "loopfollow-remote-command") { success, message in
+                    if !success {
+                        // Loop still fetches it on its next run.
+                        LogManager.shared.log(category: .apns, message: "Push for queued command failed (Loop fetches it anyway): \(message ?? "unknown")")
+                    }
+                    completion(true, nil)
+                }
+            } catch {
+                LogManager.shared.log(category: .apns, message: "Could not queue remote command in Nightscout: \(error.localizedDescription)")
+                completion(false, error.localizedDescription)
+            }
+        }
+    }
+
+    private func postToAPNs(
+        deviceToken: String,
+        bundleIdentifier: String,
+        keyId: String,
+        apnsKey: String,
+        teamId: String,
+        payload: [String: Any],
+        expiration: Date? = nil,
+        collapseId: String? = nil,
         completion: @escaping (Bool, String?) -> Void
     ) {
         // Validate credentials first
@@ -479,6 +555,14 @@ class LoopAPNSService {
         request.setValue(bundleIdentifier, forHTTPHeaderField: "apns-topic")
         request.setValue("alert", forHTTPHeaderField: "apns-push-type")
         request.setValue("10", forHTTPHeaderField: "apns-priority") // High priority
+        // Don't deliver after Loop would refuse it anyway, and let a resend replace one still waiting.
+        let pushExpiration = expiration ?? (payload["expiration"] as? String).flatMap(NightscoutUtils.parseDate)
+        if let pushExpiration {
+            request.setValue(String(Int(pushExpiration.timeIntervalSince1970)), forHTTPHeaderField: "apns-expiration")
+        }
+        if let collapseId {
+            request.setValue(String(collapseId.prefix(64)), forHTTPHeaderField: "apns-collapse-id")
+        }
 
         // Validate bundle identifier format
         if !bundleIdentifier.contains(".") {

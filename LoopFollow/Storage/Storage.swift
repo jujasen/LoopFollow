@@ -253,6 +253,8 @@ class Storage {
     /// Loop's evening watch: its settings from the profile, tonight's log, and the automatic
     /// doses already announced.
     var eveningWatchLoopSettings = StorageValue<EveningWatch.LoopSettings?>(key: "eveningWatchLoopSettings", defaultValue: nil)
+    /// Loop fetches remote commands from Nightscout (`loopSettings.remoteCommandInbox`, the jujasen fork); 0 when it does not.
+    var loopRemoteCommandInbox = StorageValue<Int>(key: "loopRemoteCommandInbox", defaultValue: 0)
     var eveningWatchLog = StorageValue<EveningWatch.Log?>(key: "eveningWatchLog", defaultValue: nil)
     var eveningWatchAnnounced = StorageValue<[String]>(key: "eveningWatchAnnounced", defaultValue: [])
 
