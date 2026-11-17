@@ -33,14 +33,16 @@ extension MainViewController {
     }
 
     // NS Bolus Data  Struct
-    struct bolusGraphStruct: Codable {
+    struct bolusGraphStruct {
         var value: Double
         var date: TimeInterval
         var sgv: Int
+        /// The Treatments list entry this dot opens.
+        var detail: Treatment? = nil
     }
 
     // NS Bolus Data  Struct
-    struct carbGraphStruct: Codable {
+    struct carbGraphStruct {
         var value: Double
         var date: TimeInterval
         var sgv: Int
@@ -49,6 +51,8 @@ extension MainViewController {
         var foodType: String? = nil
         /// Loop's id for the entry, which the chart uses to open it for editing.
         var syncIdentifier: String? = nil
+        /// The Treatments list entry this dot opens.
+        var detail: Treatment? = nil
     }
 
     // A waiting "later carbs" plan, at the carb lane's height
@@ -118,6 +122,8 @@ extension MainViewController {
 
     func clearOldNotes() {
         noteGraphData.removeAll()
+        cgmSensorStates.removeAll()
         updateNotes()
+        updateCGMSensorState()
     }
 }

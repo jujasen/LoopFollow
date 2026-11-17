@@ -7,6 +7,7 @@ struct LoopAPNSRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = RemoteSettingsViewModel()
     @ObservedObject private var activeOverrideNote = Observable.shared.override
+    @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
 
     var body: some View {
         NavigationView {
@@ -24,6 +25,10 @@ struct LoopAPNSRemoteView: View {
                         CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView(), isActive: activeOverrideNote.value != nil)
                         CommandButtonView(command: "Settings", iconName: "list.bullet.clipboard", destination: TherapySettingsView())
                         CommandButtonView(command: LocalizedStringKey(String(localized: "Logged Meals", table: "CarbEdit", comment: "Remote control button that opens the logged meals list")), iconName: "pencil.circle", destination: LoggedMealsView())
+                        // Walter's Loop has no profile patch, so the button only appears for a Loop that reports it.
+                        if loopRemoteCommands.value.contains(LoopProfile.switchCommand) {
+                            CommandButtonView(command: "Profiles", iconName: "arrow.triangle.2.circlepath", destination: LoopProfilesView())
+                        }
                     }
                     .padding(.horizontal)
                 } else {

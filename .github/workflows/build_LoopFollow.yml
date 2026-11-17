@@ -16,7 +16,7 @@ env:
 jobs:
   # use a single runner for these sequential steps
   check_status:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: Check status to decide whether to build
     permissions:
       contents: write
@@ -154,7 +154,7 @@ jobs:
   cancel_when_no_build:
     needs: check_status
     name: Cancel run when there is nothing to build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
     if: |
@@ -189,7 +189,7 @@ jobs:
   build:
     name: Build
     needs: [check_certs, check_status]
-    runs-on: ${{ vars.MAC_RUNNER || 'macos-26' }}
+    runs-on: ${{ vars.MAC_RUNNER || 'xcode-27' }}
     permissions:
       contents: write
     if:
@@ -200,7 +200,7 @@ jobs:
     steps:
       - name: Select Xcode version
         if: runner.environment == 'github-hosted'
-        run: "sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer"
+        run: "sudo xcode-select --switch /Applications/Xcode_27.0.app/Contents/Developer"
 
       - name: Checkout Repo for building
         uses: actions/checkout@v5

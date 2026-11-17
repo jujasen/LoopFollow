@@ -67,7 +67,7 @@ extension MainViewController {
     func updateDeviceStatusDisplay(jsonDeviceStatus: [[String: AnyObject]]) {
         let previousIOBText = Observable.shared.iobText.value
         let previousDeviceWasLoop = Storage.shared.device.value == "Loop"
-        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd])
+        infoManager.clearInfoData(types: [.iob, .cob, .battery, .pump, .pumpBattery, .target, .isf, .carbRatio, .updated, .recBolus, .tdd, .smoothedBG])
 
         // For Loop, clear the current override here - For Trio, it is handled using treatments
         if Storage.shared.device.value == "Loop" {
@@ -92,7 +92,7 @@ extension MainViewController {
 
         Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
 
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as? [String: AnyObject] {
             Storage.shared.pumpModel.value = lastPumpRecord["model"] as? String
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
@@ -113,15 +113,35 @@ extension MainViewController {
                     Storage.shared.lastLoopTime.value = lastPumpTime
                 }
 
-                if let reservoirData = lastPumpRecord["reservoir"] as? Double {
-                    latestPumpVolume = reservoirData
-                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", reservoirData) + String(localized: "U"), numericValue: reservoirData)
-                    Storage.shared.lastPumpReservoirU.value = reservoirData
-                } else {
+                let reservoir = PumpReservoirResolver.resolve(
+                    reservoir: lastPumpRecord["reservoir"] as? Double,
+                    pumpID: lastPumpRecord["pumpID"] as? String,
+                    manufacturer: lastPumpRecord["manufacturer"] as? String,
+                    model: lastPumpRecord["model"] as? String,
+                    displayOverride: lastPumpRecord["reservoir_display_override"] as? String,
+                    cache: Storage.shared.pumpReservoirCache.value,
+                    date: Date(timeIntervalSince1970: lastPumpTime)
+                )
+                Storage.shared.pumpReservoirCache.value = reservoir.cache
+
+                switch reservoir.state {
+                case let .units(units):
+                    latestPumpVolume = units
+                    infoManager.updateInfoData(type: .pump, value: String(format: "%.0f", units) + String(localized: "U"), numericValue: units)
+                    Storage.shared.lastPumpReservoirU.value = units
+                case .aboveReportingLimit:
                     // Pumps that only report "50+" get treated as exactly 50, both
                     // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+" + String(localized: "U"), numericValue: 50.0)
+                    Storage.shared.lastPumpReservoirU.value = nil
+                case let .status(status):
+                    latestPumpVolume = nil
+                    infoManager.updateInfoData(type: .pump, value: status)
+                    Storage.shared.lastPumpReservoirU.value = nil
+                case .unknown:
+                    // The row stays cleared, which the info table renders as an em dash.
+                    latestPumpVolume = nil
                     Storage.shared.lastPumpReservoirU.value = nil
                 }
             }
@@ -132,6 +152,14 @@ extension MainViewController {
             {
                 infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%", numericValue: pumpBatteryPercent)
                 Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
+                latestPumpBatteryDate = Date()
+            } else if let lastPercent = Observable.shared.pumpBatteryLevel.value,
+                      let lastDate = latestPumpBatteryDate,
+                      Date().timeIntervalSince(lastDate) <= 60 * 60
+            {
+                // Some records leave out the pump battery, and the level changes
+                // slowly, so the last reading is shown for up to an hour.
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", lastPercent) + "%", numericValue: lastPercent)
             }
 
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
@@ -160,10 +188,10 @@ extension MainViewController {
         }
 
         // Loop - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as? [String: AnyObject] {
             // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
             // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
-            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
+            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] as? String == nil,
                let loopTimestampString = lastLoopRecord["timestamp"] as? String,
                let loopTimestamp = formatter.date(from: loopTimestampString)?.timeIntervalSince1970,
                loopTimestamp > (Observable.shared.alertLastLoopTime.value ?? 0)
@@ -201,7 +229,7 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as? [String: AnyObject] {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 
@@ -246,6 +274,8 @@ extension MainViewController {
         }
 
         evaluateNotLooping()
+
+        DeviceStatusHistory.shared.ingestLatest(lastDeviceStatus)
 
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")

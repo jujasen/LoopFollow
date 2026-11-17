@@ -101,46 +101,16 @@ struct MealView: View {
                             .transition(.opacity)
                         }
 
-                        HKQuantityInputView(
-                            label: String(localized: "Carbs"),
-                            quantity: $carbs,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                            maxValue: maxCarbs.value,
-                            isFocused: $carbsFieldIsFocused,
-                            onValidationError: { message in
-                                handleValidationError(message)
-                            }
+                        MealMacroInputs(
+                            carbs: $carbs,
+                            fat: $fat,
+                            protein: $protein,
+                            showFatProtein: mealWithFatProtein.value,
+                            carbsFocused: $carbsFieldIsFocused,
+                            fatFocused: $fatFieldIsFocused,
+                            proteinFocused: $proteinFieldIsFocused,
+                            onValidationError: handleValidationError
                         )
-
-                        if mealWithFatProtein.value {
-                            HKQuantityInputView(
-                                label: String(localized: "Fat"),
-                                quantity: $fat,
-                                unit: .gram(),
-                                maxLength: 4,
-                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: maxFat.value,
-                                isFocused: $fatFieldIsFocused,
-                                onValidationError: { message in
-                                    handleValidationError(message)
-                                }
-                            )
-
-                            HKQuantityInputView(
-                                label: String(localized: "Protein"),
-                                quantity: $protein,
-                                unit: .gram(),
-                                maxLength: 4,
-                                minValue: HKQuantity(unit: .gram(), doubleValue: 0),
-                                maxValue: maxProtein.value,
-                                isFocused: $proteinFieldIsFocused,
-                                onValidationError: { message in
-                                    handleValidationError(message)
-                                }
-                            )
-                        }
 
                         if mealWithBolus.value {
                             HKQuantityInputView(
@@ -305,7 +275,7 @@ struct MealView: View {
                     )
                 case .statusSuccess:
                     return Alert(
-                        title: Text("Status"),
+                        title: Text("Command Sent"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
                             presentationMode.wrappedValue.dismiss()

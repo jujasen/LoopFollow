@@ -168,13 +168,15 @@ enum SettingsRoute: Hashable, Identifiable {
                 SettingsLeaf(String(localized: "Display App Badge"), ["badge"]),
                 SettingsLeaf(String(localized: "Persistent Notification")),
                 SettingsLeaf(String(localized: "Appearance"), ["dark mode", "light mode", "theme"]),
-                SettingsLeaf(String(localized: "Display Stats")),
                 SettingsLeaf(String(localized: "Display Small Graph")),
                 SettingsLeaf(String(localized: "Color BG Text")),
                 SettingsLeaf(String(localized: "Keep Screen Active"), ["screen lock", "screenlock"]),
                 SettingsLeaf(String(localized: "Show Display Name")),
                 SettingsLeaf(String(localized: "Snoozer emoji")),
                 SettingsLeaf(String(localized: "Force portrait mode"), ["orientation", "landscape"]),
+                SettingsLeaf(String(localized: "Display Stats"), ["statistics"]),
+                SettingsLeaf(String(localized: "Stats Style"), ["time in range band", "statistics box", "tir band", "progress bar"]),
+                SettingsLeaf(String(localized: "Stats Period"), ["statistics period", "last 24 hours", "since midnight", "today", "midnight"]),
                 SettingsLeaf(String(localized: "Time Zone Override"), ["timezone"]),
                 SettingsLeaf(String(localized: "Speak BG"), ["voice", "speech"]),
                 SettingsLeaf(String(localized: "Send anonymous usage stats"), ["telemetry", "diagnostics"]),
@@ -187,6 +189,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 SettingsLeaf(String(localized: "Show −90 min Line"), ["-90"]),
                 SettingsLeaf(String(localized: "Show Yesterday's BG"), ["yesterday"]),
                 SettingsLeaf(String(localized: "Show Midnight Lines")),
+                SettingsLeaf(String(localized: "Show Prior Day Time Lines"), ["prior day", "same time", "yesterday"]),
                 SettingsLeaf(String(localized: "Show Carb/Bolus Values"), ["carbs"]),
                 SettingsLeaf(String(localized: "Show Carb Absorption")),
                 SettingsLeaf(String(localized: "Treatments on Small Graph")),
@@ -202,7 +205,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 + InfoType.allCases.map { SettingsLeaf($0.name) }
         case .units: return [
                 SettingsLeaf(String(localized: "Glucose Unit")),
-                SettingsLeaf(String(localized: "Range Mode"), ["tir", "titr", "time in range"]),
+                SettingsLeaf(String(localized: "Range Mode"), ["tir", "titr", "ting", "time in range", "extended"]),
                 SettingsLeaf(String(localized: "Glycemic Metrics"), ["hba1c", "ehba1c", "gmi"]),
                 SettingsLeaf(String(localized: "Variability"), ["standard deviation", "cv"]),
             ]

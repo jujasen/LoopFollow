@@ -54,6 +54,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
 
+        WatchSessionManager.shared.activate()
+
         // Only spin up Bluetooth if the user has chosen a BLE-based background
         // refresh. Initializing BLEManager creates a CBCentralManager, which
         // triggers the Bluetooth permission prompt — deferring it keeps that
@@ -134,6 +136,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
+        RemoteCommandTracker.shared.handleNotification(userInfo: userInfo)
 
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
@@ -183,6 +186,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        RemoteCommandTracker.shared.handleNotification(userInfo: response.notification.request.content.userInfo)
+
         if response.actionIdentifier == "OPEN_APP_ACTION" {
             // Dismiss any presented modal/sheet so the user actually sees Home
             UIApplication.shared.topMost?.dismiss(animated: true)
@@ -288,6 +293,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
         let content = notification.request.content
+        RemoteCommandTracker.shared.handleNotification(userInfo: content.userInfo)
         let userInfoKeys = content.userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(
             category: .general,

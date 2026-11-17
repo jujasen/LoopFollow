@@ -147,7 +147,7 @@ struct OverrideView: View {
                     )
                 case .statusSuccess:
                     return Alert(
-                        title: Text("Success"),
+                        title: Text("Command Sent"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
                             presentationMode.wrappedValue.dismiss()

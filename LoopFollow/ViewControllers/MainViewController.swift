@@ -92,6 +92,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var iobPredictionData: [ShareGlucoseData] = []
     var cobPredictionData: [ShareGlucoseData] = []
     var uamPredictionData: [ShareGlucoseData] = []
+    var loopPredBGs: [Double]?
+    var loopPredUpdatedTime: TimeInterval?
     var openAPSPredBGs: [String: [Double]]?
     var openAPSPredUpdatedTime: TimeInterval?
     var bgCheckData: [ShareGlucoseData] = []
@@ -99,12 +101,14 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
+    var cgmSensorStates: [CGMSensorState] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
-    var latestPumpVolume: Double = 50.0
+    var latestPumpVolume: Double?
+    var latestPumpBatteryDate: Date?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
@@ -152,6 +156,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         view.backgroundColor = .systemBackground
 
         infoManager = InfoManager()
+        WatchSessionManager.shared.observe(infoManager, stats: statsDisplayModel)
 
         let mainView = MainHomeView(
             chartModel: chartModel,
@@ -220,6 +225,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // (this controller is built only after storage is ready, so it never fires
         // while we're alive); retained one release as a safety net.
         notificationCenter.addObserver(self, selector: #selector(handleBFUReloadCompleted), name: .bfuReloadCompleted, object: nil)
+        // A remote meal edit/delete changes the carb marks on the chart, whichever screen sent it.
+        notificationCenter.addObserver(self, selector: #selector(handleRemoteMealCommandDidComplete), name: .remoteMealCommandDidComplete, object: nil)
 
         #if !targetEnvironment(macCatalyst)
             notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
@@ -233,6 +240,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         // setup display for NS vs Dex
         showHideNSDetails()
+
+        DeviceStatusHistory.shared.onChange = { [weak self] in
+            self?.chartModel.rebuild()
+        }
+        DeviceStatusHistory.shared.start()
 
         scheduleAllTasks()
         setupNightscoutSocket()
@@ -270,7 +282,12 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.useIFCC.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.showGMI.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher()
+            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.statsSinceMidnight.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lowLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.highLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.graphTimeZoneEnabled.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.graphTimeZoneIdentifier.$value.map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
@@ -283,6 +300,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .sink { [weak self] _ in
                 self?.updateBGGraphSettings()
                 self?.updateBGGraph()
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "range mode changed")
+                self?.updateStats()
             }
             .store(in: &cancellables)
 
@@ -685,6 +704,15 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
         // ran during a BGAppRefreshTask background launch and deferred migrations.
         runMigrationsIfNeeded()
+    }
+
+    @objc func handleRemoteMealCommandDidComplete(_ notification: Notification) {
+        if (notification.userInfo?["key"] as? String)?.hasPrefix(LoopProfileAckAdapter.keyPrefix) == true {
+            // Loop uploads the switched profile right after it confirms the command.
+            TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(10))
+        } else {
+            TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+        }
     }
 
     @objc func handleBFUReloadCompleted() {

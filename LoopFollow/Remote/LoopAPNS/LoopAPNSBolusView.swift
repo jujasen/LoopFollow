@@ -295,7 +295,7 @@ struct LoopAPNSBolusView: View {
                 switch alertType {
                 case .success:
                     return Alert(
-                        title: Text("Success"),
+                        title: Text("Command Sent"),
                         message: Text(alertMessage),
                         dismissButton: .default(Text("OK")) {
                             presentationMode.wrappedValue.dismiss()
@@ -341,8 +341,9 @@ struct LoopAPNSBolusView: View {
 
     private func loadRecommendedBolus() {
         // Load recommended bolus from Observable
-        recommendedBolus = Observable.shared.deviceRecBolus.value
-        lastLoopTime = Observable.shared.alertLastLoopTime.value
+        let recommended = RecommendedBolus.current()
+        recommendedBolus = recommended?.units
+        lastLoopTime = recommended?.at
 
         // Reset warning state when new data is loaded
         showOldCalculationWarning = false

@@ -968,3 +968,72 @@ class LoopAPNSService {
         )
     }
 }
+
+// MARK: - Upstream commands (carb edit/delete by sync id, profile switch)
+
+/// Upstream LoopFollow's commands for a Loop built with the remote carb edit and profile
+/// patches. Walter's Loop does not report them in `testingDetails.remoteCommands`, so the
+/// buttons that send these stay hidden there; meals are edited through
+/// `sendCarbEditViaAPNS` instead. They go through the same delivery as every other command.
+extension LoopAPNSService {
+    private func sendConfirmedCommand(_ payload: [String: Any], otp: String, completion: @escaping (Bool, String?) -> Void) {
+        guard validateSetup() else {
+            let errorMessage = String(localized: "Loop APNS Configuration not valid")
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
+        guard let returnInfo = ReturnNotificationInfo.loopFollow(),
+              let encryptedReturnInfo = encryptReturnNotificationInfo(returnInfo: returnInfo, otpCode: otp)
+        else {
+            completion(false, String(localized: "This command needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."))
+            return
+        }
+        var payload = payload
+        payload["encrypted_return_notification"] = encryptedReturnInfo
+        let creds = effectiveCredentials()
+        sendAPNSNotification(
+            deviceToken: Storage.shared.deviceToken.value,
+            bundleIdentifier: Storage.shared.bundleId.value,
+            keyId: creds.keyId,
+            apnsKey: creds.apnsKey,
+            teamId: creds.teamId,
+            payload: payload,
+            completion: completion
+        )
+    }
+
+    /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
+    func sendCarbsDelete(syncIdentifier: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending carbs delete for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
+        sendConfirmedCommand(LoopAPNSCommands.carbsDeleteCommandPayload(syncIdentifier: syncIdentifier, otp: otp), otp: otp, completion: completion)
+    }
+
+    /// Replaces the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
+    func sendCarbsEdit(
+        syncIdentifier: String,
+        carbsAmount: Double,
+        absorptionTimeHours: Double,
+        foodType: String?,
+        consumedDate: Date,
+        otp: String,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        LogManager.shared.log(category: .apns, message: "Sending carbs edit for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
+        let payload = LoopAPNSCommands.carbsEditCommandPayload(
+            syncIdentifier: syncIdentifier,
+            carbsAmount: carbsAmount,
+            absorptionTimeHours: absorptionTimeHours,
+            foodType: foodType,
+            consumedDate: consumedDate,
+            otp: otp
+        )
+        sendConfirmedCommand(payload, otp: otp, completion: completion)
+    }
+
+    /// Switches Loop to the saved profile `name`. Requires the Loop remote profile patch.
+    func sendProfileSwitch(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending profile switch to \(name) fingerprint=\(fingerprint)")
+        sendConfirmedCommand(LoopAPNSCommands.profileSwitchCommandPayload(name: name, fingerprint: String(fingerprint), otp: otp), otp: otp, completion: completion)
+    }
+}

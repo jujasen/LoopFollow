@@ -282,6 +282,7 @@ extension MainViewController {
 
             self.updateBGGraph()
             self.updateStats()
+            self.updateCGMSensorState()
 
             let latestEntryIndex = entries.count - 1
             let latestBG = entries[latestEntryIndex].sgv
