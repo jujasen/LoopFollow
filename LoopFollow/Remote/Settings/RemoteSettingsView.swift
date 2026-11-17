@@ -193,11 +193,6 @@ struct RemoteSettingsView: View {
 
                 // MARK: - Debug / Info
 
-                Section(header: Text(String(localized: "Delivery", table: "RemoteCommandInbox"))) {
-                    Text(RemoteCommandInbox.availabilityText)
-                        .font(.caption)
-                }
-
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
                     Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? String(localized: "Production") : String(localized: "Development"))")
@@ -272,6 +267,12 @@ struct RemoteSettingsView: View {
                             .foregroundColor(.red)
                             .font(.caption)
                     }
+                }
+
+                // Which way remote commands go: through Nightscout (Loop fetches them) or push only.
+                Section(header: Text(String(localized: "Delivery", table: "RemoteCommandInbox"))) {
+                    Text(RemoteCommandInbox.availabilityText)
+                        .font(.caption)
                 }
 
                 Section(header: Text("Debug / Info")) {
