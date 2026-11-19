@@ -65,7 +65,7 @@ struct MealCarbEstimatorTests {
         #expect(format["type"] as? String == "json_schema")
         let schema = try #require(format["schema"] as? [String: Any])
         #expect(schema["additionalProperties"] as? Bool == false)
-        #expect(Set(schema["required"] as? [String] ?? []) == ["name", "emoji", "carbs_grams", "absorption_hours", "items", "assumptions", "confidence", "fat_grams", "protein_grams"])
+        #expect(Set(schema["required"] as? [String] ?? []) == ["name", "emoji", "carbs_grams", "absorption_hours", "absorption_reason", "items", "assumptions", "confidence", "fat_grams", "protein_grams"])
 
         let messages = try #require(body["messages"] as? [[String: Any]])
         #expect(messages.count == 1)

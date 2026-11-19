@@ -22,12 +22,12 @@
         }
       }
     },
-    "%@: Loop can no longer give it": {
+    "%@: no bolus in Nightscout": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@: Loop kan ikke lenger gi den"
+            "value": "%@: ingen bolus i Nightscout"
           }
         }
       }
@@ -122,22 +122,22 @@
         }
       }
     },
-    "If it is not in the graph, it was not given.": {
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvis den ikke vises i grafen, ble den ikke gitt."
-          }
-        }
-      }
-    },
     "It may have been given. Check the graph before sending again.": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "Den kan ha blitt gitt. Sjekk grafen før du sender på nytt."
+          }
+        }
+      }
+    },
+    "Loop could take it until %@, and no bolus of that size has shown up since. Most likely it was not given; check the graph before sending again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop kunne ta imot den til kl. %@, og ingen bolus av den størrelsen har dukket opp. Trolig ble den ikke gitt. Sjekk grafen før du sender på nytt."
           }
         }
       }
@@ -272,6 +272,16 @@
         }
       }
     },
+    "Sent at %@. The bolus is in Nightscout.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt kl. %@. Bolusen ligger i Nightscout."
+          }
+        }
+      }
+    },
     "Settings change": {
       "localizations": {
         "nb": {
@@ -302,12 +312,12 @@
         }
       }
     },
-    "This Loop can't confirm. It can be given until %@; watch the graph before sending again.": {
+    "This Loop can't answer, so LoopFollow looks for the bolus in Nightscout. Don't send again before %@.": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Denne Loop-versjonen kan ikke bekrefte. Den kan gis til kl. %@. Følg med på grafen før du sender på nytt."
+            "value": "Denne Loop-versjonen kan ikke svare, så LoopFollow ser etter bolusen i Nightscout. Ikke send på nytt før kl. %@."
           }
         }
       }

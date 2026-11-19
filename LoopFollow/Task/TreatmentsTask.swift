@@ -29,7 +29,7 @@ extension MainViewController {
         if NightscoutSocketManager.shared.connectionState == .authenticated {
             interval = 10 * 60
         }
-        if RemoteCommandRejectionMonitor.shared.isWatching() {
+        if RemoteCommandRejectionMonitor.shared.isWatching() || RemoteCommandInbox.shared.watchesTreatments() {
             // A command was just sent: catch Loop's note if it rejects it.
             interval = 60
         }

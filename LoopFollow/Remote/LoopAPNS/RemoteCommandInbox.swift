@@ -46,9 +46,58 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
     var statusMessage: String?
     var handledAt: Date?
     var dismissed: Bool = false
+    /// The bolus turned up in Nightscout at this time, whatever Loop said (or could not say) about it.
+    var seenInNightscout: Date?
 
     var id: String { commandId }
     var isBolus: Bool { units != nil }
+
+    /// How long after sending a bolus from here may still turn up in Nightscout: Loop takes a late push
+    /// for up to five minutes and uploads on its next run.
+    static let deliveryWindow: TimeInterval = 20 * 60
+
+    /// A bolus in Nightscout could be this one: no answer from Loop says otherwise yet.
+    var canBeMatchedToNightscout: Bool {
+        guard isBolus, seenInNightscout == nil else { return false }
+        switch status {
+        case .pushOnly, .pending, .running, .uncertain: return true
+        default: return false
+        }
+    }
+
+    /// The decoder tolerates commands saved before `dismissed` and `seenInNightscout` existed.
+    enum CodingKeys: String, CodingKey {
+        case commandId, objectId, summary, units, sentAt, expiration, status, statusMessage, handledAt, dismissed, seenInNightscout
+    }
+
+    init(commandId: String, objectId: String?, summary: String, units: Double?, sentAt: Date, expiration: Date, status: Status, statusMessage: String? = nil, handledAt: Date? = nil, dismissed: Bool = false, seenInNightscout: Date? = nil) {
+        self.commandId = commandId
+        self.objectId = objectId
+        self.summary = summary
+        self.units = units
+        self.sentAt = sentAt
+        self.expiration = expiration
+        self.status = status
+        self.statusMessage = statusMessage
+        self.handledAt = handledAt
+        self.dismissed = dismissed
+        self.seenInNightscout = seenInNightscout
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        commandId = try c.decode(String.self, forKey: .commandId)
+        objectId = try c.decodeIfPresent(String.self, forKey: .objectId)
+        summary = try c.decode(String.self, forKey: .summary)
+        units = try c.decodeIfPresent(Double.self, forKey: .units)
+        sentAt = try c.decode(Date.self, forKey: .sentAt)
+        expiration = try c.decode(Date.self, forKey: .expiration)
+        status = try c.decode(Status.self, forKey: .status)
+        statusMessage = try c.decodeIfPresent(String.self, forKey: .statusMessage)
+        handledAt = try c.decodeIfPresent(Date.self, forKey: .handledAt)
+        dismissed = try c.decodeIfPresent(Bool.self, forKey: .dismissed) ?? false
+        seenInNightscout = try c.decodeIfPresent(Date.self, forKey: .seenInNightscout)
+    }
 
     /// Loop's clock and ours may differ a little; wait this long past expiration before calling it lapsed.
     static let clockMargin: TimeInterval = 60
@@ -72,6 +121,7 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
     }
 
     func phase(now: Date) -> Phase {
+        if seenInNightscout != nil { return .given }
         switch status {
         case .pending:
             return now > expiration.addingTimeInterval(Self.clockMargin) ? .lapsed : .waiting
@@ -410,6 +460,54 @@ final class RemoteCommandInbox: ObservableObject {
         if changed { save() }
     }
 
+    // MARK: Boluses seen in Nightscout
+
+    /// Pairs boluses from Nightscout with the commands sent from here, oldest first, each bolus used once.
+    /// Without this a bolus sent only as a push (a Loop that can't answer) was called «can no longer be
+    /// given» once its time ran out, even when it had been given long before.
+    static func matches(commands: [QueuedRemoteCommand], boluses: [(date: Date, units: Double)]) -> [String: Date] {
+        var used = Set<Int>()
+        var result: [String: Date] = [:]
+        for command in commands.filter(\.canBeMatchedToNightscout).sorted(by: { $0.sentAt < $1.sentAt }) {
+            guard let units = command.units else { continue }
+            let from = command.sentAt.addingTimeInterval(-QueuedRemoteCommand.clockMargin)
+            let to = command.sentAt.addingTimeInterval(QueuedRemoteCommand.deliveryWindow)
+            let candidate = boluses.indices
+                .filter { !used.contains($0) }
+                .filter { boluses[$0].date >= from && boluses[$0].date <= to }
+                // Pumps round to 0.05 U (some to 0.025).
+                .filter { abs(boluses[$0].units - units) < 0.026 }
+                .min { boluses[$0].date < boluses[$1].date }
+            if let candidate {
+                used.insert(candidate)
+                result[command.commandId] = boluses[candidate].date
+            }
+        }
+        return result
+    }
+
+    /// Commands that may still turn up as a bolus in Nightscout: look there every minute.
+    func watchesTreatments(now: Date = Date()) -> Bool {
+        commands.contains { $0.canBeMatchedToNightscout && now < $0.sentAt.addingTimeInterval(QueuedRemoteCommand.deliveryWindow + 5 * 60) }
+    }
+
+    /// Called with every treatment download: a bolus that matches a command means it was given.
+    func noteBoluses(_ entries: [[String: AnyObject]], now: Date = Date()) {
+        let boluses: [(date: Date, units: Double)] = entries.compactMap { entry in
+            guard let date = NightscoutUtils.treatmentDate(from: entry), let units = entry["insulin"] as? Double, units > 0 else { return nil }
+            return (date, units)
+        }
+        let found = Self.matches(commands: commands, boluses: boluses)
+        guard !found.isEmpty else { return }
+        for (commandId, date) in found {
+            update(commandId) { $0.seenInNightscout = date }
+            if let command = commands.first(where: { $0.commandId == commandId }) {
+                LogManager.shared.log(category: .apns, message: "Remote command \(command.summary) seen in Nightscout at \(date)")
+                RemoteCommandInboxNotifier.announce(command, now: now)
+            }
+        }
+    }
+
     // MARK: Nightscout
 
     static func format(_ date: Date) -> String {
@@ -503,7 +601,7 @@ enum RemoteCommandText {
         case .giving:
             return String(format: String(localized: "💉 %@: Loop is giving it", table: "RemoteCommandInbox"), s)
         case .given:
-            return String(format: String(localized: "✅ %@ given at %@", table: "RemoteCommandInbox", comment: "1: command, 2: time"), s, time(command.handledAt ?? now))
+            return String(format: String(localized: "✅ %@ given at %@", table: "RemoteCommandInbox", comment: "1: command, 2: time"), s, time(command.seenInNightscout ?? command.handledAt ?? now))
         case .failed:
             return String(format: String(localized: "❌ %@ not given", table: "RemoteCommandInbox"), s)
         case .rejected:
@@ -519,7 +617,7 @@ enum RemoteCommandText {
         case .pushWaiting:
             return String(format: String(localized: "⏳ %@ sent as a push", table: "RemoteCommandInbox"), s)
         case .pushLapsed:
-            return String(format: String(localized: "%@: Loop can no longer give it", table: "RemoteCommandInbox"), s)
+            return String(format: String(localized: "%@: no bolus in Nightscout", table: "RemoteCommandInbox", comment: "1: e.g. Bolus 0.5 U"), s)
         }
     }
 
@@ -531,6 +629,9 @@ enum RemoteCommandText {
         case .giving:
             return String(localized: "Don't send again: this one is being given.", table: "RemoteCommandInbox")
         case .given:
+            if command.seenInNightscout != nil {
+                return String(format: String(localized: "Sent at %@. The bolus is in Nightscout.", table: "RemoteCommandInbox", comment: "1: sent time"), time(command.sentAt))
+            }
             return String(format: String(localized: "Sent at %@. Loop confirmed it.", table: "RemoteCommandInbox"), time(command.sentAt))
         case .failed, .rejected:
             return String(format: String(localized: "Nothing was given. Loop said: %@ It is safe to send again.", table: "RemoteCommandInbox", comment: "1: Loop's message"), message)
@@ -543,9 +644,9 @@ enum RemoteCommandText {
         case .noAnswer:
             return String(localized: "It may have been given. Check the graph before sending again.", table: "RemoteCommandInbox")
         case .pushWaiting:
-            return String(format: String(localized: "This Loop can't confirm. It can be given until %@; watch the graph before sending again.", table: "RemoteCommandInbox"), time(command.expiration))
+            return String(format: String(localized: "This Loop can't answer, so LoopFollow looks for the bolus in Nightscout. Don't send again before %@.", table: "RemoteCommandInbox", comment: "1: expiration time"), time(command.expiration))
         case .pushLapsed:
-            return String(localized: "If it is not in the graph, it was not given.", table: "RemoteCommandInbox")
+            return String(format: String(localized: "Loop could take it until %@, and no bolus of that size has shown up since. Most likely it was not given; check the graph before sending again.", table: "RemoteCommandInbox", comment: "1: expiration time"), time(command.expiration))
         }
     }
 

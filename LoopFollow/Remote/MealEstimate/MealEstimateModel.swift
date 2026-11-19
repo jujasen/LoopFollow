@@ -15,6 +15,9 @@ final class MealEstimateModel: ObservableObject {
     @Published private(set) var estimate: MealCarbEstimate?
     @Published private(set) var isEstimating = false
     @Published var error: String?
+    /// Carbs typed in by hand before asking (from the label or the recipe): the estimate keeps
+    /// them and is about the absorption time. Forgotten once an estimate has been made.
+    var knownCarbs: Double?
 
     private(set) var conversation: [MealCarbEstimator.Message] = []
     private var task: Task<Void, Never>?
@@ -57,7 +60,11 @@ final class MealEstimateModel: ObservableObject {
     /// Starts a fresh estimate from the description and any photos.
     func estimateMeal() {
         guard canEstimate else { return }
-        let text = description.trimmingCharacters(in: .whitespacesAndNewlines)
+        var text = description.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let knownCarbs, knownCarbs > 0 {
+            text = (text.isEmpty ? "" : text + "\n\n") + MealCarbEstimator.knownCarbsNote(knownCarbs)
+        }
+        knownCarbs = nil
         request(Self.firstMessage(text: text, photos: photos))
     }
 

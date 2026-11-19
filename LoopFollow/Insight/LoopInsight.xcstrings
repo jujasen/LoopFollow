@@ -1,6 +1,94 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Loop has not answered. Is it running, and is it a Loop that knows how?": {
+      "comment": "Insight tab: a fresh look was asked of Loop, but no newer insight came",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop har ikke svart. Kjører den, og er det en Loop-versjon som kan dette?"
+          }
+        }
+      }
+    },
+    "Asked Loop for a fresh look. It answers on its next run, within about 5 minutes.": {
+      "comment": "Insight: waiting for Loop after pull to refresh",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Har bedt Loop om en ny vurdering. Den svarer ved neste runde, innen ca. 5 minutter."
+          }
+        }
+      }
+    },
+    "Already done: it is %@ now": {
+      "comment": "Insight: a suggestion whose setting already has the proposed value (1: value with unit)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allerede gjort: nå %@"
+          }
+        }
+      }
+    },
+    "Last 14 days": {
+      "comment": "Insight: time in range day by day",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste 14 dager"
+          }
+        }
+      }
+    },
+    "Last 4 weeks": {
+      "comment": "Insight: time in range week by week",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste 4 uker"
+          }
+        }
+      }
+    },
+    "For More Time in Range": {
+      "comment": "Insight: heading of the week's concrete measures",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For mer tid i målområdet"
+          }
+        }
+      }
+    },
+    "Do This": {
+      "comment": "Insight: heading of what to do for more time in range",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gjør dette"
+          }
+        }
+      }
+    },
+    "Why": {
+      "comment": "Insight: heading of the causes of how today is going",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvorfor"
+          }
+        }
+      }
+    },
     "%1$d %% in range · %2$@ mean · %3$d lows": {
       "comment": "Insight: a period's summary (1: percent in range)(2: mean mmol/L)(3: low episodes)",
       "localizations": {

@@ -168,6 +168,7 @@ extension MainViewController {
             }
         }
         RemoteCommandRejectionMonitor.shared.check(notes: note)
+        RemoteCommandInbox.shared.noteBoluses(bolus)
         if bolus.count > 0 {
             processNSBolus(entries: bolus)
         } else {
@@ -184,6 +185,7 @@ extension MainViewController {
         }
         updateTodaysCarbsFromEntries(entries: carbs)
         LoggedCarbsStore.shared.update(carbEntries: carbs)
+        FavoriteFoodUsage.record(carbEntries: carbs)
         if carbs.count > 0 {
             processNSCarbs(entries: carbs)
         } else {

@@ -24,6 +24,8 @@ struct LoopAPNSCarbsView: View {
     @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
     @State private var selectedFavoriteFoodID: String?
+    /// The favorites eaten most lately (`FavoriteFoodUsage`); the rest are under «Browse all favorites».
+    @State private var usageLog = FavoriteFoodUsage.storedLog
     @State private var selectedPortionID: String?
     @State private var showFavoriteFoodPicker = false
     @State private var showAddFavoriteFood = false
@@ -433,6 +435,11 @@ struct LoopAPNSCarbsView: View {
                 }
             }
             .onChange(of: carbsAmount) { _, newValue in
+                // Typed by hand before asking the AI: known carbs, kept as they are by the estimate.
+                if carbsFieldIsFocused {
+                    let grams = newValue.doubleValue(for: .gram())
+                    mealEstimate.knownCarbs = grams > 0 ? grams : nil
+                }
                 // A hand-edited amount is no longer the favorite that was picked.
                 if let portion = selectedFavoriteFood?.portion(withID: selectedPortionID),
                    abs(portion.carbs - newValue.doubleValue(for: .gram())) > 0.01
@@ -697,6 +704,15 @@ struct LoopAPNSCarbsView: View {
 // MARK: - Favorite foods
 
 extension LoopAPNSCarbsView {
+    /// The most eaten favorites, with the one picked from the full list first when it isn't among them.
+    private var quickPickFavorites: [StoredFavoriteFood] {
+        let top = FavoriteFoodUsage.mostUsed(favoriteFoods.value, log: usageLog, now: Date())
+        if let selected = selectedFavoriteFood, !top.contains(where: { $0.id == selected.id }) {
+            return [selected] + top
+        }
+        return top
+    }
+
     /// The favorite currently applied to the entry, if it still exists.
     private var selectedFavoriteFood: StoredFavoriteFood? {
         guard let selectedFavoriteFoodID else { return nil }
@@ -710,7 +726,7 @@ extension LoopAPNSCarbsView {
             if !favoriteFoods.value.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
-                        ForEach(favoriteFoods.value) { food in
+                        ForEach(quickPickFavorites) { food in
                             favoriteFoodControl(for: food)
                         }
                     }
@@ -736,6 +752,10 @@ extension LoopAPNSCarbsView {
             } label: {
                 Label(favoriteFoods.value.isEmpty ? String(localized: "Add favorite foods") : String(localized: "Edit favorites"), systemImage: "square.and.pencil")
             }
+        }
+        .task {
+            await FavoriteFoodUsage.seedIfNeeded()
+            usageLog = FavoriteFoodUsage.storedLog
         }
     }
 

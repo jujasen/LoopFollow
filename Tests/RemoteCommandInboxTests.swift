@@ -119,4 +119,51 @@ final class RemoteCommandInboxTests: XCTestCase {
         XCTAssertEqual(summary.units, 0.5)
         XCTAssertNil(LoopAPNSService.summary(of: ["carbs-entry": 20.0]).units)
     }
+
+    // MARK: A bolus seen in Nightscout
+
+    func testPushOnlyBolusInNightscoutCountsAsGiven() {
+        let c = command(.pushOnly)
+        let found = RemoteCommandInbox.matches(commands: [c], boluses: [(sentAt.addingTimeInterval(140), 0.5)])
+        XCTAssertEqual(found["A"], sentAt.addingTimeInterval(140))
+
+        var seen = c
+        seen.seenInNightscout = found["A"]
+        // Long after the push expired it is still «given», not «can no longer be given».
+        XCTAssertEqual(seen.phase(now: c.expiration.addingTimeInterval(30 * 60)), .given)
+        XCTAssertFalse(seen.mayStillDeliver(now: sentAt.addingTimeInterval(200)))
+    }
+
+    func testOtherBolusesAreNotTakenForTheCommand() {
+        let c = command(.pushOnly)
+        let boluses: [(date: Date, units: Double)] = [
+            (sentAt.addingTimeInterval(-10 * 60), 0.5), // before it was sent
+            (sentAt.addingTimeInterval(60), 0.3), // another size
+            (sentAt.addingTimeInterval(40 * 60), 0.5), // much later
+        ]
+        XCTAssertTrue(RemoteCommandInbox.matches(commands: [c], boluses: boluses).isEmpty)
+    }
+
+    func testEachBolusIsUsedOnce() {
+        var first = command(.pushOnly)
+        var second = QueuedRemoteCommand(commandId: "B", objectId: nil, summary: "Bolus 0,5 E", units: 0.5, sentAt: sentAt.addingTimeInterval(60), expiration: sentAt.addingTimeInterval(360), status: .pushOnly)
+        let found = RemoteCommandInbox.matches(commands: [second, first], boluses: [(sentAt.addingTimeInterval(90), 0.5)])
+        XCTAssertEqual(found.count, 1)
+        XCTAssertNotNil(found["A"])
+        first.seenInNightscout = Date()
+        second.status = .done
+        XCTAssertFalse(first.canBeMatchedToNightscout)
+        XCTAssertFalse(second.canBeMatchedToNightscout)
+    }
+
+    func testRejectedCommandIsNotMatched() {
+        XCTAssertTrue(RemoteCommandInbox.matches(commands: [command(.rejected)], boluses: [(sentAt.addingTimeInterval(60), 0.5)]).isEmpty)
+    }
+
+    func testOldSavedCommandsStillDecode() throws {
+        let json = #"{"commandId":"A","summary":"Bolus 0,5 E","units":0.5,"sentAt":0,"expiration":300,"status":"pushOnly"}"#
+        let c = try JSONDecoder().decode(QueuedRemoteCommand.self, from: Data(json.utf8))
+        XCTAssertFalse(c.dismissed)
+        XCTAssertNil(c.seenInNightscout)
+    }
 }

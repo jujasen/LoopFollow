@@ -41,11 +41,14 @@ struct MealCarbEstimate: Codable, Equatable {
     var confidence: Confidence
     var fatGrams: Double? = nil
     var proteinGrams: Double? = nil
+    /// Why the absorption time is what it is, in one short sentence. Absent from older estimates.
+    var absorptionReason: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case name, emoji, items, assumptions, confidence
         case carbsGrams = "carbs_grams"
         case absorptionHours = "absorption_hours"
+        case absorptionReason = "absorption_reason"
         case fatGrams = "fat_grams"
         case proteinGrams = "protein_grams"
     }
@@ -129,12 +132,28 @@ final class MealCarbEstimator {
 
     /// Asks for a complete estimate of the meal described across `conversation`, which alternates
     /// the caregiver's descriptions with the model's earlier estimates.
+    ///
+    /// As in Loop: the model may first search the web for a packaged product's label, and the
+    /// answer is then read leniently; if that fails in any way, it asks once more without search.
     func estimate(conversation: [Message]) async throws -> MealCarbEstimate {
-        // Photos make the model take noticeably longer.
-        let timeout: TimeInterval = conversation.contains { !$0.images.isEmpty } ? 120 : 60
+        let hasPhotos = conversation.contains { !$0.images.isEmpty }
+        if let estimate = try? await attempt(conversation: conversation, webSearch: true, timeout: hasPhotos ? 150 : 90) {
+            return estimate
+        }
+        try Task.checkCancellation()
+        return try await attempt(conversation: conversation, webSearch: false, timeout: hasPhotos ? 120 : 60)
+    }
+
+    /// What is added to the description when carbs were typed in before asking.
+    static func knownCarbsNote(_ grams: Double) -> String {
+        let formatted = NumberFormatter.localizedString(from: NSNumber(value: grams), number: .decimal)
+        return "Karbo jeg vet: \(formatted) g (fra emballasjen eller oppskriften). Bruk akkurat dette tallet som carbs_grams; vurder bare absorpsjonstiden og resten."
+    }
+
+    private func attempt(conversation: [Message], webSearch: Bool, timeout: TimeInterval) async throws -> MealCarbEstimate {
         var lastError = EstimateError.server("No AI model available")
         for model in Self.models {
-            let request = try Self.request(model: model, conversation: conversation, apiKey: apiKey, timeout: timeout)
+            let request = try Self.request(model: model, conversation: conversation, apiKey: apiKey, timeout: timeout, webSearch: webSearch)
             let data: Data
             let response: URLResponse
             do {
@@ -157,30 +176,59 @@ final class MealCarbEstimator {
 
     // MARK: - Request
 
-    static func request(model: String, conversation: [Message], apiKey: String, timeout: TimeInterval = 60) throws -> URLRequest {
+    static func request(model: String, conversation: [Message], apiKey: String, timeout: TimeInterval = 60, webSearch: Bool = false) throws -> URLRequest {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.timeoutInterval = timeout
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue(anthropicVersion, forHTTPHeaderField: "anthropic-version")
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody(model: model, conversation: conversation))
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody(model: model, conversation: conversation, webSearch: webSearch))
         return request
     }
 
     /// A Claude Messages request: the system prompt cached, low effort (someone is waiting), and
     /// the answer held to the meal estimate schema. Thinking is left to the model (adaptive).
-    static func requestBody(model: String, conversation: [Message]) -> [String: Any] {
-        [
+    /// With `webSearch` the model may search the web, and the schema is given in words instead of
+    /// enforced (a search answer comes with citations, which an enforced format does not allow).
+    static func requestBody(model: String, conversation: [Message], webSearch: Bool = false) -> [String: Any] {
+        var body: [String: Any] = [
             "model": model,
             "max_tokens": 16000,
-            "system": [["type": "text", "text": systemPrompt, "cache_control": ["type": "ephemeral"]]],
+            "system": [["type": "text", "text": webSearch ? systemPrompt + "\n\n" + webSearchPrompt : systemPrompt, "cache_control": ["type": "ephemeral"]]],
             "messages": conversation.map { ["role": $0.role == "assistant" ? "assistant" : "user", "content": content(of: $0)] },
-            "output_config": [
+        ]
+        if webSearch {
+            body["output_config"] = ["effort": "low"]
+            body["tools"] = [[
+                "type": "web_search_20260209",
+                "name": "web_search",
+                "max_uses": 3,
+                "user_location": ["type": "approximate", "country": "NO"],
+            ] as [String: Any]]
+        } else {
+            body["output_config"] = [
                 "effort": "low",
                 "format": ["type": "json_schema", "schema": schema] as [String: Any],
-            ] as [String: Any],
-        ]
+            ] as [String: Any]
+        }
+        return body
+    }
+
+    /// The JSON in an answer that may have text around it.
+    static func jsonObject(in text: String) -> Data? {
+        if let data = text.data(using: .utf8), (try? JSONDecoder().decode(MealCarbEstimate.self, from: data)) != nil {
+            return data
+        }
+        guard let end = text.lastIndex(of: "}") else { return nil }
+        var start = text.startIndex
+        while let open = text[start...].firstIndex(of: "{"), open < end {
+            if let data = String(text[open ... end]).data(using: .utf8), (try? JSONDecoder().decode(MealCarbEstimate.self, from: data)) != nil {
+                return data
+            }
+            start = text.index(after: open)
+        }
+        return nil
     }
 
     /// Plain text, or — with photos — the text followed by the photos as base64 image blocks.
@@ -238,8 +286,10 @@ final class MealCarbEstimator {
         if response.stop_reason == "refusal" {
             throw EstimateError.refused(response.stop_details?.explanation ?? "Claude declined to answer.")
         }
+        // A search that ran out of turns has no answer to read.
+        guard response.stop_reason != "pause_turn" else { throw EstimateError.unreadableResponse }
         let text = response.content.filter { $0.type == "text" }.compactMap(\.text).joined()
-        guard let json = text.data(using: .utf8),
+        guard let json = jsonObject(in: text),
               let estimate = try? JSONDecoder().decode(MealCarbEstimate.self, from: json),
               estimate.carbsGrams.isFinite
         else {
@@ -279,12 +329,13 @@ final class MealCarbEstimator {
     static let schema: [String: Any] = [
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "emoji", "carbs_grams", "absorption_hours", "items", "assumptions", "confidence", "fat_grams", "protein_grams"],
+        "required": ["name", "emoji", "carbs_grams", "absorption_hours", "absorption_reason", "items", "assumptions", "confidence", "fat_grams", "protein_grams"],
         "properties": [
             "name": ["type": "string"],
             "emoji": ["type": "string"],
             "carbs_grams": ["type": "number"],
             "absorption_hours": ["type": "number"],
+            "absorption_reason": ["type": "string"],
             "items": [
                 "type": "array",
                 "items": [
@@ -312,7 +363,8 @@ final class MealCarbEstimator {
     - name: a short name for the meal (2-4 words), in the caregiver's language.
     - emoji: exactly one emoji for the main food of the meal (for example 🥪 for open sandwiches, not the drink next to them).
     - carbs_grams: total digestible carbohydrates in grams for the amount actually eaten. Count available carbohydrate as on Norwegian and European labels (fibre is not included).
-    - absorption_hours: how long the carbs take to absorb, between 0.5 and 8, in steps of 0.5. Loop's reference points: 2 h for fast carbs (juice, fruit, candy, white bread alone), 3 h for an ordinary mixed meal, 4 h for slow meals (pasta, rice, whole grains, or meals with moderate fat and protein), 5-6 h for very fatty or protein-heavy meals (pizza, taco, burgers, creamy sauces).
+    - absorption_hours: how long the carbs take to absorb, between 0.5 and 8, in steps of 0.5. Loop's reference points: 2 h for fast carbs (juice, fruit, candy, white bread alone), 3 h for an ordinary mixed meal, 4 h for slow meals (pasta, rice, whole grains, or meals with moderate fat and protein), 5-6 h for very fatty or protein-heavy meals (pizza, taco, burgers, creamy sauces). More reference points for a small child: juice, sports drink, glucose tablets, fruit puree pouches and dried fruit 1-1.5 h; fresh fruit, rice cakes, biscuits and sweet yoghurt or milk drinks 1.5-2 h; milk and plain yoghurt, bread with spread, cereal with milk and porridge 2-2.5 h; dinner with potatoes or bread 3 h; pasta, rice, pancakes or waffles with fat 3-4 h. Decide from what is actually in it: fat, protein and fibre slow it, liquids and sugar speed it up. When the caregiver gives the carbs, the absorption time is what they need from you, so think it through.
+    - absorption_reason: one short sentence, in the caregiver's language, on why that absorption time (for example «2 t: melkeprodukt med sukker og litt fett – raskere enn et måltid»).
     - items: each component with the amount you assumed and its carbs. The item carbs must add up to carbs_grams.
     - assumptions: short notes, in the caregiver's language, on anything you had to guess — portion size, brand, recipe. Empty when nothing was guessed.
     - confidence: high when amounts and foods are clear, medium when portions had to be guessed, low when the description is vague.
@@ -320,6 +372,15 @@ final class MealCarbEstimator {
 
     The caregiver may attach one or more photos of the meal, with or without text. Use them to identify the foods and judge the portions — the plate, cutlery, a glass or a hand gives the scale. Several photos are of the same meal, from different angles or at different moments; do not count food twice. When a photo shows a nutrition label, use its carbohydrate values. When the text and the photos disagree, the text wins, since the caregiver knows what was actually eaten. Name in assumptions anything in the photos you could not identify.
 
+    When the caregiver gives the carbs (on its own, from a label or as «Karbo jeg vet»), use exactly that number as carbs_grams and keep the items adding up to it; do not estimate the carbs again.
+
     When no amount is given, assume a typical portion for a small child and say so in assumptions. Use Norwegian products and recipes when the food is Norwegian. When the caregiver adds more information later, re-evaluate the whole meal from scratch with everything you know, and return a complete new estimate, not just the change. Never give insulin or dosing advice.
+    """
+
+    /// Added when the model may search the web.
+    static let webSearchPrompt = """
+    You can search the web. Do it when the meal has a packaged or branded product whose label you don't know for certain (for example Tine Yoghurt Junior klemmepose, a Nora or Freia product, a ready meal or a café item): look up its nutrition facts, preferably on the producer's site, Kassalapp or Oda, and use the carbohydrate per package or per 100 g. Say in assumptions where the number came from, briefly (for example «Tine.no: 10,8 g karbo per 90 g pose»). Don't search for ordinary foods you know well, and never when the caregiver gave the carbs. Search in Norwegian.
+
+    End your answer with the estimate as one JSON object and nothing after it, with exactly these keys: name, emoji, carbs_grams, absorption_hours, absorption_reason, items (each with food, amount, carbs_grams), assumptions, confidence ("high", "medium" or "low"), fat_grams, protein_grams.
     """
 }

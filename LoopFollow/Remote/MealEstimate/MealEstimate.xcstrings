@@ -2,6 +2,17 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
+    "E.g. fish gratin, or a product and its carbs": {
+      "comment": "Placeholder for the free-text meal description on the carb screen",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "F.eks. fiskegrateng, eller en vare og karboen"
+          }
+        }
+      }
+    },
     "Describe the meal": {
       "localizations": {
         "nb": {

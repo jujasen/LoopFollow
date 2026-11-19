@@ -93,7 +93,24 @@ struct LoopInsightLongTerm: Codable, Equatable {
     var advice: [LoopInsightAdvice]
     /// What the settings suggestions are built on; read but not shown. Absent in older documents.
     var patterns: [LoopInsightPattern]?
+    /// The last two weeks day by day and the last four weeks week by week, newest last. Absent in
+    /// documents from an older Loop.
+    var recentDays: [LoopInsightDay]?
+    var weeks: [LoopInsightWeek]?
     var computedAt: Date
+}
+
+struct LoopInsightDay: Codable, Equatable {
+    var date: Date
+    var timeInRangePercent: Int
+    var meanMmol: Double
+    var lowEpisodes: Int
+    var hoursAboveTen: Double
+}
+
+struct LoopInsightWeek: Codable, Equatable {
+    var end: Date
+    var period: LoopInsightPeriod
 }
 
 /// How often a part of the day went high or low after meals and at night, over the last two weeks.
@@ -125,6 +142,12 @@ struct LoopInsightSuggestion: Codable, Hashable {
     var proposed: Double
     var reason: String
     var evidenceDays: Int
+    /// How the setting stands now, as Loop sees it: "open", "done" (already has the proposed
+    /// value) or "changed" (changed to something else). Absent from an older Loop.
+    var state: String?
+
+    var isDone: Bool { state == "done" }
+    var isStale: Bool { state == "changed" }
 
     /// More insulin than now: a lower carb ratio or sensitivity, or a higher basal rate.
     var givesMoreInsulin: Bool {
@@ -154,14 +177,23 @@ struct LoopInsightText: Codable, Equatable {
     var action: String?
     /// The weeks behind only: settings changes the AI suggests.
     var suggestions: [LoopInsightSuggestion]?
+    /// The weeks behind only: which way the days, weeks and month are going.
+    var trend: String?
+    /// Today only: why the day is going as it is.
+    var causes: [String]
+    /// What to do for more time in range: for today, or from now on.
+    var fixes: [String]
 
     enum CodingKeys: String, CodingKey {
-        case summary, points, now, action, suggestions
+        case summary, points, now, action, suggestions, trend, causes, fixes
         case doseHints = "dose_hints"
         case createdAt = "created_at"
     }
 
-    init(summary: String, points: [String] = [], doseHints: [String] = [], createdAt: Date, now: String? = nil, action: String? = nil, suggestions: [LoopInsightSuggestion]? = nil) {
+    init(summary: String, points: [String] = [], doseHints: [String] = [], createdAt: Date, now: String? = nil, action: String? = nil, suggestions: [LoopInsightSuggestion]? = nil, trend: String? = nil, causes: [String] = [], fixes: [String] = []) {
+        self.trend = trend
+        self.causes = causes
+        self.fixes = fixes
         self.summary = summary
         self.points = points
         self.doseHints = doseHints
@@ -182,6 +214,9 @@ struct LoopInsightText: Codable, Equatable {
         now = try container.decodeIfPresent(String.self, forKey: .now).flatMap { $0.isEmpty ? nil : $0 }
         action = try container.decodeIfPresent(String.self, forKey: .action).flatMap { $0.isEmpty ? nil : $0 }
         suggestions = try container.decodeIfPresent([LoopInsightLossy<LoopInsightSuggestion>].self, forKey: .suggestions)?.compactMap(\.value)
+        trend = try container.decodeIfPresent(String.self, forKey: .trend).flatMap { $0.isEmpty ? nil : $0 }
+        causes = try container.decodeIfPresent([String].self, forKey: .causes) ?? []
+        fixes = try container.decodeIfPresent([String].self, forKey: .fixes) ?? []
     }
 }
 
@@ -256,6 +291,61 @@ final class LoopInsightStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: Self.cacheKey) {
             document = try? LoopInsightDocument.decoder().decode(LoopInsightDocument.self, from: data)
         }
+    }
+
+    /// When a fresh look was asked of Loop, until a newer upload has come.
+    @Published private(set) var requestedAt: Date?
+    private var waitTask: Task<Void, Never>?
+
+    /// Loop looks for the request after each loop (every five minutes), at most every two.
+    static let requestTimeout: TimeInterval = 8 * 60
+    static let requestEventType = "Insight Refresh"
+
+    /// Pull to refresh: reads Nightscout now, and asks Loop for a fresh look by putting an
+    /// «Insight Refresh» treatment there (Loop takes it away). Then keeps reading until Loop's
+    /// newer upload has come. Without a token that can write, only reads.
+    func requestFreshLook() async {
+        await refresh(force: true)
+        guard Storage.shared.nsWriteAuth.value else { return }
+        if let requestedAt, Date().timeIntervalSince(requestedAt) < 2 * 60 { return }
+        let now = Date()
+        guard await Self.postRequest(at: now) else { return }
+        requestedAt = now
+        waitTask?.cancel()
+        waitTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 20 * 1_000_000_000)
+                guard let self else { return }
+                await self.refresh(force: true)
+                guard let asked = self.requestedAt else { return }
+                if let uploaded = self.document?.uploadedAt, uploaded > asked {
+                    self.requestedAt = nil
+                    return
+                }
+                if Date().timeIntervalSince(asked) > Self.requestTimeout {
+                    self.requestedAt = nil
+                    self.errorMessage = String(localized: "Loop has not answered. Is it running, and is it a Loop that knows how?", table: "LoopInsight", comment: "Insight tab: a fresh look was asked of Loop, but no newer insight came")
+                    return
+                }
+            }
+        }
+    }
+
+    private static func postRequest(at date: Date) async -> Bool {
+        guard let url = NightscoutUtils.constructURL(baseURL: Storage.shared.url.value, token: Storage.shared.token.value, endpoint: "/api/v1/treatments", parameters: [:]) else { return false }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 20
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "eventType": requestEventType,
+            "created_at": formatter.string(from: date),
+            "enteredBy": "LoopFollow",
+        ])
+        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
+        return (response as? HTTPURLResponse).map { (200 ..< 300).contains($0.statusCode) } ?? false
     }
 
     /// Reads again unless it was read in the last minute, or `force`.

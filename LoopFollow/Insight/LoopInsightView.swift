@@ -37,7 +37,8 @@ struct LoopInsightView: View {
             nowSection
             todaySection
             weekSection
-            if let suggestions = status?.longTermText?.suggestions, !suggestions.isEmpty {
+            // Loop says which have been carried out since; a setting changed to something else is not suggested.
+            if let suggestions = status?.longTermText?.suggestions?.filter({ !$0.isStale }), !suggestions.isEmpty {
                 suggestionsSection(suggestions)
             }
             if hasDetails {
@@ -49,7 +50,7 @@ struct LoopInsightView: View {
         .navigationTitle(String(localized: "Insight", table: "LoopInsight", comment: "Title of the insight tab"))
         .navigationBarTitleDisplayMode(.inline)
         .refreshable {
-            await store.refresh(force: true)
+            await store.requestFreshLook()
         }
         .task {
             await store.refresh()
@@ -110,6 +111,10 @@ struct LoopInsightView: View {
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if let text = todayText {
+                InsightList(title: String(localized: "Why", table: "LoopInsight", comment: "Insight: heading of the causes of how today is going"), lines: text.causes, symbol: "magnifyingglass", color: .orange)
+                InsightList(title: String(localized: "Do This", table: "LoopInsight", comment: "Insight: heading of what to do for more time in range"), lines: text.fixes, symbol: "target", color: .green)
+            }
             if let today, let period = today.period {
                 PeriodRow(period: period, hoursAboveTen: today.hoursAboveTen)
             } else if store.document != nil, status?.today == nil {
@@ -131,6 +136,14 @@ struct LoopInsightView: View {
                 Text(text.summary)
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
+                if let trend = text.trend {
+                    Label {
+                        Text(trend).font(.footnote).fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: "chart.line.uptrend.xyaxis").foregroundColor(.purple)
+                    }
+                }
+                InsightList(title: String(localized: "For More Time in Range", table: "LoopInsight", comment: "Insight: heading of the week's concrete measures"), lines: text.fixes, symbol: "target", color: .green)
             } else if store.document?.aiEnabled == true {
                 Text(String(localized: "The AI looks at the week each night after 04:00.", table: "LoopInsight", comment: "Shown before the AI has written about the week"))
                     .font(.footnote)
@@ -138,6 +151,15 @@ struct LoopInsightView: View {
             }
             if let week = status?.longTerm?.last7Days {
                 LabeledValue(label: String(localized: "Last 7 days", table: "LoopInsight", comment: "Insight: last seven days"), value: periodSummary(week))
+            }
+            if let days = status?.longTerm?.recentDays, days.count >= 3 {
+                RecentDaysRow(days: days)
+            }
+            if let weeks = status?.longTerm?.weeks, weeks.count >= 2 {
+                LabeledValue(
+                    label: String(localized: "Last 4 weeks", table: "LoopInsight", comment: "Insight: time in range week by week"),
+                    value: weeks.map { "\($0.period.timeInRangePercent)" }.joined(separator: " → ") + " %"
+                )
             }
         } header: {
             Text(String(localized: "This Week", table: "LoopInsight", comment: "Header of the week section in the insight tab"))
@@ -241,7 +263,7 @@ struct LoopInsightView: View {
     private var updateSection: some View {
         Section {
             Button {
-                Task { await store.refresh(force: true) }
+                Task { await store.requestFreshLook() }
             } label: {
                 HStack {
                     Text(String(localized: "Update Now", table: "LoopInsight", comment: "Button reading the insight from Nightscout again"))
@@ -254,6 +276,13 @@ struct LoopInsightView: View {
             .disabled(store.isLoading)
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
+                if store.requestedAt != nil {
+                    Label {
+                        Text(String(localized: "Asked Loop for a fresh look. It answers on its next run, within about 5 minutes.", table: "LoopInsight", comment: "Insight: waiting for Loop after pull to refresh"))
+                    } icon: {
+                        ProgressView().controlSize(.mini)
+                    }
+                }
                 if let document = store.document {
                     Text(String(format: NSLocalizedString("From Loop %@.", tableName: "LoopInsight", comment: "Insight: when Loop last uploaded it (1: time)"), document.uploadedAt.formatted(date: Calendar.current.isDateInToday(document.uploadedAt) ? .omitted : .abbreviated, time: .shortened)))
                     if let updated = document.insight.dataUpdatedAt {
@@ -314,8 +343,17 @@ private struct SuggestionRow: View {
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            if suggestion.isDone {
+                Label {
+                    Text(String(format: NSLocalizedString("Already done: it is %@ now", tableName: "LoopInsight", comment: "Insight: a suggestion whose setting already has the proposed value (1: value with unit)"), "\(value(suggestion.proposed)) \(unit)"))
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                }
+                .font(.footnote)
+            }
         }
         .padding(.vertical, 2)
+        .opacity(suggestion.isDone ? 0.7 : 1)
     }
 
     private var title: String {
@@ -482,5 +520,67 @@ private struct AdviceRow: View {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.red).font(.footnote)
             }
         }
+    }
+}
+
+/// A short headed list: the causes of today, or what to do.
+private struct InsightList: View {
+    let title: String
+    let lines: [String]
+    let symbol: String
+    let color: Color
+
+    var body: some View {
+        if !lines.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                ForEach(lines, id: \.self) { line in
+                    Label {
+                        Text(line).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: symbol).foregroundColor(color)
+                    }
+                }
+            }
+            .padding(.vertical, 2)
+        }
+    }
+}
+
+/// Time in range day by day, the last two weeks: one bar a day, newest on the right.
+private struct RecentDaysRow: View {
+    let days: [LoopInsightDay]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(String(localized: "Last 14 days", table: "LoopInsight", comment: "Insight: time in range day by day"))
+                Spacer()
+                if let first = days.first, let last = days.last {
+                    Text(verbatim: "\(first.timeInRangePercent) → \(last.timeInRangePercent) %")
+                        .foregroundColor(.secondary)
+                }
+            }
+            .font(.subheadline)
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(days, id: \.date) { day in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Self.color(day))
+                        .frame(height: max(4, CGFloat(day.timeInRangePercent) * 0.4))
+                        .frame(maxWidth: .infinity)
+                        .accessibilityLabel(Text(verbatim: "\(day.date.formatted(.dateTime.weekday(.abbreviated).day())): \(day.timeInRangePercent) %"))
+                }
+            }
+            .frame(height: 40, alignment: .bottom)
+        }
+    }
+
+    static func color(_ day: LoopInsightDay) -> Color {
+        if day.timeInRangePercent >= 70 { return .green.opacity(0.7) }
+        if day.timeInRangePercent >= 50 { return .orange.opacity(0.7) }
+        return .red.opacity(0.7)
     }
 }
