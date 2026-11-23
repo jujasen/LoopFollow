@@ -74,6 +74,53 @@ final class BGChartModel: ObservableObject {
         }
     }
 
+    /// A pump or sensor change: a line through the whole chart with its name on it, the same
+    /// mark Loop's own chart draws (`BGChartModel.DeviceChange` there). From the "Site Change"
+    /// and "Sensor Start" treatments Loop uploads.
+    struct DeviceChange: Identifiable, Equatable {
+        enum Kind: String {
+            case pump
+            case sensor
+        }
+
+        let date: Date
+        let kind: Kind
+        var id: String { "\(kind.rawValue)-\(date.timeIntervalSince1970)" }
+
+        var title: String {
+            switch kind {
+            case .pump:
+                return String(localized: "Pump change", table: "DeviceStatus", comment: "Chart label on the line that marks a pump (pod) change")
+            case .sensor:
+                return String(localized: "Sensor change", table: "DeviceStatus", comment: "Chart label on the line that marks a new CGM sensor")
+            }
+        }
+
+        /// How far up the chart the name sits, as a fraction of the y-axis. The two kinds sit at
+        /// different heights, so both can be read when pump and sensor are changed together.
+        var labelFraction: Double {
+            switch kind {
+            case .pump: return 0.93
+            case .sensor: return 0.83
+            }
+        }
+
+        /// The changes, oldest first. One change can be in Nightscout more than once, so changes
+        /// of a kind within `sameChange` count as one.
+        static func list(pump: [Date], sensor: [Date], sameChange: TimeInterval = 10 * 60) -> [DeviceChange] {
+            var result: [DeviceChange] = []
+            for (kind, dates) in [(Kind.pump, pump), (Kind.sensor, sensor)] {
+                var last: Date?
+                for date in dates.sorted() {
+                    if let last, date.timeIntervalSince(last) < sameChange { continue }
+                    result.append(DeviceChange(date: date, kind: kind))
+                    last = date
+                }
+            }
+            return result.sorted { $0.date < $1.date }
+        }
+    }
+
     /// A waiting "later carbs" plan: a hollow ring at the due time and a dashed line out to the
     /// expiry, at the carb lane's height. Not a carb entry, so it lives apart from `carbs`.
     struct PlannedCarbPoint: Identifiable {
@@ -160,6 +207,7 @@ final class BGChartModel: ObservableObject {
     @Published var sensorStarts: [TreatmentPoint] = []
     @Published var notes: [TreatmentPoint] = []
     @Published var sensorStates: [TreatmentPoint] = []
+    @Published var deviceChanges: [DeviceChange] = []
 
     /// Device status history panes under the main chart, in display order.
     @Published var historyPanes: [BGChartHistory.Pane] = []
@@ -572,9 +620,13 @@ final class BGChartModel: ObservableObject {
         resumes = (showOtherTreatments ? vc.resumeGraphData : []).map {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: String(localized: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: pump resumed, time"))
         }
-        sensorStarts = (showOtherTreatments ? vc.sensorStartGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: String(localized: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))", comment: "Chart pill: sensor start, time"))
-        }
+        // A new sensor is drawn as a device change, with a pump change, not as a cross on the curve.
+        // Shown whatever the "other treatments" setting says: these are rare and worth seeing.
+        sensorStarts = []
+        deviceChanges = DeviceChange.list(
+            pump: vc.siteChangeGraphData.map { Date(timeIntervalSince1970: $0) },
+            sensor: vc.sensorStartGraphData.map { Date(timeIntervalSince1970: $0.date) }
+        )
         notes = (showOtherTreatments ? vc.noteGraphData : []).map {
             TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),

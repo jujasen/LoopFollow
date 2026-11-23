@@ -34,8 +34,7 @@ extension MainViewController {
                 print("Failed to parse date")
             }
         }
-        if Storage.shared.graphOtherTreatments.value {
-            updateSensorStart()
-        }
+        // Always: the chart marks a new sensor whatever the "other treatments" setting says.
+        updateSensorStart()
     }
 }

@@ -261,5 +261,10 @@ extension MainViewController {
             }
         }
         processCage(entries: pumpSiteChange)
+        let siteChanges = pumpSiteChange.compactMap { NightscoutUtils.parseDate($0.created_at)?.timeIntervalSince1970 }
+        if siteChanges != siteChangeGraphData {
+            siteChangeGraphData = siteChanges
+            updateSensorStart()
+        }
     }
 }

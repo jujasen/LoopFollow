@@ -100,6 +100,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var suspendGraphData: [DataStructs.timestampOnlyStruct] = []
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
+    /// When Nightscout says the pump (pod) was changed, for the lines the chart draws there.
+    var siteChangeGraphData: [TimeInterval] = []
     var noteGraphData: [DataStructs.noteStruct] = []
     var cgmSensorStates: [CGMSensorState] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []

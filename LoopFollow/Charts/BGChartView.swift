@@ -71,6 +71,34 @@ private func chartYDomainUpperBound(_ maxBG: Double) -> Double {
     return clampedMax + topPadding
 }
 
+/// Where on the y-axis a pump or sensor change has its name.
+private func deviceChangeLabelValue(_ change: BGChartModel.DeviceChange, maxBG: Double) -> Double {
+    chartYDomainUpperBound(maxBG) * change.labelFraction
+}
+
+private func deviceChangeColor(_ kind: BGChartModel.DeviceChange.Kind) -> Color {
+    switch kind {
+    case .pump: return .teal
+    case .sensor: return .indigo
+    }
+}
+
+/// The name on a pump or sensor change's line.
+private struct DeviceChangeLabel: View {
+    let change: BGChartModel.DeviceChange
+
+    var body: some View {
+        Text(change.title)
+            .font(.caption2.weight(.semibold))
+            .foregroundColor(.white)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(deviceChangeColor(change.kind)))
+    }
+}
+
 struct BGChartView: View {
     enum Config {
         case small
@@ -841,6 +869,9 @@ private struct MainBGChart: View {
                 body(TreatmentAnchor(date: t.date, drawnDate: t.drawnDate, sgv: t.sgv, pillText: t.pillText, syncIdentifier: t.syncIdentifier, detail: t.detail))
             }
         }
+        for change in model.deviceChanges {
+            body(TreatmentAnchor(date: change.date, drawnDate: change.date, sgv: deviceChangeLabelValue(change, maxBG: model.maxBG), pillText: "\(change.title)\n\(model.pillTimeString(for: change.date))", syncIdentifier: nil, detail: nil))
+        }
         for plan in model.plannedCarbs {
             body(TreatmentAnchor(date: plan.date, drawnDate: plan.date, sgv: plan.sgv, pillText: plan.pillText, syncIdentifier: nil, detail: nil))
         }
@@ -1350,6 +1381,7 @@ private struct BGChartCanvas: View, Equatable {
             if showTreatments {
                 treatmentMarks
             }
+            deviceChangeMarks
             if model.showPriorDayTime {
                 priorDayTimeRuleMarks
             }
@@ -1829,6 +1861,25 @@ private struct BGChartCanvas: View, Equatable {
         }
         if model.showMidnight {
             midnightRuleMarks
+        }
+    }
+
+    /// A pump or sensor change: a line through the chart, and on the large chart its name.
+    @ChartContentBuilder
+    private var deviceChangeMarks: some ChartContent {
+        ForEach(windowed(model.deviceChanges) { $0.date }) { change in
+            RuleMark(x: .value("time", change.date))
+                .lineStyle(StrokeStyle(lineWidth: isSmall ? 1 : 1.5))
+                .foregroundStyle(deviceChangeColor(change.kind).opacity(0.85))
+            if !isSmall {
+                PointMark(
+                    x: .value("time", change.date),
+                    y: .value("sgv", deviceChangeLabelValue(change, maxBG: model.maxBG))
+                )
+                .symbol {
+                    DeviceChangeLabel(change: change)
+                }
+            }
         }
     }
 
