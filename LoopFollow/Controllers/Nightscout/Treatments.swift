@@ -77,6 +77,7 @@ extension MainViewController {
         var plannedCarbs: [[String: AnyObject]] = []
         var aiBolusSuggestions: [[String: AnyObject]] = []
         var eveningWatchLogs: [[String: AnyObject]] = []
+        var manualDoseLogs: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
@@ -114,6 +115,9 @@ extension MainViewController {
             case EveningWatch.logEventType:
                 // Loop's evening watch log for tonight, not a treatment.
                 eveningWatchLogs.append(entry)
+            case DoseGuard.logEventType:
+                // Loop's log of who gave each dose by hand, not a treatment.
+                manualDoseLogs.append(entry)
             case PlannedCarb.eventType:
                 // Not carbs yet: kept apart so it never counts toward today's carbs or COB.
                 plannedCarbs.append(entry)
@@ -169,6 +173,7 @@ extension MainViewController {
         }
         RemoteCommandRejectionMonitor.shared.check(notes: note)
         RemoteCommandInbox.shared.noteBoluses(bolus)
+        DoseGuard.shared.update(logs: manualDoseLogs)
         if bolus.count > 0 {
             processNSBolus(entries: bolus)
         } else {

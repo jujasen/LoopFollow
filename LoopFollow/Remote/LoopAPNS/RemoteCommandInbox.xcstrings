@@ -2,12 +2,52 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
+    "%1$@\n\nIf you send %2$@ U now, it comes on top of that. Send it anyway?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@\n\nSender du %2$@ E nå, kommer det i tillegg. Vil du sende likevel?"
+          }
+        }
+      }
+    },
+    "%1$@ U was given as a remote bolus from another phone at %2$@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ E ble gitt som fjernbolus fra en annen telefon kl. %2$@."
+          }
+        }
+      }
+    },
+    "%1$@ U was given on the phone with Loop at %2$@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ E ble gitt på telefonen med Loop kl. %2$@."
+          }
+        }
+      }
+    },
     "%@\n\nIf you send %@ U now, both can be given. Send it anyway?": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "%1$@\n\nSender du %2$@ E nå, kan begge bli gitt. Vil du sende likevel?"
+          }
+        }
+      }
+    },
+    "%@\nLoopFollow had not shown you that when you sent, so Loop gave nothing. Look at the graph and the insulin on board before you send again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@\nDet hadde ikke LoopFollow vist deg da du sendte, så Loop ga ingenting. Se på grafen og insulin om bord før du sender på nytt."
           }
         }
       }
@@ -32,12 +72,32 @@
         }
       }
     },
+    "%d min ago": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "for %d min siden"
+          }
+        }
+      }
+    },
     "A bolus is already on its way": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "En bolus er allerede på vei"
+          }
+        }
+      }
+    },
+    "A dose was just given by someone else": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noen andre har nettopp gitt en dose"
           }
         }
       }
@@ -108,6 +168,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke send på nytt: denne blir gitt nå."
+          }
+        }
+      }
+    },
+    "Given by someone else": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gitt av noen andre"
           }
         }
       }
@@ -292,12 +362,32 @@
         }
       }
     },
+    "Someone else may be correcting the same glucose. Check the insulin on board before you send more.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noen andre kan være i gang med å korrigere det samme blodsukkeret. Sjekk insulin om bord før du sender mer."
+          }
+        }
+      }
+    },
     "The bolus is waiting for Loop in Nightscout. Loop fetches it within 5 minutes, or at once if the push gets through. The card on the main screen shows when it is given.": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "Bolusen venter på Loop i Nightscout. Loop henter den innen 5 minutter, eller med en gang hvis pushen kommer fram. Kortet på Hjem viser når den er gitt."
+          }
+        }
+      }
+    },
+    "The evening watch gave %1$@ U at %2$@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kveldsvakten ga %1$@ E kl. %2$@."
           }
         }
       }
@@ -348,6 +438,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trukket tilbake i LoopFollow"
+          }
+        }
+      }
+    },
+    "just now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "akkurat nå"
           }
         }
       }
@@ -438,6 +538,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "💉 %@: Loop gir den nå"
+          }
+        }
+      }
+    },
+    "🛑 %@ stopped: someone else had just given a dose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🛑 %@ stoppet: noen andre hadde nettopp gitt en dose"
           }
         }
       }

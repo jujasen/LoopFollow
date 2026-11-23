@@ -48,6 +48,9 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
     var dismissed: Bool = false
     /// The bolus turned up in Nightscout at this time, whatever Loop said (or could not say) about it.
     var seenInNightscout: Date?
+    /// Loop gave nothing because of these doses, which someone else gave and this bolus did not
+    /// claim to know of (`DoseGuard`).
+    var stoppedBy: [LoggedDose]?
 
     var id: String { commandId }
     var isBolus: Bool { units != nil }
@@ -67,10 +70,10 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
 
     /// The decoder tolerates commands saved before `dismissed` and `seenInNightscout` existed.
     enum CodingKeys: String, CodingKey {
-        case commandId, objectId, summary, units, sentAt, expiration, status, statusMessage, handledAt, dismissed, seenInNightscout
+        case commandId, objectId, summary, units, sentAt, expiration, status, statusMessage, handledAt, dismissed, seenInNightscout, stoppedBy
     }
 
-    init(commandId: String, objectId: String?, summary: String, units: Double?, sentAt: Date, expiration: Date, status: Status, statusMessage: String? = nil, handledAt: Date? = nil, dismissed: Bool = false, seenInNightscout: Date? = nil) {
+    init(commandId: String, objectId: String?, summary: String, units: Double?, sentAt: Date, expiration: Date, status: Status, statusMessage: String? = nil, handledAt: Date? = nil, dismissed: Bool = false, seenInNightscout: Date? = nil, stoppedBy: [LoggedDose]? = nil) {
         self.commandId = commandId
         self.objectId = objectId
         self.summary = summary
@@ -82,6 +85,7 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         self.handledAt = handledAt
         self.dismissed = dismissed
         self.seenInNightscout = seenInNightscout
+        self.stoppedBy = stoppedBy
     }
 
     init(from decoder: Decoder) throws {
@@ -97,6 +101,7 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         handledAt = try c.decodeIfPresent(Date.self, forKey: .handledAt)
         dismissed = try c.decodeIfPresent(Bool.self, forKey: .dismissed) ?? false
         seenInNightscout = try c.decodeIfPresent(Date.self, forKey: .seenInNightscout)
+        stoppedBy = try c.decodeIfPresent([LoggedDose].self, forKey: .stoppedBy)
     }
 
     /// Loop's clock and ours may differ a little; wait this long past expiration before calling it lapsed.
@@ -111,6 +116,8 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         case failed
         case uncertain
         case rejected
+        /// Loop gave nothing: someone else had given a dose this bolus did not know of.
+        case stopped
         case cancelled
         /// Loop never fetched it, and now never will.
         case lapsed
@@ -131,7 +138,7 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         case .done: return .given
         case .failed: return .failed
         case .uncertain: return .uncertain
-        case .rejected: return .rejected
+        case .rejected: return stoppedBy?.isEmpty == false ? .stopped : .rejected
         case .cancelled: return .cancelled
         case .pushOnly:
             return now > expiration.addingTimeInterval(Self.clockMargin) ? .pushLapsed : .pushWaiting
@@ -193,6 +200,13 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         }
         if let handled = treatment["handledAt"] as? String, let date = NightscoutUtils.parseDate(handled) {
             handledAt = date
+        }
+        if let details = treatment["statusDetails"] as? [String: Any],
+           details["reason"] as? String == DoseGuard.stoppedReason,
+           let doses = details["doses"] as? [[String: Any]]
+        {
+            let stopped = doses.compactMap(LoggedDose.init(document:)).sorted { $0.date < $1.date }
+            stoppedBy = stopped.isEmpty ? nil : stopped
         }
     }
 }
@@ -606,6 +620,8 @@ enum RemoteCommandText {
             return String(format: String(localized: "❌ %@ not given", table: "RemoteCommandInbox"), s)
         case .rejected:
             return String(format: String(localized: "❌ %@ rejected by Loop", table: "RemoteCommandInbox"), s)
+        case .stopped:
+            return String(format: String(localized: "🛑 %@ stopped: someone else had just given a dose", table: "RemoteCommandInbox", comment: "1: e.g. Bolus 0.5 U"), s)
         case .uncertain:
             return String(format: String(localized: "⚠️ %@: unsure whether it was given", table: "RemoteCommandInbox"), s)
         case .cancelled:
@@ -635,6 +651,8 @@ enum RemoteCommandText {
             return String(format: String(localized: "Sent at %@. Loop confirmed it.", table: "RemoteCommandInbox"), time(command.sentAt))
         case .failed, .rejected:
             return String(format: String(localized: "Nothing was given. Loop said: %@ It is safe to send again.", table: "RemoteCommandInbox", comment: "1: Loop's message"), message)
+        case .stopped:
+            return DoseGuardText.stoppedDetail(command.stoppedBy ?? [])
         case .uncertain:
             return String(format: String(localized: "The pump did not confirm (%@). Check the pump and the graph before giving more.", table: "RemoteCommandInbox"), message)
         case .cancelled:
@@ -653,7 +671,7 @@ enum RemoteCommandText {
     /// Only the answers worth a notification.
     static func notification(_ command: QueuedRemoteCommand, now: Date) -> (title: String, body: String)? {
         switch command.phase(now: now) {
-        case .given, .failed, .rejected, .uncertain, .lapsed, .noAnswer:
+        case .given, .failed, .rejected, .stopped, .uncertain, .lapsed, .noAnswer:
             return (title(command, now: now), detail(command, now: now))
         default:
             return nil

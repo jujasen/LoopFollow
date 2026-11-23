@@ -228,6 +228,9 @@ class LoopAPNSService {
             "sent-at": formatDateForAPNS(now),
             "expiration": formatDateForAPNS(expiration),
             "alert": "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
+            // The doses given by hand the user has seen. Loop gives nothing if it has a later one:
+            // someone else is correcting the same glucose (see `DoseGuard`).
+            DoseGuard.keyInPayload: formatDateForAPNS(DoseGuard.shared.knownDosesUntil(now: now)),
         ] as [String: Any]
 
         // Encrypt and include return notification info using OTP

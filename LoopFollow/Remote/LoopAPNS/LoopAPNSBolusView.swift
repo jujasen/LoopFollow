@@ -15,6 +15,9 @@ struct LoopAPNSBolusView: View {
 
     @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
     @ObservedObject private var inbox = RemoteCommandInbox.shared
+    @ObservedObject private var doseGuard = DoseGuard.shared
+    /// The doses from someone else the alert is asking about.
+    @State private var dosesAskedAbout: [LoggedDose] = []
     @FocusState private var insulinFieldIsFocused: Bool
 
     // Add state for recommended bolus and warning
@@ -49,12 +52,36 @@ struct LoopAPNSBolusView: View {
         case oldCalculationWarning
         /// An earlier bolus may still be given: a second one could come on top of it.
         case bolusOnTheWay
+        /// Someone else gave a dose in the last half hour.
+        case doseFromElsewhere
     }
 
     var body: some View {
         NavigationView {
             VStack {
                 Form {
+                    // Doses someone else gave in the last half hour: on the phone with Loop, by the
+                    // evening watch or from another LoopFollow.
+                    // (The one-second timer below redraws this, so the minutes stay current.)
+                    let elsewhere = doseGuard.fromElsewhere(commands: inbox.commands)
+                    if !elsewhere.isEmpty {
+                        Section(
+                            header: Label(DoseGuardText.sectionTitle, systemImage: "exclamationmark.triangle.fill").foregroundColor(.red),
+                            footer: Text(DoseGuardText.sectionFooter)
+                        ) {
+                            ForEach(elsewhere, id: \.date) { dose in
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(DoseGuardText.sentence(dose))
+                                        .font(.callout.weight(.semibold))
+                                        .foregroundColor(.red)
+                                    Text(DoseGuardText.minutesAgo(dose.date, now: Date()))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+
                     // What became of the last bolus sent from here
                     if let last = inbox.visible().first(where: \.isBolus) {
                         Section {
@@ -236,6 +263,9 @@ struct LoopAPNSBolusView: View {
                 let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
                 quickPickBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
 
+                // Fresh treatments: a dose someone just gave on the phone with Loop must show here.
+                TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+
                 loadRecommendedBolus()
                 if !didPrefill, let prefilledUnits, prefilledUnits > 0 {
                     didPrefill = true
@@ -325,6 +355,17 @@ struct LoopAPNSBolusView: View {
                         },
                         secondaryButton: .cancel(Text(String(localized: "Don't send", table: "RemoteCommandInbox")))
                     )
+                case .doseFromElsewhere:
+                    return Alert(
+                        title: Text(DoseGuardText.alertTitle),
+                        message: Text(alertMessage),
+                        primaryButton: .destructive(Text(String(localized: "Send anyway", table: "RemoteCommandInbox"))) {
+                            // Seen and accepted: the bolus now says it knows of these doses.
+                            doseGuard.acknowledge(dosesAskedAbout)
+                            authenticateAndSendInsulin()
+                        },
+                        secondaryButton: .cancel(Text(String(localized: "Don't send", table: "RemoteCommandInbox")))
+                    )
                 case .oldCalculationWarning:
                     return Alert(
                         title: Text("Old Calculation Warning"),
@@ -381,6 +422,17 @@ struct LoopAPNSBolusView: View {
         if insulinValue > maxBolus {
             alertMessage = String(localized: "Insulin amount (\(Localizer.formatToLocalizedString(insulinValue, maxFractionDigits: 2, minFractionDigits: 2))U) exceeds the maximum allowed (\(Localizer.formatToLocalizedString(maxBolus, maxFractionDigits: 2, minFractionDigits: 2))U). Please reduce the amount.")
             alertType = .error
+            showAlert = true
+            return
+        }
+
+        // Someone else may be correcting the same glucose. Asked once per dose; a bolus sent without
+        // this (or before the dose shows here) is stopped by Loop instead.
+        let unseen = doseGuard.unacknowledged()
+        if !unseen.isEmpty {
+            dosesAskedAbout = unseen
+            alertMessage = DoseGuardText.alertMessage(unseen, sending: insulinValue)
+            alertType = .doseFromElsewhere
             showAlert = true
             return
         }

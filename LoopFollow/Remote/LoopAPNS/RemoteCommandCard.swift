@@ -31,6 +31,8 @@ struct RemoteCommandCard: View {
             return Color.secondary.opacity(0.15)
         case .uncertain, .noAnswer:
             return Color.orange.opacity(0.25)
+        case .stopped:
+            return Color.red.opacity(0.25)
         case .waiting, .giving, .pushWaiting:
             return Color.blue.opacity(0.15)
         }
