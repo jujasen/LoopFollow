@@ -199,6 +199,7 @@ extension MainViewController {
             }
         }
         processNSAIBolusSuggestions(entries: aiBolusSuggestions)
+        AIBolusSuggestionStore.shared.hideAnswered(byBoluses: bolus)
         processNSEveningWatch(logs: eveningWatchLogs, notes: note)
         if plannedCarbs.count > 0 {
             processNSPlannedCarbs(entries: plannedCarbs)

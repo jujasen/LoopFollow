@@ -137,4 +137,33 @@ struct AIBolusSuggestionTests {
         store.update([])
         #expect(store.reviewing == nil, "gone from Nightscout: given, declined on Loop's phone or lapsed")
     }
+
+    // MARK: - Answered by a bolus
+
+    private func eveningWatchSuggestion(made: Date) -> AIBolusSuggestion {
+        AIBolusSuggestion(id: "e1", date: made, expiresAt: made.addingTimeInterval(3 * 3600), units: 0.45, reason: "", source: "eveningWatch")
+    }
+
+    @Test("#given — a bolus after the evening watch's suggestion answers it, whoever gave it")
+    func bolusAnswersTheSuggestion() {
+        let made = Self.now.addingTimeInterval(-10 * 60)
+        let suggestion = eveningWatchSuggestion(made: made)
+        // Given three minutes later, on the phone with Loop or from here; not exactly the suggested amount.
+        #expect(AIBolusSuggestionStore.answered([suggestion], boluses: [(made.addingTimeInterval(180), 0.35)]).map(\.id) == ["e1"])
+    }
+
+    @Test("#given — a bolus before the suggestion does not answer it")
+    func earlierBolusDoesNotAnswer() {
+        let made = Self.now.addingTimeInterval(-10 * 60)
+        let suggestion = eveningWatchSuggestion(made: made)
+        #expect(AIBolusSuggestionStore.answered([suggestion], boluses: [(made.addingTimeInterval(-20 * 60), 0.5)]).isEmpty)
+        #expect(AIBolusSuggestionStore.answered([suggestion], boluses: []).isEmpty)
+    }
+
+    @Test("#given — only the evening watch's suggestions are closed this way")
+    func onlyTheEveningWatch() {
+        let made = Self.now.addingTimeInterval(-10 * 60)
+        let other = AIBolusSuggestion(id: "m1", date: made, expiresAt: made.addingTimeInterval(1200), units: 0.4, reason: "")
+        #expect(AIBolusSuggestionStore.answered([other], boluses: [(made.addingTimeInterval(180), 0.4)]).isEmpty)
+    }
 }

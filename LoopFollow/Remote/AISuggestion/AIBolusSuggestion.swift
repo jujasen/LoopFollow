@@ -229,6 +229,35 @@ final class AIBolusSuggestionStore: ObservableObject {
         }
     }
 
+    /// The evening watch's suggestions that a dose by hand has answered: a bolus (given on the
+    /// phone with Loop or sent from here) since the suggestion was made. The same rule Loop uses
+    /// to call a suggestion given.
+    static func answered(_ suggestions: [AIBolusSuggestion], boluses: [(date: Date, units: Double)]) -> [AIBolusSuggestion] {
+        suggestions.filter { suggestion in
+            suggestion.isEveningWatch && boluses.contains { $0.units >= 0.05 && $0.date >= suggestion.date.addingTimeInterval(-60) }
+        }
+    }
+
+    /// Called with every treatment download. A suggestion that has been given goes from this
+    /// phone at once, with its notification and alarm, without waiting for Loop to take it out
+    /// of Nightscout.
+    func hideAnswered(byBoluses entries: [[String: AnyObject]], now: Date = Date()) {
+        let boluses: [(date: Date, units: Double)] = entries.compactMap { entry in
+            guard let date = NightscoutUtils.treatmentDate(from: entry), let units = entry["insulin"] as? Double else { return nil }
+            return (date, units)
+        }
+        let given = Self.answered(visible(now: now), boluses: boluses)
+        guard !given.isEmpty else { return }
+        for suggestion in given {
+            hide(suggestion, at: now)
+            LogManager.shared.log(category: .general, message: "AI bolus suggestion \(suggestion.id) answered by a bolus in Nightscout")
+        }
+        if reviewing.map({ r in given.contains { $0.id == r.id } }) == true {
+            reviewing = nil
+        }
+        AlarmManager.shared.eveningWatchGiven(now: now)
+    }
+
     /// Hides it on this phone only, as after sending its bolus: Loop closes it when the bolus comes.
     func hide(_ suggestion: AIBolusSuggestion, at date: Date = Date()) {
         var dismissed = self.dismissed

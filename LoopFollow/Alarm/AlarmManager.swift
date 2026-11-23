@@ -249,6 +249,11 @@ class AlarmManager {
         snoozeEveningWatch(until: now.addingTimeInterval(60 * 60))
     }
 
+    /// The suggestion was given, on the phone with Loop or from here: its alarm and notification go.
+    func eveningWatchGiven(now: Date = Date()) {
+        snoozeEveningWatch(until: now.addingTimeInterval(60))
+    }
+
     /// «Ikke nå»: the alarm is quiet for 30 minutes; the suggestion stays on the main screen.
     func quietEveningWatch(now: Date = Date()) {
         snoozeEveningWatch(until: now.addingTimeInterval(30 * 60))
