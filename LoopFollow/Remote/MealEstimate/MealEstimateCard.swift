@@ -21,8 +21,14 @@ struct MealEstimateSection: View {
         if model.isAvailable {
             Section {
                 MealEstimateCard(model: model, onSaveFavorite: onSaveFavorite, isSavedAsFavorite: isSavedAsFavorite)
+                    .listRowBackground(MealEstimateStyle.rowBackground)
             } header: {
-                Text("Ask about carbs", tableName: "MealEstimate", comment: "Section title for the meal estimate card on the carb screen")
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+                    Text("Ask about carbs", tableName: "MealEstimate", comment: "Section title for the meal estimate card on the carb screen")
+                }
+                .fontWeight(.semibold)
+                .foregroundStyle(MealEstimateStyle.gradient)
             } footer: {
                 if model.estimate != nil {
                     Text("AI estimate — check the numbers before you continue.", tableName: "MealEstimate", comment: "Reminder under the meal estimate that the numbers must be reviewed")
@@ -30,6 +36,29 @@ struct MealEstimateSection: View {
                     Text("Type what he is eating, ask a question or take a photo. The answer fills in the carbs below.", tableName: "MealEstimate", comment: "Explanation under the empty meal estimate card, which is above the carb fields")
                 }
             }
+        }
+    }
+}
+
+/// The AI's colours, as on Loop's carb screen: green running into teal and violet, so the card
+/// stands out from the plain sections around it as the place to ask.
+enum MealEstimateStyle {
+    static let colors: [Color] = [.green, .teal, .indigo]
+
+    static var gradient: LinearGradient {
+        LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing)
+    }
+
+    /// A faint wash of the same colours, under a thin border in them.
+    static var rowBackground: some View {
+        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+        return ZStack {
+            Color(.secondarySystemGroupedBackground)
+            LinearGradient(colors: colors.map { $0.opacity(0.16) }, startPoint: .topLeading, endPoint: .bottomTrailing)
+            shape.strokeBorder(
+                LinearGradient(colors: colors.map { $0.opacity(0.7) }, startPoint: .topLeading, endPoint: .bottomTrailing),
+                lineWidth: 1.5
+            )
         }
     }
 }
@@ -263,8 +292,8 @@ struct MealEstimateCard: View {
     private func promptField(_ placeholder: String, text: Binding<String>, isEnabled: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         HStack(alignment: .bottom, spacing: 8) {
             Image(systemName: "sparkles")
-                .font(.subheadline)
-                .foregroundColor(.accentColor)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MealEstimateStyle.gradient)
                 .frame(height: 40)
 
             TextField(placeholder, text: text, axis: .vertical)
@@ -293,10 +322,14 @@ struct MealEstimateCard: View {
                     }
                     .frame(width: 30, height: 30)
                 } else {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(isEnabled ? .accentColor : Color(.tertiaryLabel))
-                        .frame(width: 30, height: 30)
+                    ZStack {
+                        Circle()
+                            .fill(isEnabled ? AnyShapeStyle(LinearGradient(colors: MealEstimateStyle.colors, startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color(.tertiaryLabel)))
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 30, height: 30)
                 }
             }
             .buttonStyle(.plain)
@@ -309,7 +342,11 @@ struct MealEstimateCard: View {
         .frame(minHeight: 40)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(.tertiarySystemFill))
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(isInputFocused ? AnyShapeStyle(MealEstimateStyle.gradient) : AnyShapeStyle(Color.primary.opacity(0.08)), lineWidth: isInputFocused ? 1.5 : 1)
         )
     }
 
