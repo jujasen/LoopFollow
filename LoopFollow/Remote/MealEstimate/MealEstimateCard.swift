@@ -33,7 +33,7 @@ struct MealEstimateSection: View {
                 if model.estimate != nil {
                     Text("AI estimate — check the numbers before you continue.", tableName: "MealEstimate", comment: "Reminder under the meal estimate that the numbers must be reviewed")
                 } else {
-                    Text("Type what he is eating, ask a question or take a photo. The answer fills in the carbs below.", tableName: "MealEstimate", comment: "Explanation under the empty meal estimate card, which is above the carb fields")
+                    Text("Just type the food, ask a question or take a photo. The answer fills in the carbs below.", tableName: "MealEstimate", comment: "Explanation under the empty meal estimate card, which is above the carb fields")
                 }
             }
         }
@@ -108,7 +108,8 @@ struct MealEstimateCard: View {
                 photoStrip
 
                 promptField(
-                    String(localized: "How many carbs in …?", table: "MealEstimate", comment: "Placeholder for the free-text meal description on the carb screen"),
+                    String(localized: "Type the food", table: "MealEstimate", comment: "Accessibility label of the empty meal estimate field, whose placeholder cycles through examples"),
+                    examples: Self.examples,
                     text: $model.description,
                     isEnabled: model.canEstimate,
                     accessibilityLabel: String(localized: "Estimate carbs", table: "MealEstimate", comment: "Button label asking AI to estimate the carbs of the described meal"),
@@ -289,15 +290,55 @@ struct MealEstimateCard: View {
 
     /// A rounded, chat-style field with the send button inside, centred on a single line and
     /// staying at the bottom as the text grows.
-    private func promptField(_ placeholder: String, text: Binding<String>, isEnabled: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
+    /// What the empty field shows in turn, as in Loop: mostly just the food, as it is enough, and
+    /// one question, to show that asking works too.
+    static let examples = [
+        String(localized: "1 Nonstop and 1 jelly man", table: "MealEstimate", comment: "Example in the empty meal estimate field: just the foods, no question"),
+        String(localized: "2 wholemeal rolls", table: "MealEstimate", comment: "Example in the empty meal estimate field: just the foods, no question"),
+        String(localized: "a glass of milk and a banana", table: "MealEstimate", comment: "Example in the empty meal estimate field: just the foods, no question"),
+        String(localized: "carbs in a fruit pouch?", table: "MealEstimate", comment: "Example in the empty meal estimate field: a question"),
+    ]
+
+    private static let exampleInterval: TimeInterval = 3
+
+    /// The placeholder, one example at a time, sliding up to the next every few seconds.
+    private func cyclingExamples(_ examples: [String]) -> some View {
+        TimelineView(.periodic(from: .now, by: Self.exampleInterval)) { context in
+            let index = Int(context.date.timeIntervalSinceReferenceDate / Self.exampleInterval) % examples.count
+            ZStack(alignment: .leading) {
+                Text(String(format: String(localized: "E.g. %@", table: "MealEstimate", comment: "An example shown in the empty meal estimate field (1: the example)"), examples[index]))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .id(index)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clipped()
+            .animation(.easeInOut(duration: 0.35), value: index)
+        }
+        .foregroundColor(Color(.placeholderText))
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func promptField(_ placeholder: String, examples: [String]? = nil, text: Binding<String>, isEnabled: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         HStack(alignment: .bottom, spacing: 8) {
             Image(systemName: "sparkles")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MealEstimateStyle.gradient)
                 .frame(height: 40)
 
-            TextField(placeholder, text: text, axis: .vertical)
+            TextField(examples == nil ? placeholder : "", text: text, axis: .vertical)
                 .lineLimit(1 ... 5)
+                .accessibilityLabel(placeholder)
+                .overlay(alignment: .leading) {
+                    if let examples, text.wrappedValue.isEmpty {
+                        cyclingExamples(examples)
+                    }
+                }
                 .focused($isInputFocused)
                 .padding(.vertical, 9)
 
