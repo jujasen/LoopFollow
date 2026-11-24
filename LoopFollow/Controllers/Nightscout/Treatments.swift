@@ -76,6 +76,7 @@ extension MainViewController {
         var carbs: [[String: AnyObject]] = []
         var plannedCarbs: [[String: AnyObject]] = []
         var aiBolusSuggestions: [[String: AnyObject]] = []
+        var lowWatchSuggestions: [[String: AnyObject]] = []
         var eveningWatchLogs: [[String: AnyObject]] = []
         var manualDoseLogs: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
@@ -109,6 +110,9 @@ extension MainViewController {
                 bolus.append(entry)
             case "Carb Correction":
                 carbs.append(entry)
+            case LowWatchSuggestion.eventType:
+                // Fast carbs suggested by Loop's low watch, not carbs.
+                lowWatchSuggestions.append(entry)
             case AIBolusSuggestion.eventType:
                 // A suggestion from Loop's meal watch, not a dose.
                 aiBolusSuggestions.append(entry)
@@ -199,6 +203,7 @@ extension MainViewController {
             }
         }
         processNSAIBolusSuggestions(entries: aiBolusSuggestions)
+        processNSLowWatch(entries: lowWatchSuggestions, carbs: carbs)
         AIBolusSuggestionStore.shared.hideAnswered(byBoluses: bolus)
         processNSEveningWatch(logs: eveningWatchLogs, notes: note)
         if plannedCarbs.count > 0 {

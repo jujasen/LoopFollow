@@ -1,0 +1,42 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "🍭 Low watch: %@ g fast carbs?" : {
+      "comment" : "Title of a low watch suggestion (1: grams)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🍭 Lavvakt: %@ g rask karbo?"
+          }
+        }
+      }
+    },
+    "Loop on Walter's phone suggests this. Whoever is with him gives the carbs and enters them; then it goes from here too." : {
+      "comment" : "Under a low watch suggestion",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop på Walters telefon foreslår dette. Den som er hos ham, gir karboen og legger den inn; da forsvinner det her også."
+          }
+        }
+      }
+    },
+    "Decline" : {
+      "comment" : "Button: declines the low watch's suggestion, here and in Loop",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avslå"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -61,6 +61,12 @@ struct MainHomeView: View {
                     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             }
 
+            // Loop's low watch: fast carbs before a low
+            if isNightscoutEnabled {
+                LowWatchCard()
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            }
+
             // Loop's AI bolus suggestions, with a button that opens the bolus screen filled in
             if isNightscoutEnabled {
                 AIBolusSuggestionCard()
