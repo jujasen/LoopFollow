@@ -382,12 +382,12 @@
         }
       }
     },
-    "The evening watch gave %1$@ U at %2$@.": {
+    "The high watch gave %1$@ U at %2$@.": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kveldsvakten ga %1$@ E kl. %2$@."
+            "value": "Høyvakten ga %1$@ E kl. %2$@."
           }
         }
       }

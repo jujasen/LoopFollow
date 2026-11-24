@@ -193,7 +193,7 @@ enum DoseGuardText {
         case .phone:
             return String(format: String(localized: "%1$@ U was given on the phone with Loop at %2$@.", table: "RemoteCommandInbox", comment: "A dose someone gave on the phone with Loop (1: units, 2: time)"), units(dose.units), time(dose.date))
         case .eveningWatch:
-            return String(format: String(localized: "The evening watch gave %1$@ U at %2$@.", table: "RemoteCommandInbox", comment: "A dose Loop's evening watch gave (1: units, 2: time)"), units(dose.units), time(dose.date))
+            return String(format: String(localized: "The high watch gave %1$@ U at %2$@.", table: "RemoteCommandInbox", comment: "A dose Loop's high watch gave (1: units, 2: time)"), units(dose.units), time(dose.date))
         case .remote:
             return String(format: String(localized: "%1$@ U was given as a remote bolus from another phone at %2$@.", table: "RemoteCommandInbox", comment: "A remote bolus that was not sent from this phone (1: units, 2: time)"), units(dose.units), time(dose.date))
         }

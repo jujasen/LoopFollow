@@ -4,9 +4,11 @@
 import Foundation
 import UserNotifications
 
-/// The evening watch («Kveldsvakt») runs in Loop on Walter's phone: in the evening, when glucose
-/// keeps rising or stays high and nothing has been given or eaten for a while, it suggests a
-/// correction or, in automatic mode, gives it. LoopFollow shows what it does, from Nightscout:
+/// The high watch («Høyvakt»; at first the evening watch, «Kveldsvakt», and still called that in
+/// the code and in Nightscout) runs in Loop on Walter's phone: when glucose keeps rising or stays
+/// high and nothing has been given or eaten for a while, it suggests a correction or, in automatic
+/// mode, gives it. Around the clock (`allDay`) it only gives a dose itself in the evening window
+/// and suggests for the rest of the day. LoopFollow shows what it does, from Nightscout:
 ///
 /// - an open suggestion is an "AI Bolus Suggestion" with `source: "eveningWatch"` (see
 ///   `AIBolusSuggestion`); it stays on the main screen until it is given, declined here or in
@@ -33,6 +35,9 @@ enum EveningWatch {
         }
 
         var mode: Mode?
+        /// Watches around the clock; `start` and `end` are then when automatic mode gives a dose
+        /// itself. Nil from a Loop build before it could.
+        var allDay: Bool?
         /// Minutes after midnight.
         var start: Int?
         var end: Int?
@@ -155,6 +160,21 @@ enum EveningWatch {
         notes.compactMap(DoseNote.init(treatment:))
             .filter { !announced.contains($0.actionID) && now.timeIntervalSince($0.date) < 2 * 3600 }
             .sorted { $0.date < $1.date }
+    }
+
+    /// The alarms with a watch alarm still under a former name («Kveldsvakt») given the new one;
+    /// nil when there is none to rename. A name the user chose is left alone.
+    static func renamingFormerName(in alarms: [Alarm]) -> [Alarm]? {
+        func isFormer(_ alarm: Alarm) -> Bool {
+            alarm.type == .eveningWatch && EveningWatchText.formerNames.contains(alarm.name)
+        }
+        guard alarms.contains(where: isFormer) else { return nil }
+        return alarms.map { alarm in
+            guard isFormer(alarm) else { return alarm }
+            var renamed = alarm
+            renamed.name = EveningWatchText.name
+            return renamed
+        }
     }
 
     static func number(_ value: Any?) -> Double? {

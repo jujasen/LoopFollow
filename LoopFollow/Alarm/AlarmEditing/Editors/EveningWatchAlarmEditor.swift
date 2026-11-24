@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-/// The alarm for Loop's evening watch, and Loop's own settings for it to read.
+/// The alarm for Loop's high watch (the evening watch, in the code), and Loop's own settings for it to read.
 struct EveningWatchAlarmEditor: View {
     @Binding var alarm: Alarm
     @ObservedObject private var loopSettings = Storage.shared.eveningWatchLoopSettings
@@ -20,7 +20,12 @@ struct EveningWatchAlarmEditor: View {
             ) {
                 if let settings = loopSettings.value {
                     row(String(localized: "Mode", table: "EveningWatch", comment: "Evening watch setting"), EveningWatchText.mode(settings.mode))
-                    if let start = settings.start, let end = settings.end {
+                    if settings.allDay == true {
+                        row(String(localized: "When", table: "EveningWatch", comment: "High watch setting: when it watches"), String(localized: "Around the clock", table: "EveningWatch", comment: "High watch setting: it watches all day and night"))
+                        if settings.mode == .automatic, let start = settings.start, let end = settings.end {
+                            row(String(localized: "Gives by itself", table: "EveningWatch", comment: "Evening watch mode in Loop"), "\(EveningWatchText.clock(start))–\(EveningWatchText.clock(end))")
+                        }
+                    } else if let start = settings.start, let end = settings.end {
                         row(String(localized: "Evening", table: "EveningWatch", comment: "Evening watch setting: the window"), "\(EveningWatchText.clock(start))–\(EveningWatchText.clock(end))")
                     }
                     if let rising = settings.risingFromMmol, let high = settings.highFromMmol {
@@ -33,7 +38,7 @@ struct EveningWatchAlarmEditor: View {
                         row(String(localized: "Dose at 12", table: "EveningWatch", comment: "Evening watch setting: the dose at 12 mmol/L"), EveningWatchText.unitsWithUnit(units))
                     }
                     if let perEvening = settings.maximumPerEvening, let doses = settings.dosesPerEvening {
-                        row(String(localized: "At most per evening", table: "EveningWatch", comment: "Evening watch setting"), "\(EveningWatchText.unitsWithUnit(perEvening)) · \(doses)×")
+                        row(settings.allDay == true ? String(localized: "At most per 6 hours", table: "EveningWatch", comment: "High watch setting around the clock") : String(localized: "At most per evening", table: "EveningWatch", comment: "Evening watch setting"), "\(EveningWatchText.unitsWithUnit(perEvening)) · \(doses)×")
                     }
                     if let iob = settings.maximumIOB {
                         row(String(localized: "Insulin on board under", table: "EveningWatch", comment: "Evening watch setting"), EveningWatchText.unitsWithUnit(iob))

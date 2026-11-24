@@ -3,7 +3,7 @@
 
 import Foundation
 
-/// The evening watch's words, in their own table (EveningWatch.xcstrings).
+/// The high watch's words (the evening watch, in the code), in their own table (EveningWatch.xcstrings).
 enum EveningWatchText {
     static func units(_ units: Double) -> String {
         Localizer.formatToLocalizedString(units, maxFractionDigits: 2)
@@ -26,18 +26,25 @@ enum EveningWatchText {
         String(format: "%02d:%02d", minutes / 60, minutes % 60)
     }
 
+    /// "Høyvakt". It was «Kveldsvakt» until it could watch around the clock.
     static var name: String {
-        String(localized: "Evening Watch", table: "EveningWatch", comment: "Name of the evening watch in the alarm list and on its screens")
+        String(localized: "High Watch", table: "EveningWatch", comment: "Name of the high watch in the alarm list and on its screens")
     }
 
-    /// "🌙 Kveldsvakt: 0,35 E?"
+    /// The names an alarm was saved under before; one still called that is renamed.
+    static let formerNames = ["Kveldsvakt", "Evening Watch"]
+
+    /// In front of the name in titles, as in Loop.
+    static let symbol = "📈"
+
+    /// "📈 Høyvakt: 0,35 E?"
     static func title(units value: Double) -> String {
-        String(format: String(localized: "🌙 Evening watch: %@ U?", table: "EveningWatch", comment: "Title of an evening watch suggestion (1: units)"), units(value))
+        String(format: String(localized: "📈 High watch: %@ U?", table: "EveningWatch", comment: "Title of a high watch suggestion (1: units)"), units(value))
     }
 
     /// The alarm's title: the open suggestion, or the name.
     static func title(_ open: EveningWatch.Open?) -> String {
-        open.map { title(units: $0.units) } ?? "🌙 " + name
+        open.map { title(units: $0.units) } ?? symbol + " " + name
     }
 
     static var staysHint: String {
@@ -67,14 +74,14 @@ enum EveningWatchText {
     /// The notification for an automatic dose: Loop's own words.
     static func doseNotificationTitle(_ note: EveningWatch.DoseNote) -> String {
         note.given
-            ? String(format: String(localized: "🌙 Evening watch gave %@ U", table: "EveningWatch", comment: "Notification when the evening watch gave a dose by itself (1: units)"), units(note.units))
-            : String(format: String(localized: "🌙 Evening watch could not give %@ U", table: "EveningWatch", comment: "Notification when the pump did not take the evening watch's dose (1: units)"), units(note.units))
+            ? String(format: String(localized: "📈 High watch gave %@ U", table: "EveningWatch", comment: "Notification when the high watch gave a dose by itself (1: units)"), units(note.units))
+            : String(format: String(localized: "📈 High watch could not give %@ U", table: "EveningWatch", comment: "Notification when the pump did not take the high watch's dose (1: units)"), units(note.units))
     }
 
     // MARK: - Settings
 
     static var explanation: String {
-        String(localized: "The evening watch runs in Loop on Walter's phone. In the evening, when glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode, gives it. You get a notification for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → Evening Watch.", table: "EveningWatch", comment: "Explanation at the top of the evening watch settings")
+        String(localized: "The high watch runs in Loop on Walter's phone. When glucose keeps rising or stays high and nothing has been given or eaten for a while, it suggests a correction or, in automatic mode in the evening, gives it. You get a notification for its suggestions; the suggestion stays on the main screen until you answer. Its settings are changed in Loop under Settings → High Watch.", table: "EveningWatch", comment: "Explanation at the top of the high watch settings")
     }
 
     static var plainNotification: String {
@@ -95,7 +102,7 @@ enum EveningWatchText {
     }
 
     static var notUploaded: String {
-        String(localized: "Loop has not sent its evening watch settings yet. They come with a Loop build that has the evening watch.", table: "EveningWatch", comment: "Evening watch settings when Loop's are unknown")
+        String(localized: "Loop has not sent its high watch settings yet. They come with a Loop build that has the high watch.", table: "EveningWatch", comment: "High watch settings when Loop's are unknown")
     }
 
     static var declineReachesLoop: String {
@@ -121,7 +128,7 @@ enum EveningWatchText {
         case "falling":
             return String(localized: "Falling", table: "EveningWatch", comment: "Evening watch log")
         case "recentLow":
-            return String(localized: "Was under 6 in the last 90 min", table: "EveningWatch", comment: "Evening watch log")
+            return String(localized: "Was under 6 in the last hour", table: "EveningWatch", comment: "High watch log")
         case "recentCarbs":
             return String(format: String(localized: "Meal, waits until %@", table: "EveningWatch", comment: "Evening watch log (1: time)"), until)
         case "recentBolus":
@@ -129,7 +136,7 @@ enum EveningWatchText {
         case "recentAction":
             return String(format: String(localized: "Waits until %@ after the last one", table: "EveningWatch", comment: "Evening watch log (1: time)"), until)
         case "enoughTonight":
-            return String(localized: "Enough for tonight", table: "EveningWatch", comment: "Evening watch log")
+            return String(localized: "Has given what it may for now", table: "EveningWatch", comment: "High watch log: the most per evening, or per six hours around the clock, is reached")
         case "noInsulinOnBoard":
             return String(localized: "Insulin on board unknown", table: "EveningWatch", comment: "Evening watch log")
         case "highIOB":

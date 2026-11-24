@@ -96,7 +96,7 @@ struct EveningWatchLogView: View {
                     }
                 }
             } else {
-                Text(String(localized: "No log from Loop yet tonight.", table: "EveningWatch", comment: "Evening watch log, none from Loop"))
+                Text(String(localized: "No log from Loop yet.", table: "EveningWatch", comment: "High watch log, none from Loop"))
                     .foregroundColor(.secondary)
             }
         }

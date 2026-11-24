@@ -118,7 +118,7 @@ enum AIBolusSuggestionText {
         Localizer.formatToLocalizedString(units, maxFractionDigits: 2)
     }
 
-    /// "✨ Forslag: 0,4 E til 🥛 Melk", or "🌙 Kveldsvakt: 0,35 E?"
+    /// "✨ Forslag: 0,4 E til 🥛 Melk", or "📈 Høyvakt: 0,35 E?"
     static func title(_ suggestion: AIBolusSuggestion) -> String {
         if suggestion.isEveningWatch {
             return EveningWatchText.title(units: suggestion.units)

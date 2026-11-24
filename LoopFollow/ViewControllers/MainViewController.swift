@@ -699,6 +699,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         Storage.shared.placeInsightTabOnce()
         Storage.shared.addPumpFailureAlarmOnce()
         Storage.shared.addEveningWatchAlarmOnce()
+        Storage.shared.renameEveningWatchAlarm()
     }
 
     @objc func appDidBecomeActive() {

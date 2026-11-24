@@ -71,7 +71,7 @@ struct EveningWatchTests {
         #expect(suggestion.isEveningWatch)
         #expect(suggestion.nsID == "ns-e1")
         #expect(suggestion.expiresAt > Self.now.addingTimeInterval(2 * 3600))
-        #expect(AIBolusSuggestionText.title(suggestion).contains("🌙"))
+        #expect(AIBolusSuggestionText.title(suggestion).contains(EveningWatchText.symbol))
         #expect(AIBolusSuggestionText.lapses(suggestion) == EveningWatchText.staysHint)
     }
 
@@ -140,5 +140,24 @@ struct EveningWatchTests {
         #expect(settings.mode == .automatic)
         #expect(EveningWatchText.clock(settings.start ?? 0) == "20:30")
         #expect(settings.learnedUnits == 0.45)
+        #expect(settings.allDay == nil, "a Loop build before around the clock does not send it")
+
+        let aroundTheClock = try JSONDecoder().decode(EveningWatch.LoopSettings.self, from: Data(#"{"mode":"suggest","allDay":true,"start":1110,"end":60}"#.utf8))
+        #expect(aroundTheClock.allDay == true)
+    }
+
+    @Test("#rename — an alarm still called Kveldsvakt becomes the high watch; a name of one's own stays")
+    func rename() {
+        var former = Alarm(type: .eveningWatch)
+        former.name = "Kveldsvakt"
+        var own = Alarm(type: .eveningWatch)
+        own.name = "Walter kveld"
+        var other = Alarm(type: .low)
+        other.name = "Kveldsvakt"
+
+        let renamed = EveningWatch.renamingFormerName(in: [former, own, other])
+        #expect(renamed?.map(\.name) == [EveningWatchText.name, "Walter kveld", "Kveldsvakt"])
+        #expect(EveningWatch.renamingFormerName(in: renamed ?? []) == nil, "nothing left to rename")
+        #expect(!EveningWatchText.formerNames.contains(EveningWatchText.name))
     }
 }

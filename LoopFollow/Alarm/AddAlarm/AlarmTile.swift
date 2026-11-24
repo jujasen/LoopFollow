@@ -13,7 +13,7 @@ struct AlarmTile: View {
                 Image(systemName: type.icon)
                     .font(.title2)
                     .foregroundColor(.accentColor)
-                Text(type.rawValue)
+                Text(type == .eveningWatch ? EveningWatchText.name : type.rawValue)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)

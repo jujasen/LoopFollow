@@ -256,4 +256,12 @@ extension Storage {
         alarm.name = EveningWatchText.name
         alarms.value.append(alarm)
     }
+
+    /// The evening watch became the high watch: an alarm still under the old name gets the new
+    /// one. A name the user chose is left alone.
+    func renameEveningWatchAlarm() {
+        if let renamed = EveningWatch.renamingFormerName(in: alarms.value) {
+            alarms.value = renamed
+        }
+    }
 }

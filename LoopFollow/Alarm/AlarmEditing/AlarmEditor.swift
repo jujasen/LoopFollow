@@ -39,7 +39,7 @@ struct AlarmEditor: View {
                         }
                     }
                 }
-                .navigationTitle(alarm.type.rawValue)
+                .navigationTitle(alarm.type == .eveningWatch ? EveningWatchText.name : alarm.type.rawValue)
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
     }
