@@ -46,6 +46,19 @@ struct MealCarbEstimatorTests {
         #expect(request.value(forHTTPHeaderField: "Authorization") == nil)
     }
 
+    @Test("every item carries its carbs per 100 g, and older answers without it still read")
+    func carbsPer100g() throws {
+        let body = try Self.json(MealCarbEstimator.request(model: "claude-sonnet-5-5", conversation: [.init(role: "user", content: "Hvor mye kh i en nonstop?")], apiKey: "k"))
+        let output = try #require(body["output_config"] as? [String: Any])
+        let schema = try #require((output["format"] as? [String: Any])?["schema"] as? [String: Any])
+        let items = try #require(((schema["properties"] as? [String: Any])?["items"] as? [String: Any])?["items"] as? [String: Any])
+        #expect(items["required"] as? [String] == ["food", "amount", "carbs_grams", "carbs_per_100g"])
+
+        #expect(try MealCarbEstimator.parseResponse(Self.claudeResponse(text: Self.estimateJSON)).items[0].carbsPer100g == nil)
+        let withPer100g = Self.estimateJSON.replacingOccurrences(of: #""carbs_grams":24}"#, with: #""carbs_grams":24,"carbs_per_100g":12}"#)
+        #expect(try MealCarbEstimator.parseResponse(Self.claudeResponse(text: withPer100g)).items[0].carbsPer100g == 12)
+    }
+
     @Test("asks for the meal schema with a cached system prompt")
     func requestBody() throws {
         let body = try Self.json(MealCarbEstimator.request(model: "claude-sonnet-5-5", conversation: [.init(role: "user", content: "Pizza")], apiKey: "k"))

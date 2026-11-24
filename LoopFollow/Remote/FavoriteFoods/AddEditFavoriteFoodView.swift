@@ -42,10 +42,10 @@ struct AddEditFavoriteFoodView: View {
     }
 
     /// Create a new food, optionally pre-filled from what is already typed on the carb screen.
-    init(initialFolderID: String? = nil, carbs: Double? = nil, foodType: String = "", absorptionTime: TimeInterval? = nil) {
+    init(initialFolderID: String? = nil, name: String = "", carbs: Double? = nil, foodType: String = "", absorptionTime: TimeInterval? = nil) {
         originalFood = nil
         isModal = true
-        _name = State(initialValue: "")
+        _name = State(initialValue: name)
         _foodType = State(initialValue: foodType)
         let components = FavoriteFoodAbsorption.components(absorptionTime ?? FavoriteFoodAbsorption.default)
         _absorptionHours = State(initialValue: components.hours)

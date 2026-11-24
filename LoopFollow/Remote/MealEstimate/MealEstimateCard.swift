@@ -1,23 +1,30 @@
 // LoopFollow
 // MealEstimateCard.swift
 
-// The "describe the meal" card on the carb screen, under the ordinary fields, as on Loop's carb
-// screen (Loop's `MealEstimateCard.swift`): free text and/or photos of the meal in, carbs,
-// absorption time and the dish filled into the fields above. The breakdown and the guesses
-// behind the numbers open under "Show calculation", and a follow-up re-evaluates the whole meal.
+// The "ask about carbs" card on the carb screen, under the ordinary fields, as on Loop's carb
+// screen (Loop's `MealEstimateCard.swift`): a question, a description and/or photos of the meal
+// in, carbs, absorption time and the dish filled into the fields above. The breakdown and the
+// guesses behind the numbers open under "Show calculation", and a follow-up (typed, or one of
+// the quick ones) re-evaluates the whole meal. Worded as a place to ask, because «describe the
+// meal» read as logging and caregivers asked a chatbot app instead.
 
 import PhotosUI
 import SwiftUI
 
 struct MealEstimateSection: View {
     @ObservedObject var model: MealEstimateModel
+    /// Set from outside (the hint by the amount field) to put the cursor in the field.
+    @Binding var focusRequest: Bool
+    /// Opens the favorite food editor with the answer filled in.
+    var onSaveFavorite: (() -> Void)? = nil
+    var isSavedAsFavorite = false
 
     var body: some View {
         if model.isAvailable {
             Section {
-                MealEstimateCard(model: model)
+                MealEstimateCard(model: model, focusRequest: $focusRequest, onSaveFavorite: onSaveFavorite, isSavedAsFavorite: isSavedAsFavorite)
             } header: {
-                Text("Describe the meal", tableName: "MealEstimate", comment: "Section title for the meal estimate card on the carb screen")
+                Text("Ask about carbs", tableName: "MealEstimate", comment: "Section title for the meal estimate card on the carb screen")
             } footer: {
                 if model.estimate != nil {
                     Text("AI estimate — check the numbers before you continue.", tableName: "MealEstimate", comment: "Reminder under the meal estimate that the numbers must be reviewed")
@@ -29,6 +36,9 @@ struct MealEstimateSection: View {
 
 struct MealEstimateCard: View {
     @ObservedObject var model: MealEstimateModel
+    @Binding var focusRequest: Bool
+    var onSaveFavorite: (() -> Void)? = nil
+    var isSavedAsFavorite = false
 
     @FocusState private var isInputFocused: Bool
     @State private var showsBreakdown = false
@@ -49,25 +59,42 @@ struct MealEstimateCard: View {
                         .transition(.opacity)
                 }
 
+                if !model.isEstimating {
+                    if let onSaveFavorite {
+                        saveFavoriteButton(action: onSaveFavorite)
+                    }
+
+                    quickFollowUps
+                }
+
                 photoStrip
 
                 promptField(
-                    String(localized: "Add or correct something…", table: "MealEstimate", comment: "Placeholder for adding more information to a meal estimate"),
+                    String(localized: "Ask more or correct something…", table: "MealEstimate", comment: "Placeholder for adding more information to a meal estimate"),
                     text: $model.followUp,
                     isEnabled: model.canRefine,
                     accessibilityLabel: String(localized: "Update estimate", table: "MealEstimate", comment: "Button label asking AI to re-evaluate the meal with the added information"),
                     action: model.refine
                 )
             } else {
+                Text("Type what he is eating, ask a question or take a photo. The answer fills in the carbs above.", tableName: "MealEstimate", comment: "Explanation at the top of the empty meal estimate card on the carb screen")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
                 photoStrip
 
                 promptField(
-                    String(localized: "E.g. fish gratin, or a product and its carbs", table: "MealEstimate", comment: "Placeholder for the free-text meal description on the carb screen"),
+                    String(localized: "How many carbs in …?", table: "MealEstimate", comment: "Placeholder for the free-text meal description on the carb screen"),
                     text: $model.description,
                     isEnabled: model.canEstimate,
                     accessibilityLabel: String(localized: "Estimate carbs", table: "MealEstimate", comment: "Button label asking AI to estimate the carbs of the described meal"),
                     action: model.estimateMeal
                 )
+            }
+
+            if model.isEstimating, let startedAt = model.startedAt {
+                waitingLine(since: startedAt)
             }
 
             if let error = model.error {
@@ -80,6 +107,11 @@ struct MealEstimateCard: View {
         .animation(.easeInOut(duration: 0.2), value: showsBreakdown)
         .animation(.easeInOut(duration: 0.2), value: model.estimate)
         .animation(.easeInOut(duration: 0.2), value: model.photos)
+        .onChange(of: focusRequest) { _, requested in
+            guard requested else { return }
+            isInputFocused = true
+            focusRequest = false
+        }
         .fullScreenCover(item: $photoSource) { source in
             switch source {
             case .camera:
@@ -95,6 +127,93 @@ struct MealEstimateCard: View {
     }
 
     // MARK: - Input
+
+    /// One tap for the corrections asked most often; "weighed it" puts the start of the sentence
+    /// in the field, for the weight to be typed after it.
+    private var quickFollowUps: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                quickFollowUpButton(String(localized: "Only half", table: "MealEstimate", comment: "Quick follow-up on a meal estimate: the child ate half of it")) {
+                    isInputFocused = false
+                    model.refine(.half)
+                }
+                quickFollowUpButton(String(localized: "Twice as much", table: "MealEstimate", comment: "Quick follow-up on a meal estimate: the child ate twice as much")) {
+                    isInputFocused = false
+                    model.refine(.double)
+                }
+                quickFollowUpButton(String(localized: "I weighed it", table: "MealEstimate", comment: "Quick follow-up on a meal estimate: starts a sentence giving the weight of the food")) {
+                    model.followUp = String(localized: "It weighed ", table: "MealEstimate", comment: "Start of the follow-up sentence giving the weight of the food, followed by the weight the caregiver types")
+                    isInputFocused = true
+                }
+            }
+        }
+    }
+
+    private func quickFollowUpButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.medium))
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(Color.accentColor.opacity(0.14)))
+        }
+        .buttonStyle(.borderless)
+    }
+
+    /// Saving the answer turns the next time into one tap on a favorite.
+    private func saveFavoriteButton(action: @escaping () -> Void) -> some View {
+        Button(action: {
+            isInputFocused = false
+            action()
+        }) {
+            Label(
+                isSavedAsFavorite
+                    ? String(localized: "Saved as favorite food", table: "MealEstimate", comment: "Shown on a meal estimate once it has been saved as a favorite food")
+                    : String(localized: "Save as favorite – one tap next time", table: "MealEstimate", comment: "Button saving a meal estimate as a favorite food"),
+                systemImage: isSavedAsFavorite ? "star.fill" : "star"
+            )
+            .font(.subheadline.weight(.medium))
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.borderless)
+        .disabled(isSavedAsFavorite)
+    }
+
+    /// What is happening while the answer is on its way: a search or photos can take a minute,
+    /// and a spinner alone looks stuck long before that.
+    private func waitingLine(since startedAt: Date) -> some View {
+        TimelineView(.periodic(from: startedAt, by: 1)) { context in
+            let seconds = max(0, Int(context.date.timeIntervalSince(startedAt)))
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(waitingTitle(after: seconds))
+                        .font(.subheadline)
+                    if seconds >= 10 {
+                        Text("It can take up to a minute. Keep the screen open.", tableName: "MealEstimate", comment: "Shown under a meal estimate that is taking a while")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Spacer(minLength: 4)
+                Text(verbatim: "\(seconds) s")
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private func waitingTitle(after seconds: Int) -> String {
+        if seconds < 10 {
+            return String(localized: "Working out the carbs…", table: "MealEstimate", comment: "First line while a meal estimate is on its way")
+        }
+        if !model.photos.isEmpty || model.estimatePhotoCount > 0 {
+            return String(localized: "Looking at the photos…", table: "MealEstimate", comment: "Line while a meal estimate with photos takes a while")
+        }
+        return String(localized: "Looking the food up…", table: "MealEstimate", comment: "Line while a meal estimate takes a while, usually because it searches the web")
+    }
 
     /// The photos that go with the next message, each with a button to take it out again.
     @ViewBuilder
@@ -216,6 +335,13 @@ struct MealEstimateCard: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
+                if estimate.items.count == 1, let per100g = estimate.items[0].carbsPer100g, per100g > 0 {
+                    // For a single food, the number to multiply the weight by, as a chatbot would give.
+                    Text(String(format: String(localized: "%@ per 100 g", table: "MealEstimate", comment: "Carbs per 100 g of a food in a meal estimate (1: carbs in grams)"), MealEstimateText.grams(per100g)))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
                 if let reason = estimate.absorptionReason, !reason.isEmpty {
                     // Why this absorption time: often the one thing the caregiver doesn't know.
                     Text(reason)
@@ -264,7 +390,7 @@ struct MealEstimateCard: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(item.food)
                             .font(.subheadline)
-                        Text(item.amount)
+                        Text(amountLine(for: item))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -313,6 +439,13 @@ struct MealEstimateCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+    }
+
+    /// "1 stk, ca. 70 g · 41 g per 100 g", when the model said what the food holds per 100 g.
+    private func amountLine(for item: MealCarbEstimate.Item) -> String {
+        guard let per100g = item.carbsPer100g, per100g > 0 else { return item.amount }
+        let per100gText = String(format: String(localized: "%@ per 100 g", table: "MealEstimate", comment: "Carbs per 100 g of a food in a meal estimate (1: carbs in grams)"), MealEstimateText.grams(per100g))
+        return "\(item.amount) · \(per100gText)"
     }
 
     /// "45 g · 3 hr", and how many photos the estimate looked at, when it had any.

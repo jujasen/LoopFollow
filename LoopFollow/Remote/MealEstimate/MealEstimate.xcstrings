@@ -2,43 +2,12 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
-    "E.g. fish gratin, or a product and its carbs": {
-      "comment": "Placeholder for the free-text meal description on the carb screen",
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "F.eks. fiskegrateng, eller en vare og karboen"
-          }
-        }
-      }
-    },
-    "Describe the meal": {
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beskriv måltidet"
-          }
-        }
-      }
-    },
     "AI estimate — check the numbers before you continue.": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "AI-anslag – sjekk tallene før du går videre."
-          }
-        }
-      }
-    },
-    "Add or correct something…": {
-      "localizations": {
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Legg til eller rett noe …"
           }
         }
       }
@@ -189,6 +158,182 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klarte ikke å lese beregningen. Prøv igjen."
+          }
+        }
+      }
+    },
+    "Ask about carbs": {
+      "comment": "Section title for the meal estimate card on the carb screen",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spør om karbo"
+          }
+        }
+      }
+    },
+    "How many carbs in …?": {
+      "comment": "Placeholder for the free-text meal description on the carb screen",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvor mye karbo i …?"
+          }
+        }
+      }
+    },
+    "Type what he is eating, ask a question or take a photo. The answer fills in the carbs above.": {
+      "comment": "Explanation at the top of the empty meal estimate card on the carb screen",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skriv hva han spiser, still et spørsmål eller ta bilde. Svaret fylles inn i karbofeltet over."
+          }
+        }
+      }
+    },
+    "Ask more or correct something…": {
+      "comment": "Placeholder for adding more information to a meal estimate",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spør videre eller rett noe …"
+          }
+        }
+      }
+    },
+    "Only half": {
+      "comment": "Quick follow-up on a meal estimate: the child ate half of it",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare halvparten"
+          }
+        }
+      }
+    },
+    "Twice as much": {
+      "comment": "Quick follow-up on a meal estimate: the child ate twice as much",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dobbelt så mye"
+          }
+        }
+      }
+    },
+    "I weighed it": {
+      "comment": "Quick follow-up on a meal estimate: starts a sentence giving the weight of the food",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeg veide maten"
+          }
+        }
+      }
+    },
+    "It weighed ": {
+      "comment": "Start of the follow-up sentence giving the weight of the food, followed by the weight the caregiver types",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maten veide "
+          }
+        }
+      }
+    },
+    "%@ per 100 g": {
+      "comment": "Carbs per 100 g of a food in a meal estimate (1: carbs in grams)",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ per 100 g"
+          }
+        }
+      }
+    },
+    "Saved as favorite food": {
+      "comment": "Shown on a meal estimate once it has been saved as a favorite food",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagret som favoritt"
+          }
+        }
+      }
+    },
+    "Save as favorite – one tap next time": {
+      "comment": "Button saving a meal estimate as a favorite food",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagre som favoritt – ett trykk neste gang"
+          }
+        }
+      }
+    },
+    "It can take up to a minute. Keep the screen open.": {
+      "comment": "Shown under a meal estimate that is taking a while",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det kan ta opptil ett minutt. La skjermen være åpen."
+          }
+        }
+      }
+    },
+    "Working out the carbs…": {
+      "comment": "First line while a meal estimate is on its way",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regner ut karboen …"
+          }
+        }
+      }
+    },
+    "Looking at the photos…": {
+      "comment": "Line while a meal estimate with photos takes a while",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ser på bildene …"
+          }
+        }
+      }
+    },
+    "Looking the food up…": {
+      "comment": "Line while a meal estimate takes a while, usually because it searches the web",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søker etter maten på nettet …"
+          }
+        }
+      }
+    },
+    "Don't know the carbs? Ask here": {
+      "comment": "Link under the carb amount field that jumps to the AI meal estimate",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vet du ikke karboen? Spør her"
           }
         }
       }

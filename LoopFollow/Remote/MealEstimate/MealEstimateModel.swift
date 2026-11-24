@@ -14,6 +14,8 @@ final class MealEstimateModel: ObservableObject {
     @Published private(set) var photos: [Data] = []
     @Published private(set) var estimate: MealCarbEstimate?
     @Published private(set) var isEstimating = false
+    /// When the estimate on its way was asked for, to tell a long wait from a stuck one.
+    @Published private(set) var startedAt: Date?
     @Published var error: String?
     /// Carbs typed in by hand before asking (from the label or the recipe): the estimate keeps
     /// them and is about the absorption time. Forgotten once an estimate has been made.
@@ -76,6 +78,25 @@ final class MealEstimateModel: ObservableObject {
         request(Self.followUpConversation(conversation, estimate: estimate, text: text, photos: photos))
     }
 
+    /// The follow-ups asked most often, one tap each, as in Loop.
+    enum QuickFollowUp: CaseIterable {
+        case half, double
+
+        /// What the model is told.
+        var message: String {
+            switch self {
+            case .half: return "Barnet spiste bare halvparten av dette."
+            case .double: return "Barnet spiste dobbelt så mye av dette."
+            }
+        }
+    }
+
+    func refine(_ quickFollowUp: QuickFollowUp) {
+        guard !isEstimating, estimate != nil else { return }
+        followUp = quickFollowUp.message
+        refine()
+    }
+
     /// Stops an estimate on its way, leaving the text and photos to be corrected and sent again.
     func cancel() {
         task?.cancel()
@@ -113,6 +134,7 @@ final class MealEstimateModel: ObservableObject {
         guard let estimator else { return }
         task?.cancel()
         isEstimating = true
+        startedAt = Date()
         error = nil
         task = Task { [weak self] in
             do {

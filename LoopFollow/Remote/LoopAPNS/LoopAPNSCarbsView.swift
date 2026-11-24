@@ -32,6 +32,11 @@ struct LoopAPNSCarbsView: View {
     /// The dish the AI estimate named, sent in `foodType` ("🍕 Pizza") while its emoji is chosen.
     @State private var estimatedFood: CarbFoodLabel?
     @StateObject private var mealEstimate = MealEstimateModel()
+    @State private var focusMealPrompt = false
+    /// Favorites there were when the editor was opened, to find (and select) the one it saved.
+    @State private var favoriteIDsBeforeSave: Set<String>?
+
+    private static let mealEstimateSectionID = "mealEstimateSection"
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
@@ -112,233 +117,245 @@ struct LoopAPNSCarbsView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Form {
-                    favoriteFoodsSection
+                ScrollViewReader { scrollProxy in
+                    Form {
+                        favoriteFoodsSection
 
-                    if !quickPickMeals.quickPickMeals.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Meals"), infoText: QuickPickSectionHeader.mealInfoText)) {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(quickPickMeals.quickPickMeals) { meal in
-                                        Button {
-                                            carbsAmount = HKQuantity(unit: .gram(), doubleValue: meal.carbs)
-                                        } label: {
-                                            Text("\(Int(meal.carbs))g")
-                                                .font(.subheadline.weight(.medium))
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 8)
-                                                .background(Color.accentColor.opacity(0.15))
-                                                .foregroundColor(.accentColor)
-                                                .cornerRadius(8)
+                        if !quickPickMeals.quickPickMeals.isEmpty {
+                            Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Meals"), infoText: QuickPickSectionHeader.mealInfoText)) {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(quickPickMeals.quickPickMeals) { meal in
+                                            Button {
+                                                carbsAmount = HKQuantity(unit: .gram(), doubleValue: meal.carbs)
+                                            } label: {
+                                                Text("\(Int(meal.carbs))g")
+                                                    .font(.subheadline.weight(.medium))
+                                                    .padding(.horizontal, 14)
+                                                    .padding(.vertical, 8)
+                                                    .background(Color.accentColor.opacity(0.15))
+                                                    .foregroundColor(.accentColor)
+                                                    .cornerRadius(8)
+                                            }
+                                            .buttonStyle(.plain)
                                         }
-                                        .buttonStyle(.plain)
                                     }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                        }
+
+                        Section {
+                            HKQuantityInputView(
+                                label: String(localized: "Carbs Amount"),
+                                quantity: $carbsAmount,
+                                unit: .gram(),
+                                maxLength: 4,
+                                minValue: HKQuantity(unit: .gram(), doubleValue: 1.0),
+                                maxValue: Storage.shared.maxCarbs.value,
+                                isFocused: $carbsFieldIsFocused,
+                                onValidationError: { message in
+                                    alertMessage = message
+                                    alertType = .error
+                                    showAlert = true
+                                }
+                            )
+
+                            if showsAskAboutCarbsHint {
+                                askAboutCarbsHint(scrollProxy: scrollProxy)
+                            }
+
+                            HStack(spacing: 8) {
+                                Text("Time")
+
+                                Spacer()
+
+                                Button(action: {
+                                    adjustConsumedDate(byMinutes: -timeAdjustmentStepMinutes)
+                                }) {
+                                    Image(systemName: "minus")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundColor(Color(.systemGray6))
+                                        .frame(width: 28, height: 28)
+                                        .background(Color.blue)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(.plain)
+
+                                Button(action: {
+                                    showDatePickerSheet = true
+                                }) {
+                                    Text(consumedDate, format: Date.FormatStyle().hour().minute())
+                                        .font(.body.monospacedDigit())
+                                        .foregroundColor(.primary)
+                                        .frame(minWidth: 58)
+                                }
+                                .buttonStyle(.plain)
+
+                                Button(action: {
+                                    adjustConsumedDate(byMinutes: timeAdjustmentStepMinutes)
+                                }) {
+                                    Image(systemName: "plus")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundColor(Color(.systemGray6))
+                                        .frame(width: 28, height: 28)
+                                        .background(Color.blue)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+
+                            HStack(alignment: .center, spacing: 12) {
+                                Text("Food Type")
+
+                                Spacer()
+
+                                HStack(spacing: 10) {
+                                    Button(action: {
+                                        foodType = "🍭"
+                                        setAbsorptionTime(hours: lollipopStandardAbsorption.hours, minutes: lollipopStandardAbsorption.minutes)
+                                    }) {
+                                        Text("🍭")
+                                            .font(.title3)
+                                            .frame(width: 42, height: 42)
+                                            .background(foodType == "🍭" ? Color.white.opacity(0.12) : Color.clear)
+                                            .cornerRadius(12)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Button(action: {
+                                        foodType = "🌮"
+                                        setAbsorptionTime(hours: tacoStandardAbsorption.hours, minutes: tacoStandardAbsorption.minutes)
+                                    }) {
+                                        Text("🌮")
+                                            .font(.title3)
+                                            .frame(width: 42, height: 42)
+                                            .background(foodType == "🌮" ? Color.white.opacity(0.12) : Color.clear)
+                                            .cornerRadius(12)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Button(action: {
+                                        foodType = "🍕"
+                                        setAbsorptionTime(hours: pizzaStandardAbsorption.hours, minutes: pizzaStandardAbsorption.minutes)
+                                    }) {
+                                        Text("🍕")
+                                            .font(.title3)
+                                            .frame(width: 42, height: 42)
+                                            .background(foodType == "🍕" ? Color.white.opacity(0.12) : Color.clear)
+                                            .cornerRadius(12)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Button(action: {
+                                        foodType = "🍽️"
+                                        showAbsorptionPickerSheet = true
+                                    }) {
+                                        Text("🍽️")
+                                            .font(.title3)
+                                            .frame(width: 42, height: 42)
+                                            .background(foodType == "🍽️" ? Color.white.opacity(0.12) : Color.clear)
+                                            .cornerRadius(12)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+
+                            HStack(spacing: 8) {
+                                Text("Absorption Time")
+
+                                Image(systemName: "info.circle")
+                                    .foregroundColor(.blue)
+                                    .font(.subheadline)
+
+                                Spacer()
+
+                                Button(action: {
+                                    showAbsorptionPickerSheet = true
+                                }) {
+                                    Text(absorptionTimeText)
+                                        .foregroundColor(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        MealEstimateSection(
+                            model: mealEstimate,
+                            focusRequest: $focusMealPrompt,
+                            onSaveFavorite: openFavoriteEditor,
+                            isSavedAsFavorite: selectedFavoriteFood != nil
+                        )
+                        .id(Self.mealEstimateSectionID)
+
+                        // TOTP Blocking Warning Section
+                        if isTOTPBlocked && showTOTPWarning {
+                            Section {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .foregroundColor(.orange)
+                                        Text("TOTP Code Already Used")
+                                            .font(.headline)
+                                            .foregroundColor(.orange)
+                                    }
+                                    Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .multilineTextAlignment(.leading)
                                 }
                                 .padding(.vertical, 4)
                             }
                         }
-                    }
 
-                    Section {
-                        HKQuantityInputView(
-                            label: String(localized: "Carbs Amount"),
-                            quantity: $carbsAmount,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 1.0),
-                            maxValue: Storage.shared.maxCarbs.value,
-                            isFocused: $carbsFieldIsFocused,
-                            onValidationError: { message in
-                                alertMessage = message
-                                alertType = .error
-                                showAlert = true
-                            }
-                        )
-
-                        HStack(spacing: 8) {
-                            Text("Time")
-
-                            Spacer()
-
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: -timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "minus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-
-                            Button(action: {
-                                showDatePickerSheet = true
-                            }) {
-                                Text(consumedDate, format: Date.FormatStyle().hour().minute())
-                                    .font(.body.monospacedDigit())
-                                    .foregroundColor(.primary)
-                                    .frame(minWidth: 58)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        HStack(alignment: .center, spacing: 12) {
-                            Text("Food Type")
-
-                            Spacer()
-
-                            HStack(spacing: 10) {
-                                Button(action: {
-                                    foodType = "🍭"
-                                    setAbsorptionTime(hours: lollipopStandardAbsorption.hours, minutes: lollipopStandardAbsorption.minutes)
-                                }) {
-                                    Text("🍭")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍭" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
+                        Section(header: Text("Security")) {
+                            VStack(alignment: .leading) {
+                                Text("Current OTP Code")
+                                    .font(.headline)
+                                if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
+                                    HStack {
+                                        Text(otpCode)
+                                            .font(.system(.body, design: .monospaced))
+                                            .foregroundColor(.green)
+                                            .padding(.vertical, 4)
+                                            .padding(.horizontal, 8)
+                                            .background(Color.green.opacity(0.1))
+                                            .cornerRadius(4)
+                                        Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                } else {
+                                    Text("Invalid QR code URL")
+                                        .foregroundColor(.red)
                                 }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🌮"
-                                    setAbsorptionTime(hours: tacoStandardAbsorption.hours, minutes: tacoStandardAbsorption.minutes)
-                                }) {
-                                    Text("🌮")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🌮" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍕"
-                                    setAbsorptionTime(hours: pizzaStandardAbsorption.hours, minutes: pizzaStandardAbsorption.minutes)
-                                }) {
-                                    Text("🍕")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍕" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍽️"
-                                    showAbsorptionPickerSheet = true
-                                }) {
-                                    Text("🍽️")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍽️" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
                             }
-                        }
-
-                        HStack(spacing: 8) {
-                            Text("Absorption Time")
-
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.blue)
-                                .font(.subheadline)
-
-                            Spacer()
-
-                            Button(action: {
-                                showAbsorptionPickerSheet = true
-                            }) {
-                                Text(absorptionTimeText)
-                                    .foregroundColor(.secondary)
-                            }
-                            .buttonStyle(.plain)
                         }
                     }
-
-                    MealEstimateSection(model: mealEstimate)
-
-                    // TOTP Blocking Warning Section
-                    if isTOTPBlocked && showTOTPWarning {
-                        Section {
-                            VStack(alignment: .leading, spacing: 8) {
+                    .safeAreaInset(edge: .bottom) {
+                        Button(action: sendCarbs) {
+                            if isLoading {
                                 HStack {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundColor(.orange)
-                                    Text("TOTP Code Already Used")
-                                        .font(.headline)
-                                        .foregroundColor(.orange)
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                    Text("Sending...")
                                 }
-                                Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-
-                    Section(header: Text("Security")) {
-                        VStack(alignment: .leading) {
-                            Text("Current OTP Code")
-                                .font(.headline)
-                            if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
-                                HStack {
-                                    Text(otpCode)
-                                        .font(.system(.body, design: .monospaced))
-                                        .foregroundColor(.green)
-                                        .padding(.vertical, 4)
-                                        .padding(.horizontal, 8)
-                                        .background(Color.green.opacity(0.1))
-                                        .cornerRadius(4)
-                                    Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            } else {
-                                Text("Invalid QR code URL")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    Button(action: sendCarbs) {
-                        if isLoading {
-                            HStack {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                Text("Sending...")
-                            }
-                            .frame(maxWidth: .infinity)
-                        } else {
-                            Text("Send Carbs")
                                 .frame(maxWidth: .infinity)
+                            } else {
+                                Text("Send Carbs")
+                                    .frame(maxWidth: .infinity)
+                            }
                         }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(.bar)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(.bar)
+                    .navigationTitle("Carbs")
+                    .navigationBarTitleDisplayMode(.inline)
                 }
-                .navigationTitle("Carbs")
-                .navigationBarTitleDisplayMode(.inline)
             }
             .sheet(isPresented: $showDatePickerSheet) {
                 NavigationStack {
@@ -425,9 +442,10 @@ struct LoopAPNSCarbsView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showAddFavoriteFood) {
+            .sheet(isPresented: $showAddFavoriteFood, onDismiss: selectSavedFavorite) {
                 NavigationStack {
                     AddEditFavoriteFoodView(
+                        name: estimatedFood?.emoji == foodType ? estimatedFood?.name ?? "" : "",
                         carbs: carbsAmount.doubleValue(for: .gram()),
                         foodType: foodType,
                         absorptionTime: absorptionTimeValue * 3600
@@ -654,6 +672,53 @@ struct LoopAPNSCarbsView: View {
         return ""
     }
 
+    /// Shown where the number is missing, for whoever doesn't know it; the card that can answer is
+    /// further down.
+    private var showsAskAboutCarbsHint: Bool {
+        mealEstimate.isAvailable
+            && mealEstimate.estimate == nil
+            && !mealEstimate.isEstimating
+            && carbsAmount.doubleValue(for: .gram()) <= 0
+            && selectedFavoriteFood == nil
+    }
+
+    private func askAboutCarbsHint(scrollProxy: ScrollViewProxy) -> some View {
+        Button {
+            carbsFieldIsFocused = false
+            withAnimation {
+                scrollProxy.scrollTo(Self.mealEstimateSectionID, anchor: .top)
+            }
+            focusMealPrompt = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                Text("Don't know the carbs? Ask here", tableName: "MealEstimate", comment: "Link under the carb amount field that jumps to the AI meal estimate")
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundColor(.accentColor)
+        }
+        .buttonStyle(.borderless)
+    }
+
+    private func openFavoriteEditor() {
+        favoriteIDsBeforeSave = Set(favoriteFoods.value.map(\.id))
+        showAddFavoriteFood = true
+    }
+
+    /// Selects the favorite just saved for what is on screen, so the screen shows it is saved.
+    private func selectSavedFavorite() {
+        defer { favoriteIDsBeforeSave = nil }
+        guard let before = favoriteIDsBeforeSave,
+              let saved = favoriteFoods.value.first(where: { !before.contains($0.id) }),
+              let portion = saved.portions.first(where: { abs($0.carbs - carbsAmount.doubleValue(for: .gram())) < 0.01 })
+        else { return }
+        selectedFavoriteFoodID = saved.id
+        selectedPortionID = portion.id
+    }
+
     /// Fills in the fields from an AI estimate. Nothing is sent; the caregiver reviews and
     /// confirms as with a typed entry.
     private func applyEstimate(_ estimate: MealCarbEstimate) {
@@ -741,7 +806,7 @@ extension LoopAPNSCarbsView {
             }
 
             Button {
-                showAddFavoriteFood = true
+                openFavoriteEditor()
             } label: {
                 Label("Save as favorite food", systemImage: "star")
             }
