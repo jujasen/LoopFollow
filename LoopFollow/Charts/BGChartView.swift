@@ -71,7 +71,7 @@ private func chartYDomainUpperBound(_ maxBG: Double) -> Double {
     return clampedMax + topPadding
 }
 
-/// Where on the y-axis a pump or sensor change has its name.
+/// Where on the y-axis a pump or sensor change has its icon.
 private func deviceChangeLabelValue(_ change: BGChartModel.DeviceChange, maxBG: Double) -> Double {
     chartYDomainUpperBound(maxBG) * change.labelFraction
 }
@@ -83,19 +83,17 @@ private func deviceChangeColor(_ kind: BGChartModel.DeviceChange.Kind) -> Color 
     }
 }
 
-/// The name on a pump or sensor change's line.
+/// The icon on a pump or sensor change's line: the pod or sensor symbol in a coloured circle.
 private struct DeviceChangeLabel: View {
     let change: BGChartModel.DeviceChange
 
     var body: some View {
-        Text(change.title)
-            .font(.caption2.weight(.semibold))
+        Image(systemName: change.symbolName)
+            .font(.system(size: 11, weight: .semibold))
             .foregroundColor(.white)
-            .lineLimit(1)
-            .fixedSize()
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(Capsule().fill(deviceChangeColor(change.kind)))
+            .frame(width: 22, height: 22)
+            .background(Circle().fill(deviceChangeColor(change.kind)))
+            .accessibilityLabel(change.title)
     }
 }
 
@@ -1864,7 +1862,7 @@ private struct BGChartCanvas: View, Equatable {
         }
     }
 
-    /// A pump or sensor change: a line through the chart, and on the large chart its name.
+    /// A pump or sensor change: a line through the chart, and on the large chart its icon.
     @ChartContentBuilder
     private var deviceChangeMarks: some ChartContent {
         ForEach(windowed(model.deviceChanges) { $0.date }) { change in
@@ -1879,6 +1877,7 @@ private struct BGChartCanvas: View, Equatable {
                 .symbol {
                     DeviceChangeLabel(change: change)
                 }
+                .accessibilityLabel(change.title)
             }
         }
     }

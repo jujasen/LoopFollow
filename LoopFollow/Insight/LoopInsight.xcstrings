@@ -549,6 +549,28 @@
           }
         }
       }
+    },
+    "Couldn't ask Loop for a fresh look: Nightscout didn't take the request. Try again.": {
+      "comment": "Insight: pull to refresh, posting the request to Nightscout failed",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fikk ikke bedt Loop om en ny vurdering: Nightscout tok ikke imot forespørselen. Prøv igjen."
+          }
+        }
+      }
+    },
+    "LoopFollow can only read Nightscout, so it can't ask Loop for a fresh look; this is what Loop sent last. Give LoopFollow a token with the careportal role (Settings → Nightscout).": {
+      "comment": "Insight: pull to refresh could not ask Loop, the Nightscout token can't write",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LoopFollow kan bare lese fra Nightscout, så den kan ikke be Loop om en ny vurdering. Dette er det Loop sendte sist. Gi LoopFollow et token med rollen careportal (Innstillinger → Nightscout)."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

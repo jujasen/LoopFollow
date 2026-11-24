@@ -301,15 +301,31 @@ final class LoopInsightStore: ObservableObject {
     static let requestTimeout: TimeInterval = 8 * 60
     static let requestEventType = "Insight Refresh"
 
+    /// Why the last pull did not reach Loop, shown under the update button.
+    @Published private(set) var requestProblem: String?
+
     /// Pull to refresh: reads Nightscout now, and asks Loop for a fresh look by putting an
     /// «Insight Refresh» treatment there (Loop takes it away). Then keeps reading until Loop's
-    /// newer upload has come. Without a token that can write, only reads.
+    /// newer upload has come. Without a token that can write, it only reads and says so.
     func requestFreshLook() async {
         await refresh(force: true)
-        guard Storage.shared.nsWriteAuth.value else { return }
         if let requestedAt, Date().timeIntervalSince(requestedAt) < 2 * 60 { return }
+        // The flag is only set when the Nightscout settings are checked, so a token that was
+        // given more rights later still looks read-only. Look again before giving up.
+        if !Storage.shared.nsWriteAuth.value, let canWrite = await Self.tokenCanWrite() {
+            Storage.shared.nsWriteAuth.value = canWrite
+        }
+        guard Storage.shared.nsWriteAuth.value else {
+            requestProblem = String(localized: "LoopFollow can only read Nightscout, so it can't ask Loop for a fresh look; this is what Loop sent last. Give LoopFollow a token with the careportal role (Settings → Nightscout).", table: "LoopInsight", comment: "Insight: pull to refresh could not ask Loop, the Nightscout token can't write")
+            return
+        }
         let now = Date()
-        guard await Self.postRequest(at: now) else { return }
+        // Its own task, so the list redrawing while it runs can't cancel the request.
+        guard await Task(operation: { await Self.postRequest(at: now) }).value else {
+            requestProblem = String(localized: "Couldn't ask Loop for a fresh look: Nightscout didn't take the request. Try again.", table: "LoopInsight", comment: "Insight: pull to refresh, posting the request to Nightscout failed")
+            return
+        }
+        requestProblem = nil
         requestedAt = now
         waitTask?.cancel()
         waitTask = Task { [weak self] in
@@ -324,9 +340,18 @@ final class LoopInsightStore: ObservableObject {
                 }
                 if Date().timeIntervalSince(asked) > Self.requestTimeout {
                     self.requestedAt = nil
-                    self.errorMessage = String(localized: "Loop has not answered. Is it running, and is it a Loop that knows how?", table: "LoopInsight", comment: "Insight tab: a fresh look was asked of Loop, but no newer insight came")
+                    self.requestProblem = String(localized: "Loop has not answered. Is it running, and is it a Loop that knows how?", table: "LoopInsight", comment: "Insight tab: a fresh look was asked of Loop, but no newer insight came")
                     return
                 }
+            }
+        }
+    }
+
+    /// Whether the Nightscout token can write treatments, or nil when Nightscout couldn't be asked.
+    private static func tokenCanWrite() async -> Bool? {
+        await withCheckedContinuation { continuation in
+            NightscoutUtils.verifyURLAndToken { error, _, canWrite, _ in
+                continuation.resume(returning: error == nil ? canWrite : nil)
             }
         }
     }

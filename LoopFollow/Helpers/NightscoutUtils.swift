@@ -199,6 +199,21 @@ class NightscoutUtils {
         return components?.url
     }
 
+    /// Whether a token's permissions allow `permission`. Nightscout's permissions are Shiro
+    /// patterns: a part may be `*` or several names split by commas, and a pattern that stops
+    /// early allows everything under it, so `api:*:create` and `api:treatments` both allow
+    /// `api:treatments:create`.
+    static func grants(_ permission: String, permissionGroups: [[String]]) -> Bool {
+        let wanted = permission.split(separator: ":").map(String.init)
+        return permissionGroups.joined().contains { pattern in
+            let parts = pattern.split(separator: ":").map(String.init)
+            guard !parts.isEmpty, parts.count <= wanted.count else { return false }
+            return zip(parts, wanted).allSatisfy { part, name in
+                part == "*" || part.split(separator: ",").contains { $0.trimmingCharacters(in: .whitespaces) == name }
+            }
+        }
+    }
+
     static func verifyURLAndToken(completion: @escaping (NightscoutError?, String?, Bool, Bool) -> Void) {
         let urlUser = Storage.shared.url.value
         let token = Storage.shared.token.value
@@ -235,7 +250,7 @@ class NightscoutUtils {
                                 if permissionGroups.contains(where: { $0.contains("*") }) {
                                     nsWriteAuth = true
                                     nsAdminAuth = true
-                                } else if permissionGroups.contains(where: { $0.contains("api:treatments:create") }) {
+                                } else if grants("api:treatments:create", permissionGroups: permissionGroups) {
                                     nsWriteAuth = true
                                 }
                                 completion(nil, token, nsWriteAuth, nsAdminAuth)

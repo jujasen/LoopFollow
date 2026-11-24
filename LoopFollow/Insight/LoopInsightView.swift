@@ -300,6 +300,9 @@ struct LoopInsightView: View {
                         Text(String(localized: "AI Dose Advice is off in Loop, so only the numbers are shown.", table: "LoopInsight", comment: "Insight: AI is off in Loop"))
                     }
                 }
+                if let problem = store.requestProblem {
+                    Text(problem).foregroundColor(.orange)
+                }
                 if let error = store.errorMessage {
                     Text(error).foregroundColor(.red)
                 }

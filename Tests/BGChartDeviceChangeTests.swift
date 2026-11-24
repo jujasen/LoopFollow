@@ -39,4 +39,10 @@ struct BGChartDeviceChangeTests {
         #expect(changes[0].labelFraction != changes[1].labelFraction)
         #expect(changes[0].id != changes[1].id)
     }
+
+    @Test("pump and sensor changes have the tiles' icons")
+    func icons() {
+        let changes = BGChartModel.DeviceChange.list(pump: [Self.hours(-2)], sensor: [Self.hours(-5)])
+        #expect(changes.map(\.symbolName) == ["sensor.tag.radiowaves.forward.fill", "cross.vial.fill"])
+    }
 }

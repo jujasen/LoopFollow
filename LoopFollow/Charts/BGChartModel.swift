@@ -74,7 +74,7 @@ final class BGChartModel: ObservableObject {
         }
     }
 
-    /// A pump or sensor change: a line through the whole chart with its name on it, the same
+    /// A pump or sensor change: a line through the whole chart with an icon on it, like the
     /// mark Loop's own chart draws (`BGChartModel.DeviceChange` there). From the "Site Change"
     /// and "Sensor Start" treatments Loop uploads.
     struct DeviceChange: Identifiable, Equatable {
@@ -96,8 +96,16 @@ final class BGChartModel: ObservableObject {
             }
         }
 
-        /// How far up the chart the name sits, as a fraction of the y-axis. The two kinds sit at
-        /// different heights, so both can be read when pump and sensor are changed together.
+        /// The icon on the line: the same symbols as the sensor and pod tiles.
+        var symbolName: String {
+            switch kind {
+            case .pump: return "cross.vial.fill"
+            case .sensor: return "sensor.tag.radiowaves.forward.fill"
+            }
+        }
+
+        /// How far up the chart the icon sits, as a fraction of the y-axis. The two kinds sit at
+        /// different heights, so both can be seen when pump and sensor are changed together.
         var labelFraction: Double {
             switch kind {
             case .pump: return 0.93
