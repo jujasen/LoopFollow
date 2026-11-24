@@ -128,7 +128,7 @@ struct MealView: View {
                         }
                     }
 
-                    MealEstimateSection(model: mealEstimate, focusRequest: .constant(false))
+                    MealEstimateSection(model: mealEstimate)
 
                     Section(header: Text("Schedule")) {
                         Toggle("Schedule for later", isOn: $isScheduling)

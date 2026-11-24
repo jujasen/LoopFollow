@@ -13,8 +13,6 @@ import SwiftUI
 
 struct MealEstimateSection: View {
     @ObservedObject var model: MealEstimateModel
-    /// Set from outside (the hint by the amount field) to put the cursor in the field.
-    @Binding var focusRequest: Bool
     /// Opens the favorite food editor with the answer filled in.
     var onSaveFavorite: (() -> Void)? = nil
     var isSavedAsFavorite = false
@@ -22,12 +20,14 @@ struct MealEstimateSection: View {
     var body: some View {
         if model.isAvailable {
             Section {
-                MealEstimateCard(model: model, focusRequest: $focusRequest, onSaveFavorite: onSaveFavorite, isSavedAsFavorite: isSavedAsFavorite)
+                MealEstimateCard(model: model, onSaveFavorite: onSaveFavorite, isSavedAsFavorite: isSavedAsFavorite)
             } header: {
                 Text("Ask about carbs", tableName: "MealEstimate", comment: "Section title for the meal estimate card on the carb screen")
             } footer: {
                 if model.estimate != nil {
                     Text("AI estimate — check the numbers before you continue.", tableName: "MealEstimate", comment: "Reminder under the meal estimate that the numbers must be reviewed")
+                } else {
+                    Text("Type what he is eating, ask a question or take a photo. The answer fills in the carbs below.", tableName: "MealEstimate", comment: "Explanation under the empty meal estimate card, which is above the carb fields")
                 }
             }
         }
@@ -36,7 +36,6 @@ struct MealEstimateSection: View {
 
 struct MealEstimateCard: View {
     @ObservedObject var model: MealEstimateModel
-    @Binding var focusRequest: Bool
     var onSaveFavorite: (() -> Void)? = nil
     var isSavedAsFavorite = false
 
@@ -77,11 +76,6 @@ struct MealEstimateCard: View {
                     action: model.refine
                 )
             } else {
-                Text("Type what he is eating, ask a question or take a photo. The answer fills in the carbs above.", tableName: "MealEstimate", comment: "Explanation at the top of the empty meal estimate card on the carb screen")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
                 photoStrip
 
                 promptField(
@@ -107,11 +101,6 @@ struct MealEstimateCard: View {
         .animation(.easeInOut(duration: 0.2), value: showsBreakdown)
         .animation(.easeInOut(duration: 0.2), value: model.estimate)
         .animation(.easeInOut(duration: 0.2), value: model.photos)
-        .onChange(of: focusRequest) { _, requested in
-            guard requested else { return }
-            isInputFocused = true
-            focusRequest = false
-        }
         .fullScreenCover(item: $photoSource) { source in
             switch source {
             case .camera:

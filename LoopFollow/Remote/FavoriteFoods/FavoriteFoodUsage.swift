@@ -9,7 +9,7 @@ import Foundation
 /// days, so a food logged in Loop counts the same as one sent from here.
 enum FavoriteFoodUsage {
     /// The carb screen shows this many foods.
-    static let quickPickCount = 10
+    static let quickPickCount = 6
     /// Servings older than this no longer count, so what is eaten now rises to the top.
     static let window: TimeInterval = 90 * 24 * 3600
     /// Two entries this close are one serving.

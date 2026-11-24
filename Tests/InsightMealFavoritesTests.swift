@@ -98,7 +98,7 @@ struct InsightMealFavoritesTests {
         let log = FavoriteFoodUsage.recording(entries, favorites: favorites, into: [:], now: now)
         #expect(log["f3"]?.count == 1)
         let top = FavoriteFoodUsage.mostUsed(favorites, log: log, now: now)
-        #expect(top.count == 10)
+        #expect(top.count == 6)
         #expect(top.prefix(3).map(\.id) == ["f12", "f7", "f3"])
     }
 }
