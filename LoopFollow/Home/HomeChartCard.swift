@@ -11,7 +11,7 @@ struct HomeChartCard: View {
     var smallGraphHeight: CGFloat
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 2) {
             HStack {
                 Text(String(localized: "Glucose", table: "Home", comment: "Title of the chart card on Home"))
                     .font(.subheadline.weight(.semibold))
@@ -27,7 +27,8 @@ struct HomeChartCard: View {
                     .frame(height: smallGraphHeight)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.top, 6)
+        .padding(.bottom, 4)
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(

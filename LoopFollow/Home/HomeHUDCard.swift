@@ -35,7 +35,8 @@ struct HomeHUDCard: View {
                 glucoseColumn
                     .frame(maxWidth: .infinity)
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
         }
         .scrollIndicators(.hidden)
         .refreshable { onRefresh?() }

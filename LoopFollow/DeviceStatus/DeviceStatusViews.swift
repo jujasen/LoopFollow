@@ -136,8 +136,8 @@ private let podTint = Color.blue
 // MARK: - Home screen tiles
 
 /// Two tiles under Home's HUD — sensor and pod — each on its own card with the
-/// time left in large numbers and a lifecycle bar, like the tiles LoopFollow had
-/// before the redesign, only bigger. Tapping one opens the Loop-style detail screen.
+/// time left and a lifecycle bar, like the tiles LoopFollow had before the
+/// redesign. Tapping one opens the Loop-style detail screen.
 struct DeviceStatusStrip: View {
     @ObservedObject var infoManager: InfoManager
 
@@ -204,9 +204,9 @@ struct DeviceStatusStrip: View {
                     HStack(spacing: 4) {
                         ReservoirGauge(fill: snapshot.reservoirFill,
                                        color: snapshot.reservoirLevel.color(normal: podTint))
-                            .frame(width: 14, height: 19)
+                            .frame(width: 12, height: 16)
                         Text(text)
-                            .font(.headline.monospacedDigit())
+                            .font(.subheadline.weight(.semibold).monospacedDigit())
                             .foregroundStyle(snapshot.reservoirLevel.color(normal: .primary))
                     }
                 )
@@ -228,13 +228,18 @@ private struct DeviceTile: View {
         let level = lifecycle?.level(at: now) ?? .normal
         let barColor = lifecycle == nil ? Color.secondary : level.color(normal: tint)
 
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 icon
-                    .frame(width: 30, height: 30)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .frame(width: 24, height: 24)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(remainingText)
+                        .font(.headline.monospacedDigit())
+                        .foregroundStyle(level == .normal ? Color.primary : barColor)
+                }
                 Spacer(minLength: 2)
                 if let trailing {
                     trailing
@@ -243,16 +248,11 @@ private struct DeviceTile: View {
             .lineLimit(1)
             .minimumScaleFactor(0.7)
 
-            Text(remainingText)
-                .font(.title2.weight(.bold).monospacedDigit())
-                .foregroundStyle(level == .normal ? Color.primary : barColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-
             LifecycleBar(progress: lifecycle?.progress(at: now) ?? 0, color: barColor)
-                .frame(height: 6)
+                .frame(height: 4)
         }
-        .padding(12)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
