@@ -122,7 +122,12 @@ struct RemoteCommandOutcomeRow: View {
 
     var body: some View {
         let phase = command.phase(now: now)
-        let showsDetail = expanded || (!showsSentTime && RemoteCommandOutcome.needsAttention(phase))
+        // Outcomes to read before sending again open by themselves: always on Home, and in the
+        // list of recent commands while they are recent enough to act on.
+        let isRecent = now.timeIntervalSince(command.sentAt) < 3 * 60 * 60
+        let opensByItself = RemoteCommandOutcome.needsAttention(phase) && (!showsSentTime || isRecent)
+        // A tap closes one that opened by itself, and opens the others.
+        let showsDetail = expanded != opensByItself
         HStack(alignment: .center, spacing: 10) {
             Image(systemName: RemoteCommandOutcome.symbol(phase))
                 .font(.title3)

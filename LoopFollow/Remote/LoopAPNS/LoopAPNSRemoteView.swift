@@ -14,21 +14,30 @@ struct LoopAPNSRemoteView: View {
     @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
     @ObservedObject private var inbox = RemoteCommandInbox.shared
 
+    /// False when pushed onto the Menu's navigation stack, which already has one.
+    var embedsInNavigationStack: Bool = true
+
     /// How many of the latest commands the list shows.
     private static let recentCount = 8
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if viewModel.loopAPNSSetup {
-                    commandList
-                } else {
-                    notConfigured
-                }
-            }
-            .navigationTitle(String(localized: "Remote", table: "RemoteControl", comment: "Title of the remote control screen"))
-            .navigationBarTitleDisplayMode(viewModel.loopAPNSSetup ? .large : .inline)
+        if embedsInNavigationStack {
+            NavigationStack { screen }
+        } else {
+            screen
         }
+    }
+
+    private var screen: some View {
+        Group {
+            if viewModel.loopAPNSSetup {
+                commandList
+            } else {
+                notConfigured
+            }
+        }
+        .navigationTitle(String(localized: "Remote", table: "RemoteControl", comment: "Title of the remote control screen"))
+        .navigationBarTitleDisplayMode(viewModel.loopAPNSSetup ? .large : .inline)
     }
 
     // MARK: Configured

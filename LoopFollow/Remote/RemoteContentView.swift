@@ -6,6 +6,8 @@ import SwiftUI
 struct RemoteContentView: View {
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var remoteType = Storage.shared.remoteType
+    /// False when pushed onto the Menu's navigation stack, which already has one.
+    var embedsInNavigationStack: Bool = true
 
     var body: some View {
         Group {
@@ -18,7 +20,7 @@ struct RemoteContentView: View {
                 }
 
             case .loopAPNS:
-                LoopAPNSRemoteView()
+                LoopAPNSRemoteView(embedsInNavigationStack: embedsInNavigationStack)
 
             case .none:
                 Text("Please select a Remote Type in Settings.")
