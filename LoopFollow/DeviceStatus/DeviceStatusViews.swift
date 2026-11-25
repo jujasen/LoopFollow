@@ -134,12 +134,12 @@ extension DeviceLifecycle.Level {
 private let sensorTint = Color.teal
 private let podTint = Color.blue
 
-// MARK: - Home screen strip
+// MARK: - Home screen HUD
 
-/// Two tiles under the glucose display — sensor and pod — each with the time
-/// left and a lifecycle bar, like the HUD at the top of Loop. Tapping one opens
-/// the Loop-style detail screen for it.
-struct DeviceStatusStrip: View {
+/// The right side of Home's HUD, as in Loop: the pod with the insulin left and
+/// its age, and the sensor with the time it has left. Tapping one opens the
+/// Loop-style detail screen for it.
+struct DeviceStatusHUDColumn: View {
     @ObservedObject var infoManager: InfoManager
 
     @ObservedObject private var sageInsertTime = Storage.shared.sageInsertTime
@@ -158,18 +158,26 @@ struct DeviceStatusStrip: View {
 
     var body: some View {
         let snapshot = DeviceStatusSnapshot.current
-        if snapshot.sensor != nil || snapshot.pod != nil {
-            TimelineView(.periodic(from: .now, by: 30)) { context in
-                HStack(spacing: 8) {
-                    Button { shown = .sensor } label: {
-                        sensorTile(snapshot, now: context.date)
+        if snapshot.sensor != nil || snapshot.pod != nil || snapshot.reservoirText != nil {
+            HStack(spacing: 12) {
+                Divider()
+                TimelineView(.periodic(from: .now, by: 30)) { context in
+                    VStack(alignment: .leading, spacing: 10) {
+                        if snapshot.pod != nil || snapshot.reservoirText != nil {
+                            Button { shown = .pod } label: {
+                                podRow(snapshot, now: context.date)
+                            }
+                        }
+                        if snapshot.sensor != nil {
+                            Button { shown = .sensor } label: {
+                                sensorRow(snapshot, now: context.date)
+                            }
+                        }
                     }
-                    Button { shown = .pod } label: {
-                        podTile(snapshot, now: context.date)
-                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .frame(width: 104)
             .sheet(item: $shown) { sheet in
                 NavigationStack {
                     switch sheet {
@@ -181,110 +189,79 @@ struct DeviceStatusStrip: View {
         }
     }
 
-    private func sensorTile(_ snapshot: DeviceStatusSnapshot, now: Date) -> some View {
-        DeviceTile(
-            imageName: snapshot.sensorKind.imageName,
-            symbolName: "sensor.tag.radiowaves.forward.fill",
-            title: String(localized: "Sensor", table: "DeviceStatus", comment: "Title of the sensor tile on the home screen"),
-            lifecycle: snapshot.sensor,
-            tint: sensorTint,
-            now: now
-        )
-    }
-
-    private func podTile(_ snapshot: DeviceStatusSnapshot, now: Date) -> some View {
-        DeviceTile(
-            imageName: snapshot.pumpKind.imageName,
-            symbolName: "cross.vial.fill",
-            title: snapshot.pumpKind.shortName,
-            lifecycle: snapshot.pod,
-            tint: podTint,
-            now: now,
-            trailing: snapshot.reservoirText.map { text in
-                AnyView(
-                    HStack(spacing: 3) {
-                        ReservoirGauge(fill: snapshot.reservoirFill,
-                                       color: snapshot.reservoirLevel.color(normal: podTint))
-                            .frame(width: 11, height: 15)
-                        Text(text)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(snapshot.reservoirLevel.color(normal: .primary))
-                    }
-                )
-            }
-        )
-    }
-}
-
-private struct DeviceTile: View {
-    let imageName: String?
-    let symbolName: String
-    let title: String
-    let lifecycle: DeviceLifecycle?
-    let tint: Color
-    let now: Date
-    var trailing: AnyView? = nil
-
-    var body: some View {
-        let level = lifecycle?.level(at: now) ?? .normal
-        let barColor = lifecycle == nil ? Color.secondary : level.color(normal: tint)
-
-        HStack(spacing: 8) {
-            icon
-                .frame(width: 22, height: 22)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(title)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer(minLength: 2)
-                    Text(remainingText)
-                        .font(.subheadline.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(level == .normal ? .primary : barColor)
-                    if let trailing {
-                        Text("·").foregroundStyle(.secondary)
-                        trailing
-                    }
+    private func podRow(_ snapshot: DeviceStatusSnapshot, now: Date) -> some View {
+        let level = snapshot.pod?.level(at: now) ?? .normal
+        let reservoirColor = snapshot.reservoirLevel.color(normal: podTint)
+        let age = snapshot.pod.map { HomeDurationFormat.compact(now.timeIntervalSince($0.start)) }
+        return HStack(spacing: 6) {
+            Group {
+                if snapshot.pumpKind == .omnipod {
+                    ReservoirGauge(fill: snapshot.reservoirFill, color: reservoirColor)
+                } else {
+                    Image(systemName: "cross.vial.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(reservoirColor)
                 }
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
-                ProgressView(value: lifecycle?.progress(at: now) ?? 0)
-                    .tint(barColor)
             }
+            .frame(width: 14, height: 19)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(snapshot.reservoirText ?? "—")
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(snapshot.reservoirLevel.color(normal: .primary))
+                Text([snapshot.pumpKind.shortName, age].compactMap { $0 }.joined(separator: " "))
+                    .font(.caption2)
+                    .foregroundStyle(level == .normal ? Color.secondary : level.color(normal: .secondary))
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .frame(maxWidth: .infinity)
-        .background(Color(UIColor.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
     }
 
-    @ViewBuilder
-    private var icon: some View {
-        if let imageName {
-            Image(imageName)
+    private func sensorRow(_ snapshot: DeviceStatusSnapshot, now: Date) -> some View {
+        let lifecycle = snapshot.sensor
+        let level = lifecycle?.level(at: now) ?? .normal
+        let phase = lifecycle?.phase(at: now)
+        let remaining = lifecycle?.remaining(at: now) ?? 0
+        let value: String
+        let caption: String
+        switch phase {
+        case .warmup:
+            value = "⏳ " + HomeDurationFormat.compact(remaining)
+            caption = String(localized: "Sensor warming up", table: "DeviceStatus", comment: "Home HUD: under the time left of a sensor's warmup")
+        case .active, .grace:
+            value = HomeDurationFormat.compact(remaining)
+            caption = String(localized: "Sensor left", table: "DeviceStatus", comment: "Home HUD: under the time a sensor has left, e.g. '6d' over 'Sensor left'")
+        case .expired:
+            value = String(localized: "Expired", table: "DeviceStatus")
+            caption = String(localized: "Sensor", table: "DeviceStatus")
+        case nil:
+            value = "—"
+            caption = String(localized: "Sensor", table: "DeviceStatus")
+        }
+        return HStack(spacing: 6) {
+            Image(systemName: "sensor.tag.radiowaves.forward.fill")
                 .resizable()
                 .scaledToFit()
-        } else {
-            Image(systemName: symbolName)
-                .foregroundStyle(tint)
+                .foregroundStyle(level.color(normal: sensorTint))
+                .frame(width: 14, height: 16)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(value)
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(level.color(normal: .primary))
+                Text(caption)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
-    }
-
-    private var remainingText: String {
-        guard let lifecycle else { return "—" }
-        switch lifecycle.phase(at: now) {
-        case .warmup:
-            return "⏳ " + DeviceStatusFormat.short(lifecycle.remaining(at: now) ?? 0)
-        case .active, .grace:
-            return DeviceStatusFormat.short(lifecycle.remaining(at: now) ?? 0)
-        case .expired:
-            return String(localized: "Expired", table: "DeviceStatus", comment: "Tile text when a sensor or pod is past its end")
-        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
     }
 }
 

@@ -20,6 +20,8 @@ struct HomeContentView: View {
             // whole screen up by a keyboard's height until a rotation forces the
             // safe area to recompute. Opting out of keyboard avoidance prevents it.
             .ignoresSafeArea(.keyboard)
+            // Home's cards sit on the grouped background, also behind the status bar and tab bar.
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 }
 

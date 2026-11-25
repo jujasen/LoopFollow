@@ -34,6 +34,8 @@ class Observable {
     var loopStatusColor = ObservableValue<Color>(default: .primary)
     var predictionText = ObservableValue<String>(default: "")
     var predictionColor = ObservableValue<Color>(default: .purple)
+    /// Loop's forecast curve from the latest device status, for Home's «in 30 min»; nil for other systems.
+    var loopPrediction = ObservableValue<LoopPredictionCurve?>(default: nil)
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
     /// Replaces the current alarm's name on screen when the firing needs its

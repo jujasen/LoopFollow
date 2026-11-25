@@ -257,7 +257,8 @@ private struct MainBGChart: View {
         GeometryReader { geo in
             chart(viewport: geo.size)
         }
-        .background(Color(.systemBackground))
+        // The surface of Home's chart card, so the chart sits flush in it in light and dark mode.
+        .background(Color(.secondarySystemGroupedBackground))
     }
 
     private func chart(viewport: CGSize) -> some View {
@@ -1280,7 +1281,8 @@ private struct SmallBGChart: View {
                     }
             )
         }
-        .background(Color(.systemBackground))
+        // The surface of Home's chart card, so the chart sits flush in it in light and dark mode.
+        .background(Color(.secondarySystemGroupedBackground))
     }
 
     /// Box showing where the main chart's visible window currently sits.
@@ -2080,5 +2082,23 @@ private struct PillLabel: View {
             .foregroundColor(.primary)
             .multilineTextAlignment(.center)
             .lineLimit(lineLimit)
+    }
+}
+
+extension BGChartInteraction {
+    /// Shows `seconds` of the main chart with "now" where following puts it,
+    /// and keeps following — what Home's 3/6/12/24 h control does.
+    func show(seconds: TimeInterval, model: BGChartModel) {
+        let span = min(max(seconds, BGChartConfig.minVisibleSeconds), BGChartConfig.maxVisibleSeconds)
+        visibleSeconds = span
+        followLatest = true
+        scrollPosition = ChartSpan.leadingEdge(
+            seconds: span,
+            now: model.now,
+            nowFraction: BGChartConfig.followNowFraction,
+            domainStart: model.domainStart,
+            domainEnd: model.domainEnd
+        )
+        persistZoom()
     }
 }

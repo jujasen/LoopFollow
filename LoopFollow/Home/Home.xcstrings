@@ -1,0 +1,363 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld d" : {
+      "comment" : "Days since Loop last ran, under the loop ring",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld d"
+          }
+        }
+      }
+    },
+    "%lld d %lld h" : {
+      "comment" : "A duration: days and hours",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld d %lld t"
+          }
+        }
+      }
+    },
+    "%lld h" : {
+      "comment" : "Hours since Loop last ran, under the loop ring",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld t"
+          }
+        }
+      }
+    },
+    "%lld h %lld min" : {
+      "comment" : "A duration: hours and minutes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld t %lld min"
+          }
+        }
+      }
+    },
+    "%lld hours" : {
+      "comment" : "Chart span, for VoiceOver",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld timer"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "comment" : "Minutes since Loop last ran, under the loop ring",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "Active carbs" : {
+      "comment" : "Home: carbs on board",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive karbo"
+          }
+        }
+      }
+    },
+    "Active insulin" : {
+      "comment" : "Home: insulin on board",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivt insulin"
+          }
+        }
+      }
+    },
+    "All values" : {
+      "comment" : "Title of the information table opened from Home",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle verdier"
+          }
+        }
+      }
+    },
+    "Always shown" : {
+      "comment" : "Information table placement: a card on Home",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alltid synlig"
+          }
+        }
+      }
+    },
+    "Basal" : {
+      "comment" : "Home: the basal rate running now",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basal"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ferdig"
+          }
+        }
+      }
+    },
+    "Forecast" : {
+      "comment" : "Home: where the forecast ends up, when there is no 30-minute value",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prognose"
+          }
+        }
+      }
+    },
+    "Glucose" : {
+      "comment" : "Title of the chart card on Home",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blodsukker"
+          }
+        }
+      }
+    },
+    "Hidden" : {
+      "comment" : "Information table placement: not shown",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjult"
+          }
+        }
+      }
+    },
+    "High" : {
+      "comment" : "Statistics card: above range",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Høyt"
+          }
+        }
+      }
+    },
+    "Home shows active insulin, active carbs, basal and the forecast. The rows below are the full table." : {
+      "comment" : "Footer of the information table placement setting",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hjem viser aktivt insulin, aktive karbo, basal og prognosen. Radene under er hele tabellen."
+          }
+        }
+      }
+    },
+    "Home shows how much of this period was in range. Today starts at midnight in your time zone, or in the Time Zone Override below when it is on. Tap the card for the full statistics." : {
+      "comment" : "Footer of the statistics settings",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hjem viser hvor mye av denne perioden som var i målområdet. «I dag» starter ved midnatt i din tidssone, eller i den overstyrte tidssonen under når den er slått på. Trykk på kortet for hele statistikken."
+          }
+        }
+      }
+    },
+    "In 30 min" : {
+      "comment" : "Home: Loop's forecast 30 minutes from now",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om 30 min"
+          }
+        }
+      }
+    },
+    "In range" : {
+      "comment" : "Statistics card: in range",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I mål"
+          }
+        }
+      }
+    },
+    "Last 24 h: %@ in range" : {
+      "comment" : "Statistics card headline; 1: percentage",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siste 24 t: %@ i målområdet"
+          }
+        }
+      }
+    },
+    "Loop ran %@ ago" : {
+      "comment" : "1: e.g. 2 min",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop kjørte for %@ siden"
+          }
+        }
+      }
+    },
+    "Loop: no runs seen yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop: ingen runder sett ennå"
+          }
+        }
+      }
+    },
+    "Low" : {
+      "comment" : "Statistics card: below range",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lavt"
+          }
+        }
+      }
+    },
+    "More" : {
+      "comment" : "Opens the full statistics from Home",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mer"
+          }
+        }
+      }
+    },
+    "On Home" : {
+      "comment" : "Setting: where Home shows the information table",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Hjem"
+          }
+        }
+      }
+    },
+    "Shows all values" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viser alle verdier"
+          }
+        }
+      }
+    },
+    "Tap the numbers" : {
+      "comment" : "Information table placement: opens with a tap on Home's four numbers",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trykk på tallene"
+          }
+        }
+      }
+    },
+    "Today: %@ in range" : {
+      "comment" : "Statistics card headline; 1: percentage",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dag: %@ i målområdet"
+          }
+        }
+      }
+    },
+    "g" : {
+      "comment" : "Symbol for grams",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

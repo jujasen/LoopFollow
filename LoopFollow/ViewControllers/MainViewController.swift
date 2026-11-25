@@ -155,7 +155,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     // MARK: - Programmatic UI Setup
 
     private func setupUI() {
-        view.backgroundColor = .systemBackground
+        // Home's cards sit on the grouped background, as in Loop.
+        view.backgroundColor = .systemGroupedBackground
 
         infoManager = InfoManager()
         WatchSessionManager.shared.observe(infoManager, stats: statsDisplayModel)

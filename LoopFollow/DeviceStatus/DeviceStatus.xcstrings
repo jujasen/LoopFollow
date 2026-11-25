@@ -321,6 +321,30 @@
         }
       }
     },
+    "Sensor left": {
+      "comment": "Home HUD: under the time a sensor has left, e.g. '6d' over 'Sensor left'",
+      "extractionState": "manual",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor igjen"
+          }
+        }
+      }
+    },
+    "Sensor warming up": {
+      "comment": "Home HUD: under the time left of a sensor's warmup",
+      "extractionState": "manual",
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensoren varmes opp"
+          }
+        }
+      }
+    },
     "Time": {
       "localizations": {
         "nb": {
