@@ -4,14 +4,14 @@
 import SwiftUI
 
 /// The top of Home, laid out like the HUD at the top of Loop's status screen:
-/// the loop ring with its age, the glucose with trend, delta and age, and the
-/// pod and sensor on the right. Pull down on it to refresh, as before.
+/// the loop ring with its age, and the glucose with trend, delta and age in
+/// large type. The sensor and pod have their own tiles under it.
+/// Pull down on it to refresh, as before.
 /// While the chart is being scrubbed it shows the scrubbed time instead.
 struct HomeHUDCard: View {
     @ObservedObject var infoManager: InfoManager
     /// Nightscout is set up, so there is a loop to show.
     var showsLoop: Bool
-    var showsDevices: Bool
     var onRefresh: (() -> Void)?
 
     @ObservedObject private var bgText = Observable.shared.bgText
@@ -33,10 +33,7 @@ struct HomeHUDCard: View {
                     loopColumn
                 }
                 glucoseColumn
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                if showsDevices {
-                    DeviceStatusHUDColumn(infoManager: infoManager)
-                }
+                    .frame(maxWidth: .infinity)
             }
             .padding(12)
         }
@@ -101,25 +98,33 @@ struct HomeHUDCard: View {
         let unit = UnitSettingsStore.shared.glucoseUnit.rawValue
         let delta = snapshot?.deltaText ?? deltaText.value
         let detail = snapshot == nil
-            ? [unit, delta, minAgoText.value].filter { !$0.isEmpty }.joined(separator: " · ")
-            : [unit, delta].filter { !$0.isEmpty }.joined(separator: " · ")
+            ? [unit, minAgoText.value].filter { !$0.isEmpty }.joined(separator: " · ")
+            : unit
 
-        return VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .center, spacing: 6) {
+        return VStack(alignment: .center, spacing: 2) {
+            HStack(alignment: .center, spacing: 10) {
                 Text(snapshot?.bgText ?? bgText.value)
-                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .font(.system(size: 84, weight: .black))
                     .monospacedDigit()
                     .foregroundStyle(Self.readable(snapshot?.bgColor ?? bgTextColor.value))
                     .strikethrough(isStale, pattern: .solid, color: .red)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                Text(snapshot?.directionText ?? directionText.value)
-                    .font(.system(size: 30, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
+                    .layoutPriority(1)
+                VStack(alignment: .leading, spacing: -4) {
+                    Text(snapshot?.directionText ?? directionText.value)
+                        .font(.system(size: 50, weight: .black))
+                    if !delta.isEmpty {
+                        Text(delta)
+                            .font(.system(size: 30, weight: .bold))
+                            .monospacedDigit()
+                    }
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
             }
             Text(detail)
-                .font(.subheadline)
+                .font(.headline)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

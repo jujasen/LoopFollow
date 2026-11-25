@@ -3,9 +3,9 @@
 
 import SwiftUI
 
-/// Home, laid out like Loop's status screen: the HUD on top, four numbers,
-/// the cards that come and go (sent commands, low watch, AI suggestions), the
-/// chart, and the statistics in plain words.
+/// Home, laid out like Loop's status screen: the HUD on top, the sensor and pod
+/// tiles, four numbers, the cards that come and go (sent commands, low watch,
+/// AI suggestions), the chart, and the statistics in plain words.
 struct MainHomeView: View {
     // Deliberately not @ObservedObject: this view only passes the model on.
     // The chart views observe what they each need, so data and (especially)
@@ -60,12 +60,18 @@ struct MainHomeView: View {
             HomeHUDCard(
                 infoManager: infoManager,
                 showsLoop: isNightscoutEnabled,
-                showsDevices: isNightscoutEnabled && showDeviceStatus.value,
                 onRefresh: onRefresh
             )
             .fixedSize(horizontal: false, vertical: true)
             .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .padding(.bottom, 8)
+
+            // Sensor and pod, each on its own tile: time left and insulin remaining
+            if isNightscoutEnabled && showDeviceStatus.value {
+                DeviceStatusStrip(infoManager: infoManager)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    .padding(.bottom, 8)
+            }
 
             if isNightscoutEnabled {
                 // Active insulin, active carbs, basal and the forecast
