@@ -57,4 +57,38 @@ struct RemoteControlTextTests {
         #expect(OverrideStatusText.subtitle(name: "Syk", endAt: nil, now: now) == "Syk · on until stopped")
         #expect(OverrideStatusText.subtitle(name: "Syk", endAt: now.timeIntervalSince1970 - 10, now: now) == "Syk")
     }
+
+    @Test("#mealOutcome — a meal with bolus says what Loop gave, and never invites sending the carbs again")
+    func mealOutcome() {
+        let sent = Self.now.addingTimeInterval(-5 * 60)
+        let handled = sent.addingTimeInterval(60)
+        let time = handled.formatted(date: .omitted, time: .shortened)
+        func meal(_ status: QueuedRemoteCommand.Status, carbsSaved: Bool? = nil, delivered: Double? = nil, message: String? = nil) -> QueuedRemoteCommand {
+            QueuedRemoteCommand(commandId: "m", objectId: "o", summary: "Meal 45 g + 3.25 U", units: 3.25, sentAt: sent,
+                                expiration: sent.addingTimeInterval(10 * 60), status: status, statusMessage: message, handledAt: handled,
+                                meal: MealBolusDetails(carbs: 45, approvedUnits: 3.25, carbsSaved: carbsSaved, deliveredUnits: delivered))
+        }
+        // Given: the units Loop gave, which can be less than approved.
+        let given = meal(.done, carbsSaved: true, delivered: 3.2)
+        #expect(RemoteCommandOutcome.title(given, now: Self.now) == RemoteCommandText.summary(mealCarbs: 45, units: 3.2))
+        #expect(RemoteCommandOutcome.text(given, now: Self.now) == "Given at \(time)")
+
+        let noBolus = meal(.done, carbsSaved: true, delivered: 0)
+        #expect(noBolus.phase(now: Self.now) == .savedWithoutBolus)
+        #expect(RemoteCommandOutcome.title(noBolus, now: Self.now) == "Meal 45 g")
+        #expect(RemoteCommandOutcome.text(noBolus, now: Self.now) == "Carbs saved, no bolus")
+        #expect(!RemoteCommandOutcome.needsAttention(.savedWithoutBolus))
+
+        // The carbs are in Loop, the bolus is not: shown open, and its text says not to resend the carbs.
+        let bolusFailed = meal(.failed, carbsSaved: true, message: "Pump error.")
+        #expect(bolusFailed.phase(now: Self.now) == .carbsSavedBolusFailed)
+        #expect(RemoteCommandOutcome.text(bolusFailed, now: Self.now) == "Carbs saved, bolus not given")
+        #expect(RemoteCommandOutcome.needsAttention(.carbsSavedBolusFailed))
+        #expect(RemoteCommandText.detail(bolusFailed, now: Self.now).contains("Don't send the carbs again"))
+
+        let nothing = meal(.rejected, message: "Bolus in progress.")
+        #expect(RemoteCommandOutcome.text(nothing, now: Self.now) == "Rejected: Bolus in progress.")
+        #expect(RemoteCommandOutcome.text(meal(.failed, message: "No pump."), now: Self.now) == "Nothing saved: No pump.")
+        #expect(RemoteCommandOutcome.text(meal(.uncertain, carbsSaved: true), now: Self.now) == "Carbs saved, unsure about the bolus")
+    }
 }

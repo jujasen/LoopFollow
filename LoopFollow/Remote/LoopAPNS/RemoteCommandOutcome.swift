@@ -11,9 +11,28 @@ enum RemoteCommandOutcome {
         date.formatted(date: .omitted, time: .shortened)
     }
 
+    /// What the command was, as Loop resolved it: a meal with bolus shows the units Loop gave,
+    /// which can be less than approved, or only its carbs when no bolus came.
+    static func title(_ command: QueuedRemoteCommand, now: Date) -> String {
+        guard let meal = command.meal else { return command.summary }
+        switch command.phase(now: now) {
+        case .given:
+            return RemoteCommandText.summary(mealCarbs: meal.carbs, units: meal.deliveredUnits ?? meal.approvedUnits)
+        case .savedWithoutBolus:
+            return String(format: String(localized: "Meal %@ g", table: "RemoteControl", comment: "A meal sent with a bolus, when no bolus came; 1: grams"), RemoteCommandText.grams(meal.carbs))
+        default:
+            return command.summary
+        }
+    }
+
     static func text(_ command: QueuedRemoteCommand, now: Date) -> String {
         let message = (command.statusMessage ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let isMeal = command.meal != nil
         switch command.phase(now: now) {
+        case .savedWithoutBolus:
+            return String(localized: "Carbs saved, no bolus", table: "RemoteControl", comment: "A meal with bolus: Loop saved the carbs and gave no bolus")
+        case .carbsSavedBolusFailed:
+            return String(localized: "Carbs saved, bolus not given", table: "RemoteControl", comment: "A meal with bolus: the carbs are in Loop, the bolus is not")
         case .waiting:
             return String(localized: "Waiting for Loop", table: "RemoteControl")
         case .giving:
@@ -25,7 +44,9 @@ enum RemoteCommandOutcome {
             }
             return String(format: String(localized: "Done at %@", table: "RemoteControl", comment: "A command that is not a bolus was carried out; 1: time"), at)
         case .failed:
-            let base = command.isBolus
+            let base = isMeal
+                ? String(localized: "Nothing saved", table: "RemoteControl", comment: "A meal with bolus: neither carbs nor bolus were saved")
+                : command.isBolus
                 ? String(localized: "Not given", table: "RemoteControl")
                 : String(localized: "Failed", table: "RemoteControl", comment: "A command that is not a bolus could not be carried out")
             return message.isEmpty ? base : base + ": " + message
@@ -37,6 +58,9 @@ enum RemoteCommandOutcome {
         case .stopped:
             return String(localized: "Stopped: someone else had just given a dose", table: "RemoteControl")
         case .uncertain:
+            if isMeal {
+                return String(localized: "Carbs saved, unsure about the bolus", table: "RemoteControl")
+            }
             return String(localized: "Unsure whether it was given", table: "RemoteControl")
         case .cancelled:
             return String(localized: "Withdrawn", table: "RemoteControl")
@@ -55,7 +79,8 @@ enum RemoteCommandOutcome {
         switch phase {
         case .waiting, .pushWaiting: return "hourglass.circle"
         case .giving: return "arrow.triangle.2.circlepath.circle"
-        case .given: return "checkmark.circle"
+        case .given, .savedWithoutBolus: return "checkmark.circle"
+        case .carbsSavedBolusFailed: return "exclamationmark.triangle"
         case .failed, .rejected: return "xmark.circle"
         case .stopped: return "hand.raised.circle"
         case .uncertain, .noAnswer, .pushLapsed: return "exclamationmark.triangle"
@@ -66,9 +91,9 @@ enum RemoteCommandOutcome {
 
     static func tint(_ phase: QueuedRemoteCommand.Phase) -> Color {
         switch phase {
-        case .given: return HomePalette.carbs
+        case .given, .savedWithoutBolus: return HomePalette.carbs
         case .waiting, .giving, .pushWaiting: return HomePalette.basal
-        case .uncertain, .noAnswer, .pushLapsed, .lapsed: return HomePalette.warning
+        case .uncertain, .noAnswer, .pushLapsed, .lapsed, .carbsSavedBolusFailed: return HomePalette.warning
         case .stopped, .failed, .rejected: return .red
         case .cancelled: return .secondary
         }
@@ -77,7 +102,8 @@ enum RemoteCommandOutcome {
     /// Outcomes where the longer explanation matters before anyone sends again.
     static func needsAttention(_ phase: QueuedRemoteCommand.Phase) -> Bool {
         switch phase {
-        case .uncertain, .noAnswer, .stopped, .pushLapsed, .lapsed:
+        // A meal whose bolus failed: its explanation says not to send the carbs again.
+        case .uncertain, .noAnswer, .stopped, .pushLapsed, .lapsed, .carbsSavedBolusFailed:
             return true
         default:
             return false
@@ -104,9 +130,9 @@ struct RemoteCommandOutcomeRow: View {
                 .frame(width: 26)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                let outcomeColor = phase == .given ? Color.secondary : RemoteCommandOutcome.tint(phase)
+                let outcomeColor = phase == .given || phase == .savedWithoutBolus ? Color.secondary : RemoteCommandOutcome.tint(phase)
                 if showsSentTime {
-                    Text(command.summary)
+                    Text(RemoteCommandOutcome.title(command, now: now))
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                     Text(RemoteCommandOutcome.text(command, now: now))
@@ -115,7 +141,7 @@ struct RemoteCommandOutcomeRow: View {
                         .lineLimit(showsDetail ? nil : 1)
                 } else {
                     // Home: one line, «Bolus 3,2 E · Given at 13:59».
-                    (Text(command.summary).fontWeight(.semibold)
+                    (Text(RemoteCommandOutcome.title(command, now: now)).fontWeight(.semibold)
                         + Text(" · " + RemoteCommandOutcome.text(command, now: now)).foregroundColor(outcomeColor))
                         .font(.subheadline)
                         .lineLimit(showsDetail ? nil : 1)

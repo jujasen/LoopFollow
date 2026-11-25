@@ -58,6 +58,41 @@
         }
       }
     },
+    "Carbs saved, bolus not given" : {
+      "comment" : "A meal with bolus: the carbs are in Loop, the bolus is not",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbo lagret, bolus ikke gitt"
+          }
+        }
+      }
+    },
+    "Carbs saved, no bolus" : {
+      "comment" : "A meal with bolus: Loop saved the carbs and gave no bolus",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbo lagret, ingen bolus"
+          }
+        }
+      }
+    },
+    "Carbs saved, unsure about the bolus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbo lagret, usikkert om bolusen ble gitt"
+          }
+        }
+      }
+    },
     "Change or delete carbs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -228,6 +263,18 @@
         }
       }
     },
+    "Meal %@ g" : {
+      "comment" : "A meal sent with a bolus, when no bolus came; 1: grams",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Måltid %@ g"
+          }
+        }
+      }
+    },
     "Never reached Loop" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -291,6 +338,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ikke gitt"
+          }
+        }
+      }
+    },
+    "Nothing saved" : {
+      "comment" : "A meal with bolus: neither carbs nor bolus were saved",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingenting lagret"
           }
         }
       }
