@@ -1,0 +1,175 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Done at %@" : {
+      "comment" : "A command that is not a bolus was carried out; 1: time",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utført kl. %@"
+          }
+        }
+      }
+    },
+    "Failed" : {
+      "comment" : "A command that is not a bolus could not be carried out",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mislyktes"
+          }
+        }
+      }
+    },
+    "Given at %@" : {
+      "comment" : "1: time",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gitt kl. %@"
+          }
+        }
+      }
+    },
+    "Loop is giving it now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop gir den nå"
+          }
+        }
+      }
+    },
+    "Loop started but has not answered" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop startet, men har ikke svart"
+          }
+        }
+      }
+    },
+    "Never reached Loop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kom aldri fram til Loop"
+          }
+        }
+      }
+    },
+    "No bolus in Nightscout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen bolus i Nightscout"
+          }
+        }
+      }
+    },
+    "Not given" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke gitt"
+          }
+        }
+      }
+    },
+    "Rejected by Loop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvist av Loop"
+          }
+        }
+      }
+    },
+    "Rejected: %@" : {
+      "comment" : "1: Loop's reason",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvist: %@"
+          }
+        }
+      }
+    },
+    "Sent as a push" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sendt som push"
+          }
+        }
+      }
+    },
+    "Stopped: someone else had just given a dose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppet: noen andre hadde nettopp gitt en dose"
+          }
+        }
+      }
+    },
+    "Unsure whether it was given" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usikkert om den ble gitt"
+          }
+        }
+      }
+    },
+    "Waiting for Loop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Venter på Loop"
+          }
+        }
+      }
+    },
+    "Withdrawn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trukket tilbake"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

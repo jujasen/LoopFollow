@@ -19,6 +19,7 @@ struct AIBolusSuggestionCard: View {
                         AIBolusSuggestionRow(suggestion: suggestion, canReview: remoteType.value == .loopAPNS)
                     }
                 }
+                .padding(.bottom, 8)
             }
         }
     }
@@ -41,14 +42,18 @@ private struct AIBolusSuggestionRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(AIBolusSuggestionText.title(suggestion))
                     .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 if !suggestion.reason.isEmpty {
                     Text(suggestion.reason)
-                        .font(.caption)
+                        .font(.footnote)
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Text(AIBolusSuggestionText.lapses(suggestion))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
             Spacer(minLength: 4)
             VStack(spacing: 6) {
@@ -81,13 +86,9 @@ private struct AIBolusSuggestionRow: View {
                 .buttonStyle(.bordered)
             }
             .tint(.purple)
-            .font(.subheadline)
+            .controlSize(.small)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.purple.opacity(0.16))
-        )
+        .homeCard(padding: 10)
+        .overlay(alignment: .leading) { HomeCardAccent(color: HomePalette.prediction) }
     }
 }
