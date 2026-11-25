@@ -89,9 +89,17 @@ struct FavoriteFoodChip: View {
             }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(food.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.primary)
+                HStack(spacing: 5) {
+                    Text(food.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                    // The grams, as in the sketch: one amount, or the one picked.
+                    if let grams = (selectedPortion ?? (food.hasMultiplePortions ? nil : food.defaultPortion))?.carbs {
+                        Text(String(format: String(localized: "%@ g", table: "MealBolus", comment: "1: grams"), RemoteCommandText.grams(grams)))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.green)
+                    }
+                }
 
                 if let subtitle {
                     Text(subtitle)

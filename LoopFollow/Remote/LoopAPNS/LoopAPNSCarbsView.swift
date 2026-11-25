@@ -7,61 +7,72 @@ import SwiftUI
 struct LoopAPNSCarbsView: View {
     private typealias AbsorptionPreset = (hours: Int, minutes: Int)
 
+    /// «Add meal», then (when Loop takes a meal with bolus) «Meal bolus».
+    private enum Step {
+        case meal
+        case bolus
+    }
+
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
     @ObservedObject private var favoriteFoods = Storage.shared.favoriteFoods
+    @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
+    @ObservedObject private var inbox = RemoteCommandInbox.shared
+    @State private var step: Step = .meal
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
     @State private var absorptionMinutes = 0
-    @State private var foodType = ""
-    @State private var consumedDate = Date()
+    /// The emoji the graph shows («🍕»): from a favorite, the AI estimate or a tapped speed.
+    @State private var foodEmoji = ""
+    @State private var foodName = ""
+    /// nil: now, whenever the meal is sent.
+    @State private var consumedDate: Date?
+    @State private var pickedDate = Date()
     @State private var showDatePickerSheet = false
     @State private var showAbsorptionPickerSheet = false
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
-    @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
     @State private var selectedFavoriteFoodID: String?
-    /// The favorites eaten most lately (`FavoriteFoodUsage`); the rest are under «Browse all favorites».
+    /// The favorites eaten most lately (`FavoriteFoodUsage`); the rest are under «All».
     @State private var usageLog = FavoriteFoodUsage.storedLog
     @State private var selectedPortionID: String?
     @State private var showFavoriteFoodPicker = false
     @State private var showAddFavoriteFood = false
-    /// The dish the AI estimate named, sent in `foodType` ("🍕 Pizza") while its emoji is chosen.
-    @State private var estimatedFood: CarbFoodLabel?
     @StateObject private var mealEstimate = MealEstimateModel()
     /// Favorites there were when the editor was opened, to find (and select) the one it saved.
     @State private var favoriteIDsBeforeSave: Set<String>?
-    private let otpPeriod: TimeInterval = 30
-    private let timeAdjustmentStepMinutes = 5
+    /// The meal with bolus just sent, shown step by step.
+    @State private var sentCommand: SentMealCommand?
+    private let timeAdjustmentStepMinutes = 15
     private let maxPastHours = 12
     private let maxFutureHours = 1
     private let minAllowedAbsorptionTime = 0.5
     private let maxAllowedAbsorptionTime = 8.0
-    private let lollipopStandardAbsorption: AbsorptionPreset = (0, 30)
-    private let tacoStandardAbsorption: AbsorptionPreset = (3, 0)
-    private let pizzaStandardAbsorption: AbsorptionPreset = (5, 0)
-    private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var carbsFieldIsFocused: Bool
 
-    // Computed property to check if TOTP should be blocked
+    private struct SentMealCommand: Identifiable {
+        let id: String
+    }
+
     private var isTOTPBlocked: Bool {
         TOTPService.shared.isTOTPBlocked(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
     }
 
-    private var absorptionTimeValue: Double {
-        Double(absorptionHours) + (Double(absorptionMinutes) / 60.0)
+    /// Loop takes the meal and its bolus as one command (`MealBolusCommand`); otherwise the carbs go
+    /// alone, as before, and the bolus is sent from the bolus screen.
+    private var offersMealBolus: Bool {
+        MealBolusCommand.isOffered(remoteCommands: loopRemoteCommands.value, inboxAvailable: inbox.isAvailable)
     }
 
-    private var absorptionTimeText: String {
-        if absorptionMinutes == 0 {
-            return String(localized: "\(absorptionHours) hr")
-        }
+    private var carbsValue: Double {
+        carbsAmount.doubleValue(for: .gram())
+    }
 
-        return String(localized: "\(absorptionHours) hr \(absorptionMinutes) min")
+    private var absorptionTimeValue: Double {
+        Double(absorptionHours) + (Double(absorptionMinutes) / 60.0)
     }
 
     private var absorptionConfirmationText: String {
@@ -105,6 +116,19 @@ struct LoopAPNSCarbsView: View {
         Date().addingTimeInterval(TimeInterval(maxFutureHours) * 60 * 60)
     }
 
+    /// The speed segment for the absorption time, nil for any other time.
+    private var absorptionPreset: MealAbsorption? {
+        MealAbsorption(rawValue: absorptionHours * 60 + absorptionMinutes)
+    }
+
+    private var foodLabel: CarbFoodLabel {
+        CarbFoodLabel(emoji: foodEmoji, name: foodName)
+    }
+
+    private var draft: MealDraft {
+        MealDraft(carbs: carbsValue, absorptionHours: absorptionTimeValue, label: foodLabel, startDate: consumedDate ?? Date())
+    }
+
     enum AlertType {
         case success
         case error
@@ -113,476 +137,435 @@ struct LoopAPNSCarbsView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    // Asking comes first, as in Loop: the answer fills in the fields under it.
-                    MealEstimateSection(
-                        model: mealEstimate,
-                        onSaveFavorite: openFavoriteEditor,
-                        isSavedAsFavorite: selectedFavoriteFood != nil
+            Group {
+                switch step {
+                case .meal:
+                    mealForm
+                case .bolus:
+                    MealBolusScreen(
+                        draft: draft,
+                        onSaveWithoutBolus: saveWithoutBolus,
+                        isSavingCarbs: isLoading,
+                        onSent: { command in sentCommand = SentMealCommand(id: command.commandId) }
                     )
-
-                    favoriteFoodsSection
-
-                    if !quickPickMeals.quickPickMeals.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Meals"), infoText: QuickPickSectionHeader.mealInfoText)) {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(quickPickMeals.quickPickMeals) { meal in
-                                        Button {
-                                            carbsAmount = HKQuantity(unit: .gram(), doubleValue: meal.carbs)
-                                        } label: {
-                                            Text("\(Int(meal.carbs))g")
-                                                .font(.subheadline.weight(.medium))
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 8)
-                                                .background(Color.accentColor.opacity(0.15))
-                                                .foregroundColor(.accentColor)
-                                                .cornerRadius(8)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                            }
-                        }
-                    }
-
-                    Section {
-                        HKQuantityInputView(
-                            label: String(localized: "Carbs Amount"),
-                            quantity: $carbsAmount,
-                            unit: .gram(),
-                            maxLength: 4,
-                            minValue: HKQuantity(unit: .gram(), doubleValue: 1.0),
-                            maxValue: Storage.shared.maxCarbs.value,
-                            isFocused: $carbsFieldIsFocused,
-                            onValidationError: { message in
-                                alertMessage = message
-                                alertType = .error
-                                showAlert = true
-                            }
-                        )
-
-                        HStack(spacing: 8) {
-                            Text("Time")
-
-                            Spacer()
-
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: -timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "minus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-
-                            Button(action: {
-                                showDatePickerSheet = true
-                            }) {
-                                Text(consumedDate, format: Date.FormatStyle().hour().minute())
-                                    .font(.body.monospacedDigit())
-                                    .foregroundColor(.primary)
-                                    .frame(minWidth: 58)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button(action: {
-                                adjustConsumedDate(byMinutes: timeAdjustmentStepMinutes)
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        HStack(alignment: .center, spacing: 12) {
-                            Text("Food Type")
-
-                            Spacer()
-
-                            HStack(spacing: 10) {
-                                Button(action: {
-                                    foodType = "🍭"
-                                    setAbsorptionTime(hours: lollipopStandardAbsorption.hours, minutes: lollipopStandardAbsorption.minutes)
-                                }) {
-                                    Text("🍭")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍭" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🌮"
-                                    setAbsorptionTime(hours: tacoStandardAbsorption.hours, minutes: tacoStandardAbsorption.minutes)
-                                }) {
-                                    Text("🌮")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🌮" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍕"
-                                    setAbsorptionTime(hours: pizzaStandardAbsorption.hours, minutes: pizzaStandardAbsorption.minutes)
-                                }) {
-                                    Text("🍕")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍕" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: {
-                                    foodType = "🍽️"
-                                    showAbsorptionPickerSheet = true
-                                }) {
-                                    Text("🍽️")
-                                        .font(.title3)
-                                        .frame(width: 42, height: 42)
-                                        .background(foodType == "🍽️" ? Color.white.opacity(0.12) : Color.clear)
-                                        .cornerRadius(12)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-
-                        HStack(spacing: 8) {
-                            Text("Absorption Time")
-
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.blue)
-                                .font(.subheadline)
-
-                            Spacer()
-
-                            Button(action: {
-                                showAbsorptionPickerSheet = true
-                            }) {
-                                Text(absorptionTimeText)
-                                    .foregroundColor(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-
-
-                    // TOTP Blocking Warning Section
-                    if isTOTPBlocked && showTOTPWarning {
-                        Section {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundColor(.orange)
-                                    Text("TOTP Code Already Used")
-                                        .font(.headline)
-                                        .foregroundColor(.orange)
-                                }
-                                Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-
-                    Section(header: Text("Security")) {
-                        VStack(alignment: .leading) {
-                            Text("Current OTP Code")
-                                .font(.headline)
-                            if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
-                                HStack {
-                                    Text(otpCode)
-                                        .font(.system(.body, design: .monospaced))
-                                        .foregroundColor(.green)
-                                        .padding(.vertical, 4)
-                                        .padding(.horizontal, 8)
-                                        .background(Color.green.opacity(0.1))
-                                        .cornerRadius(4)
-                                    Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            } else {
-                                Text("Invalid QR code URL")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    Button(action: sendCarbs) {
-                        if isLoading {
-                            HStack {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                Text("Sending...")
-                            }
-                            .frame(maxWidth: .infinity)
-                        } else {
-                            Text("Send Carbs")
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(carbsAmount.doubleValue(for: .gram()) <= 0 || isLoading || isTOTPBlocked)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(.bar)
-                }
-                .navigationTitle("Carbs")
-                .navigationBarTitleDisplayMode(.inline)
-            }
-            .sheet(isPresented: $showDatePickerSheet) {
-                NavigationStack {
-                    VStack {
-                        DatePicker(
-                            "Time",
-                            selection: Binding(
-                                get: { consumedDate },
-                                set: { consumedDate = clampedConsumedDate($0) }
-                            ),
-                            in: oldestAcceptedDate ... latestAcceptedDate,
-                            displayedComponents: [.hourAndMinute, .date]
-                        )
-                        .datePickerStyle(.wheel)
-                        .labelsHidden()
-                        .padding()
-
-                        Spacer()
-                    }
-                    .navigationTitle("Consumption Time")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") {
-                                consumedDate = clampedConsumedDate(consumedDate)
-                                showDatePickerSheet = false
-                            }
-                        }
-                    }
-                }
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showAbsorptionPickerSheet) {
-                NavigationStack {
-                    VStack {
-                        HStack(spacing: 0) {
-                            Picker("Hours", selection: $absorptionHours) {
-                                ForEach(0 ... maximumAbsorptionHours, id: \.self) { hour in
-                                    Text("\(hour) hr")
-                                        .tag(hour)
-                                }
-                            }
-
-                            Picker("Minutes", selection: $absorptionMinutes) {
-                                ForEach(absorptionMinuteOptions, id: \.self) { minute in
-                                    Text("\(minute) min")
-                                        .tag(minute)
-                                }
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 180)
-                        .padding(.horizontal)
-
-                        Spacer()
-                    }
-                    .navigationTitle("Absorption Time")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") {
-                                normalizeAbsorptionTime()
-                                showAbsorptionPickerSheet = false
-                            }
-                        }
-                    }
-                }
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-                .onAppear {
-                    normalizeAbsorptionTime()
-                }
-                .onChange(of: absorptionHours) { _ in
-                    normalizeAbsorptionTime()
+                    .transition(.move(edge: .trailing))
                 }
             }
-            .sheet(isPresented: $showFavoriteFoodPicker) {
-                FavoriteFoodPickerView(selectedFood: selectedFavoriteFood) { food, portion in
-                    if let food {
-                        applyFavorite(food, portion: portion)
-                    } else {
-                        clearFavoriteSelection()
-                    }
-                }
-            }
-            .sheet(isPresented: $showAddFavoriteFood, onDismiss: selectSavedFavorite) {
-                NavigationStack {
-                    AddEditFavoriteFoodView(
-                        name: estimatedFood?.emoji == foodType ? estimatedFood?.name ?? "" : "",
-                        carbs: carbsAmount.doubleValue(for: .gram()),
-                        foodType: foodType,
-                        absorptionTime: absorptionTimeValue * 3600
-                    )
-                }
-            }
-            .onChange(of: carbsAmount) { _, newValue in
-                // Typed by hand before asking the AI: known carbs, kept as they are by the estimate.
-                if carbsFieldIsFocused {
-                    let grams = newValue.doubleValue(for: .gram())
-                    mealEstimate.knownCarbs = grams > 0 ? grams : nil
-                }
-                // A hand-edited amount is no longer the favorite that was picked.
-                if let portion = selectedFavoriteFood?.portion(withID: selectedPortionID),
-                   abs(portion.carbs - newValue.doubleValue(for: .gram())) > 0.01
-                {
-                    selectedFavoriteFoodID = nil
-                    selectedPortionID = nil
-                }
-            }
-            .onReceive(mealEstimate.$estimate.compactMap { $0 }) { estimate in
-                applyEstimate(estimate)
-            }
-            .onAppear {
-                // Validate APNS setup
-                let apnsService = LoopAPNSService()
-                if !apnsService.validateSetup() {
-                    alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
-                    alertType = .error
-                    showAlert = true
-                }
-
-                quickPickMeals.refresh(
-                    maxCarbs: Storage.shared.maxCarbs.value.doubleValue(for: .gram()),
-                    includeFatProtein: false
-                )
-
-                // Reset timer state so it shows '-' until first tick
-                otpTimeRemaining = nil
-                // Don't reset TOTP usage flag here - let the timer handle it
-
-                // Validate TOTP state when view appears
-                _ = isTOTPBlocked
-
-                // Add delay before showing TOTP warning to prevent flash after successful send
-                if isTOTPBlocked {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showTOTPWarning = true
+            .animation(.easeInOut(duration: 0.25), value: step == .bolus)
+            .navigationTitle(step == .meal ? String(localized: "Add meal", table: "MealBolus") : String(localized: "Meal bolus", table: "MealBolus"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if step == .bolus {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            step = .meal
+                        } label: {
+                            Label(String(localized: "Meal", table: "MealBolus", comment: "Back button from the meal bolus to the meal"), systemImage: "chevron.left")
+                                .labelStyle(.titleAndIcon)
+                        }
                     }
                 } else {
-                    showTOTPWarning = false
-                }
-            }
-            .onReceive(otpTimer) { _ in
-                let now = Date().timeIntervalSince1970
-                let newOtpTimeRemaining = Int(otpPeriod - (now.truncatingRemainder(dividingBy: otpPeriod)))
-
-                // Check if we've moved to a new TOTP period (when time remaining increases)
-                if let currentOtpTimeRemaining = otpTimeRemaining,
-                   newOtpTimeRemaining > currentOtpTimeRemaining
-                {
-                    // New TOTP code generated, reset the usage flag
-                    TOTPService.shared.resetTOTPUsage()
-                }
-
-                // Also check if we're at the very beginning of a new period (when time remaining is close to 30)
-                if newOtpTimeRemaining >= 29 {
-                    // We're at the start of a new TOTP period, reset the usage flag
-                    TOTPService.shared.resetTOTPUsage()
-                }
-
-                otpTimeRemaining = newOtpTimeRemaining
-            }
-            .alert(isPresented: $showAlert) {
-                switch alertType {
-                case .success:
-                    return Alert(
-                        title: Text("Command Sent"),
-                        message: Text(alertMessage),
-                        dismissButton: .default(Text("OK")) {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(String(localized: "Cancel", table: "MealBolus")) {
                             presentationMode.wrappedValue.dismiss()
                         }
-                    )
-                case .error:
-                    return Alert(
-                        title: Text("Error"),
-                        message: Text(alertMessage),
-                        dismissButton: .default(Text("OK"))
-                    )
-                case .confirmation:
-                    let timeFormatter = DateFormatter()
-                    timeFormatter.timeStyle = .short
-                    timeFormatter.dateStyle = .short
-                    return Alert(
-                        title: Text("Confirm Carbs"),
-                        message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(absorptionConfirmationText)h absorption time at \(timeFormatter.string(from: consumedDate))?"),
-                        primaryButton: .default(Text("Send")) {
-                            sendCarbsConfirmed()
-                        },
-                        secondaryButton: .cancel()
-                    )
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        favoritesMenu
+                    }
                 }
+            }
+        }
+        // Pushed from the remote screen, its bar would sit above this one with a second back button.
+        .toolbar(.hidden, for: .navigationBar)
+        .modifier(TOTPPeriodWatcher())
+        .sheet(isPresented: $showDatePickerSheet) {
+            NavigationStack {
+                VStack {
+                    DatePicker(
+                        "Time",
+                        selection: Binding(
+                            get: { pickedDate },
+                            set: { pickedDate = clampedConsumedDate($0) }
+                        ),
+                        in: oldestAcceptedDate ... latestAcceptedDate,
+                        displayedComponents: [.hourAndMinute, .date]
+                    )
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+                    .padding()
+
+                    Spacer()
+                }
+                .navigationTitle("Consumption Time")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            setConsumedDate(clampedConsumedDate(pickedDate))
+                            showDatePickerSheet = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showAbsorptionPickerSheet) {
+            NavigationStack {
+                VStack {
+                    HStack(spacing: 0) {
+                        Picker("Hours", selection: $absorptionHours) {
+                            ForEach(0 ... maximumAbsorptionHours, id: \.self) { hour in
+                                Text("\(hour) hr")
+                                    .tag(hour)
+                            }
+                        }
+
+                        Picker("Minutes", selection: $absorptionMinutes) {
+                            ForEach(absorptionMinuteOptions, id: \.self) { minute in
+                                Text("\(minute) min")
+                                    .tag(minute)
+                            }
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 180)
+                    .padding(.horizontal)
+
+                    Spacer()
+                }
+                .navigationTitle("Absorption Time")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            normalizeAbsorptionTime()
+                            showAbsorptionPickerSheet = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+            .onAppear {
+                normalizeAbsorptionTime()
+            }
+            .onChange(of: absorptionHours) { _ in
+                normalizeAbsorptionTime()
+            }
+        }
+        .sheet(isPresented: $showFavoriteFoodPicker) {
+            FavoriteFoodPickerView(selectedFood: selectedFavoriteFood) { food, portion in
+                if let food {
+                    applyFavorite(food, portion: portion)
+                } else {
+                    clearFavoriteSelection()
+                }
+            }
+        }
+        .sheet(isPresented: $showAddFavoriteFood, onDismiss: selectSavedFavorite) {
+            NavigationStack {
+                AddEditFavoriteFoodView(
+                    name: foodName,
+                    carbs: carbsValue,
+                    foodType: foodEmoji,
+                    absorptionTime: absorptionTimeValue * 3600
+                )
+            }
+        }
+        .sheet(item: $sentCommand) { sent in
+            MealSentSheet(commandId: sent.id) {
+                sentCommand = nil
+                presentationMode.wrappedValue.dismiss()
+            }
+            .interactiveDismissDisabled(false)
+        }
+        .onChange(of: carbsAmount) { _, newValue in
+            // Typed by hand before asking the AI: known carbs, kept as they are by the estimate.
+            if carbsFieldIsFocused {
+                let grams = newValue.doubleValue(for: .gram())
+                mealEstimate.knownCarbs = grams > 0 ? grams : nil
+            }
+            // A hand-edited amount is no longer the favorite that was picked.
+            if let portion = selectedFavoriteFood?.portion(withID: selectedPortionID),
+               abs(portion.carbs - newValue.doubleValue(for: .gram())) > 0.01
+            {
+                selectedFavoriteFoodID = nil
+                selectedPortionID = nil
+            }
+        }
+        .onReceive(mealEstimate.$estimate.compactMap { $0 }) { estimate in
+            applyEstimate(estimate)
+        }
+        .onAppear {
+            if !LoopAPNSService().validateSetup() {
+                alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
+                alertType = .error
+                showAlert = true
+            }
+
+            // Add delay before showing TOTP warning to prevent flash after successful send
+            if isTOTPBlocked {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showTOTPWarning = true
+                }
+            } else {
+                showTOTPWarning = false
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            switch alertType {
+            case .success:
+                return Alert(
+                    title: Text("Command Sent"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                )
+            case .error:
+                return Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            case .confirmation:
+                let timeFormatter = DateFormatter()
+                timeFormatter.timeStyle = .short
+                timeFormatter.dateStyle = .short
+                return Alert(
+                    title: Text("Confirm Carbs"),
+                    message: Text("Send \(Int(carbsAmount.doubleValue(for: .gram())))g of carbs with \(absorptionConfirmationText)h absorption time at \(timeFormatter.string(from: consumedDate ?? Date()))?"),
+                    primaryButton: .default(Text("Send")) {
+                        sendCarbsConfirmed()
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }
 
-    private func sendCarbs() {
-        guard carbsAmount.doubleValue(for: .gram()) > 0 else {
-            alertMessage = String(localized: "Please enter a valid carb amount")
-            alertType = .error
-            showAlert = true
-            return
-        }
+    // MARK: - Step 1: the meal
 
-        // Check guardrails
+    private var mealForm: some View {
+        Form {
+            favoriteFoodsSection
+
+            // The AI estimate fills in the fields under it.
+            MealEstimateSection(
+                model: mealEstimate,
+                onSaveFavorite: openFavoriteEditor,
+                isSavedAsFavorite: selectedFavoriteFood != nil
+            )
+
+            Section {
+                BigAmountRow(
+                    label: String(localized: "Carbohydrates", table: "MealBolus"),
+                    quantity: $carbsAmount,
+                    unit: .gram(),
+                    unitText: String(localized: "g", table: "MealBolus", comment: "Grams after the carb field"),
+                    color: .systemGreen,
+                    maxLength: 4,
+                    minValue: HKQuantity(unit: .gram(), doubleValue: 1.0),
+                    maxValue: Storage.shared.maxCarbs.value,
+                    isFocused: $carbsFieldIsFocused,
+                    onValidationError: { message in
+                        alertMessage = message
+                        alertType = .error
+                        showAlert = true
+                    }
+                )
+
+                timeRow
+
+                HStack(spacing: 8) {
+                    Text("Food", tableName: "MealBolus")
+                    Spacer()
+                    if !foodEmoji.isEmpty {
+                        Text(foodEmoji)
+                    }
+                    TextField(String(localized: "Optional", table: "MealBolus", comment: "Placeholder of the food name field"), text: $foodName)
+                        .multilineTextAlignment(.trailing)
+                        .foregroundColor(.secondary)
+                        .submitLabel(.done)
+                        // Hugs the name, so the emoji sits right in front of it.
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+
+                absorptionRow
+            } footer: {
+                Text(offersMealBolus
+                    ? String(localized: "The next screen shows what Loop will give as a bolus for this meal. Nothing is sent until you tap «Save and deliver».", table: "MealBolus")
+                    : String(localized: "This Loop can't take a meal and its bolus as one command yet, so the carbs are sent on their own. Send the bolus afterwards from Bolus.", table: "MealBolus"))
+            }
+
+            if isTOTPBlocked && showTOTPWarning && !offersMealBolus {
+                TOTPBlockedSection()
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button(action: continueOrSend) {
+                if isLoading {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Sending...")
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Text(offersMealBolus ? String(localized: "Continue", table: "MealBolus") : String(localized: "Save carbs", table: "MealBolus"))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(carbsValue <= 0 || isLoading || (!offersMealBolus && isTOTPBlocked))
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(.bar)
+        }
+    }
+
+    private var timeRow: some View {
+        HStack(spacing: 8) {
+            Text("Time")
+            Spacer()
+            Button {
+                adjustConsumedDate(byMinutes: -timeAdjustmentStepMinutes)
+            } label: {
+                Text("−15").font(.subheadline.weight(.semibold).monospacedDigit())
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .accessibilityLabel(String(localized: "15 minutes earlier", table: "MealBolus"))
+
+            Button {
+                pickedDate = consumedDate ?? Date()
+                showDatePickerSheet = true
+            } label: {
+                Group {
+                    if let consumedDate {
+                        Text(consumedDate, format: Date.FormatStyle().hour().minute())
+                    } else {
+                        Text("Now", tableName: "MealBolus", comment: "The meal's time when it is now")
+                    }
+                }
+                .font(.body.weight(.semibold).monospacedDigit())
+                .foregroundColor(.primary)
+                .frame(minWidth: 52)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                adjustConsumedDate(byMinutes: timeAdjustmentStepMinutes)
+            } label: {
+                Text("+15").font(.subheadline.weight(.semibold).monospacedDigit())
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .accessibilityLabel(String(localized: "15 minutes later", table: "MealBolus"))
+        }
+    }
+
+    private var absorptionRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("How fast is it absorbed?", tableName: "MealBolus")
+            Picker(String(localized: "Absorption", table: "MealBolus"), selection: Binding(
+                get: { absorptionPreset },
+                set: { preset in
+                    guard let preset else { return }
+                    setAbsorptionTime(hours: preset.minutes / 60, minutes: preset.minutes % 60)
+                    // As the emoji buttons did: the speed tapped is what the graph shows, unless the
+                    // meal has its own emoji.
+                    if foodEmoji.isEmpty || MealAbsorption.allCases.contains(where: { $0.emoji == foodEmoji }) {
+                        foodEmoji = preset.emoji
+                    }
+                }
+            )) {
+                ForEach(MealAbsorption.allCases) { preset in
+                    Text(preset.title + " " + MealAbsorption.shortText(hours: Double(preset.minutes) / 60))
+                        .tag(Optional(preset))
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            HStack {
+                if let absorptionPreset {
+                    Text(absorptionPreset.examples)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text(String(format: String(localized: "Own time: %@", table: "MealBolus", comment: "1: absorption time"), MealAbsorption.shortText(hours: absorptionTimeValue)))
+                        .foregroundColor(.orange)
+                }
+                Spacer()
+                Button(String(localized: "Other time…", table: "MealBolus")) {
+                    showAbsorptionPickerSheet = true
+                }
+                .buttonStyle(.borderless)
+            }
+            .font(.footnote)
+        }
+        .padding(.vertical, 4)
+    }
+
+    // MARK: - Sending
+
+    /// «Continue» to the meal bolus, or (for a Loop without it) the carbs alone as before.
+    private func continueOrSend() {
+        guard validateMeal() else { return }
+        carbsFieldIsFocused = false
+        if offersMealBolus {
+            step = .bolus
+        } else {
+            alertType = .confirmation
+            showAlert = true
+        }
+    }
+
+    /// The same checks as before sending carbs.
+    private func validateMeal() -> Bool {
+        guard carbsValue > 0 else {
+            showError(String(localized: "Please enter a valid carb amount"))
+            return false
+        }
         let maxCarbs = Storage.shared.maxCarbs.value.doubleValue(for: .gram())
-        let carbsValue = carbsAmount.doubleValue(for: .gram())
-
         if carbsValue > maxCarbs {
-            alertMessage = String(localized: "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount.")
-            alertType = .error
-            showAlert = true
-            return
+            showError(String(localized: "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount."))
+            return false
         }
-
-        // Validate time constraints (similar to LoopCaregiver)
+        let date = consumedDate ?? Date()
         let now = Date()
-        let oldestAcceptedDate = now.addingTimeInterval(-60 * 60 * Double(maxPastHours))
-        let latestAcceptedDate = now.addingTimeInterval(60 * 60 * Double(maxFutureHours))
-
-        if consumedDate < oldestAcceptedDate {
-            alertMessage = String(localized: "Time must be within the prior \(maxPastHours) hours")
-            alertType = .error
-            showAlert = true
-            return
+        if date < now.addingTimeInterval(-60 * 60 * Double(maxPastHours)) {
+            showError(String(localized: "Time must be within the prior \(maxPastHours) hours"))
+            return false
         }
-
-        if consumedDate > latestAcceptedDate {
-            alertMessage = String(localized: "Time must be within the next \(maxFutureHours) hour")
-            alertType = .error
-            showAlert = true
-            return
+        if date > now.addingTimeInterval(60 * 60 * Double(maxFutureHours)) {
+            showError(String(localized: "Time must be within the next \(maxFutureHours) hour"))
+            return false
         }
+        guard absorptionTimeValue >= minAllowedAbsorptionTime, absorptionTimeValue <= maxAllowedAbsorptionTime else {
+            showError(absorptionValidationMessage)
+            return false
+        }
+        return true
+    }
 
-        alertType = .confirmation
+    private func showError(_ message: String) {
+        alertMessage = message
+        alertType = .error
         showAlert = true
+    }
+
+    /// «Save without bolus» on the meal bolus screen: the plain carb command.
+    private func saveWithoutBolus() {
+        guard validateMeal() else { return }
+        if isTOTPBlocked && !inbox.isAvailable {
+            showError(String(localized: "This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command."))
+            return
+        }
+        sendCarbsConfirmed()
     }
 
     private func sendCarbsConfirmed() {
@@ -609,12 +592,12 @@ struct LoopAPNSCarbsView: View {
         // Create the APNS payload for carbs with custom time
         // We "randomize" the milliseconds to avoid issue with NS which
         // doesn't allow entries at the same second.
-        let adjustedConsumedDate = consumedDate.dateUsingCurrentSeconds()
+        let adjustedConsumedDate = (consumedDate ?? Date()).dateUsingCurrentSeconds()
         let payload = LoopAPNSPayload(
             type: .carbs,
-            carbsAmount: carbsAmount.doubleValue(for: .gram()),
+            carbsAmount: carbsValue,
             absorptionTime: selectedAbsorptionTime,
-            foodType: CarbFoodLabel(emoji: foodType, name: foodName).foodType,
+            foodType: foodLabel.foodType,
             consumedDate: adjustedConsumedDate,
             otp: otpCode
         )
@@ -651,18 +634,6 @@ struct LoopAPNSCarbsView: View {
         }
     }
 
-    /// The dish's name for `foodType`: the favorite's, or the AI estimate's while its emoji is
-    /// still the one chosen.
-    private var foodName: String {
-        if let selectedFavoriteFood {
-            return selectedFavoriteFood.name
-        }
-        if let estimatedFood, estimatedFood.emoji == foodType {
-            return estimatedFood.name
-        }
-        return ""
-    }
-
     private func openFavoriteEditor() {
         favoriteIDsBeforeSave = Set(favoriteFoods.value.map(\.id))
         showAddFavoriteFood = true
@@ -686,8 +657,8 @@ struct LoopAPNSCarbsView: View {
         selectedFavoriteFoodID = nil
         selectedPortionID = nil
         carbsAmount = HKQuantity(unit: .gram(), doubleValue: estimate.roundedCarbs)
-        foodType = estimate.foodTypeEmoji
-        estimatedFood = CarbFoodLabel(emoji: estimate.foodTypeEmoji, name: estimate.name)
+        foodEmoji = estimate.foodTypeEmoji
+        foodName = estimate.name
         let components = FavoriteFoodAbsorption.components(estimate.absorptionTime)
         setAbsorptionTime(hours: components.hours, minutes: components.minutes)
     }
@@ -717,8 +688,14 @@ struct LoopAPNSCarbsView: View {
     }
 
     private func adjustConsumedDate(byMinutes minutes: Int) {
-        let adjustedDate = Calendar.current.date(byAdding: .minute, value: minutes, to: consumedDate) ?? consumedDate
-        consumedDate = clampedConsumedDate(adjustedDate)
+        let base = consumedDate ?? Date()
+        let adjustedDate = Calendar.current.date(byAdding: .minute, value: minutes, to: base) ?? base
+        setConsumedDate(clampedConsumedDate(adjustedDate))
+    }
+
+    /// Back within a minute of now is «now» again.
+    private func setConsumedDate(_ date: Date) {
+        consumedDate = abs(date.timeIntervalSinceNow) < 60 ? nil : date
     }
 
     private func clampedConsumedDate(_ date: Date) -> Date {
@@ -746,25 +723,50 @@ extension LoopAPNSCarbsView {
 
     /// Saved meals: one tap fills in carbs, food type and absorption time. Nothing is sent
     /// until the entry is reviewed and confirmed, exactly as with a typed entry.
+    @ViewBuilder
     private var favoriteFoodsSection: some View {
-        Section(header: Text("Favorite Foods")) {
-            if !favoriteFoods.value.isEmpty {
+        if favoriteFoods.value.isEmpty {
+            Section {
+                NavigationLink {
+                    FavoriteFoodsView()
+                } label: {
+                    Label(String(localized: "Add favorite foods"), systemImage: "star")
+                }
+            }
+        } else {
+            Section(header: Text("Favorite Foods")) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         ForEach(quickPickFavorites) { food in
                             favoriteFoodControl(for: food)
                         }
+                        Button {
+                            showFavoriteFoodPicker = true
+                        } label: {
+                            Text("All", tableName: "MealBolus", comment: "Chip that opens all favorite foods")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(Capsule().fill(Color(.tertiarySystemFill)))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.accentColor)
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 2)
                 }
-
-                Button {
-                    showFavoriteFoodPicker = true
-                } label: {
-                    Label("Browse all favorites", systemImage: "list.bullet")
-                }
+                .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                .listRowBackground(Color.clear)
             }
+            .task {
+                await FavoriteFoodUsage.seedIfNeeded()
+                usageLog = FavoriteFoodUsage.storedLog
+            }
+        }
+    }
 
+    /// Saving what is on screen as a favorite, and editing them, in the top bar.
+    private var favoritesMenu: some View {
+        Menu {
             Button {
                 openFavoriteEditor()
             } label: {
@@ -772,16 +774,16 @@ extension LoopAPNSCarbsView {
             }
             .disabled(carbsAmount.doubleValue(for: .gram()) <= 0)
 
-            NavigationLink {
-                FavoriteFoodsView()
+            Button {
+                showFavoriteFoodPicker = true
             } label: {
-                Label(favoriteFoods.value.isEmpty ? String(localized: "Add favorite foods") : String(localized: "Edit favorites"), systemImage: "square.and.pencil")
+                Label("Browse all favorites", systemImage: "list.bullet")
             }
+            .disabled(favoriteFoods.value.isEmpty)
+        } label: {
+            Image(systemName: "star.circle")
         }
-        .task {
-            await FavoriteFoodUsage.seedIfNeeded()
-            usageLog = FavoriteFoodUsage.storedLog
-        }
+        .accessibilityLabel(Text("Favorite Foods"))
     }
 
     @ViewBuilder
@@ -832,7 +834,8 @@ extension LoopAPNSCarbsView {
         let portion = portion ?? food.defaultPortion
         carbsFieldIsFocused = false
         carbsAmount = HKQuantity(unit: .gram(), doubleValue: portion.carbs)
-        foodType = food.foodType
+        foodEmoji = food.foodType
+        foodName = food.name
         let components = FavoriteFoodAbsorption.components(food.absorptionTime)
         setAbsorptionTime(hours: components.hours, minutes: components.minutes)
         selectedFavoriteFoodID = food.id
@@ -843,7 +846,8 @@ extension LoopAPNSCarbsView {
         selectedFavoriteFoodID = nil
         selectedPortionID = nil
         carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0)
-        foodType = ""
+        foodEmoji = ""
+        foodName = ""
         let components = FavoriteFoodAbsorption.components(FavoriteFoodAbsorption.default)
         setAbsorptionTime(hours: components.hours, minutes: components.minutes)
     }

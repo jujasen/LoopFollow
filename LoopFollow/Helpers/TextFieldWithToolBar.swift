@@ -9,6 +9,8 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     @Binding var quantity: HKQuantity
 
     var textColor: UIColor
+    /// nil keeps the system's body font.
+    var font: UIFont?
     var textAlignment: NSTextAlignment
     var autocapitalizationType: UITextAutocapitalizationType
     var autocorrectionType: UITextAutocorrectionType
@@ -25,6 +27,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     public init(
         quantity: Binding<HKQuantity>,
         textColor: UIColor = .label,
+        font: UIFont? = nil,
         textAlignment: NSTextAlignment = .right,
         autocapitalizationType: UITextAutocapitalizationType = .none,
         autocorrectionType: UITextAutocorrectionType = .no,
@@ -40,6 +43,7 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
     ) {
         _quantity = quantity
         self.textColor = textColor
+        self.font = font
         self.textAlignment = textAlignment
         self.autocapitalizationType = autocapitalizationType
         self.autocorrectionType = autocorrectionType
@@ -104,6 +108,9 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
         }
 
         textField.textColor = textColor
+        if let font, textField.font != font {
+            textField.font = font
+        }
         textField.textAlignment = textAlignment
         textField.keyboardType = unit.preferredFractionDigits == 0 ? .numberPad : .decimalPad
         textField.autocapitalizationType = autocapitalizationType

@@ -1,0 +1,856 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "%@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ E"
+          }
+        }
+      }
+    },
+    "%@ at %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ kl. %2$@"
+          }
+        }
+      }
+    },
+    "%@ g": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ g"
+          }
+        }
+      }
+    },
+    "%@ g ÷ %@; Loop has no fresh recommendation to add.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ g ÷ %2$@; Loop har ingen fersk anbefaling å legge til."
+          }
+        }
+      }
+    },
+    "%@ h": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ t"
+          }
+        }
+      }
+    },
+    "%@ h %@ min": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ t %2$@ min"
+          }
+        }
+      }
+    },
+    "%@ · after %@ seconds": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · etter %2$@ sekunder"
+          }
+        }
+      }
+    },
+    "%@ · put in Nightscout": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · lagt i Nightscout"
+          }
+        }
+      }
+    },
+    "%@%@ g + up to %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@%2$@ g + inntil %3$@"
+          }
+        }
+      }
+    },
+    "(old)": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(gammel)"
+          }
+        }
+      }
+    },
+    "15 minutes earlier": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 minutter tidligere"
+          }
+        }
+      }
+    },
+    "15 minutes later": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 minutter senere"
+          }
+        }
+      }
+    },
+    "Absorption": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opptak"
+          }
+        }
+      }
+    },
+    "Active insulin": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivt insulin"
+          }
+        }
+      }
+    },
+    "Add meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til måltid"
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle"
+          }
+        }
+      }
+    },
+    "Bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolus"
+          }
+        }
+      }
+    },
+    "Bolus given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolus gitt"
+          }
+        }
+      }
+    },
+    "Bolus may have been given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolusen kan være gitt"
+          }
+        }
+      }
+    },
+    "Bolus not given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bolus ikke gitt"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avbryt"
+          }
+        }
+      }
+    },
+    "Carbohydrates": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbohydrater"
+          }
+        }
+      }
+    },
+    "Carbs": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbo"
+          }
+        }
+      }
+    },
+    "Carbs not saved": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbo ikke lagret"
+          }
+        }
+      }
+    },
+    "Carbs saved": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karbo lagret"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lukk"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortsett"
+          }
+        }
+      }
+    },
+    "Deliver bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gi bolus"
+          }
+        }
+      }
+    },
+    "Estimate. Loop works it out again when the meal arrives.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anslag. Loop regner på nytt når måltidet kommer fram."
+          }
+        }
+      }
+    },
+    "Fast": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raskt"
+          }
+        }
+      }
+    },
+    "Food": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matvare"
+          }
+        }
+      }
+    },
+    "Giving the bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gir bolus"
+          }
+        }
+      }
+    },
+    "Glucose": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blodsukker"
+          }
+        }
+      }
+    },
+    "How fast is it absorbed?": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvor fort tas det opp?"
+          }
+        }
+      }
+    },
+    "If someone gives insulin after %@, Loop does not give this bolus, and you are told.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Har noen gitt insulin etter %@, gir ikke Loop denne bolusen, og du får beskjed."
+          }
+        }
+      }
+    },
+    "If someone gives insulin you haven't seen here, Loop does not give this bolus, and you are told.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Har noen gitt insulin du ikke har sett her, gir ikke Loop denne bolusen, og du får beskjed."
+          }
+        }
+      }
+    },
+    "Last bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siste bolus"
+          }
+        }
+      }
+    },
+    "Limited to the maximum bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrenset til maks bolus."
+          }
+        }
+      }
+    },
+    "Loop calculated it at %@, %@ min ago": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop regnet ut kl. %1$@, for %2$@ min siden"
+          }
+        }
+      }
+    },
+    "Loop did not fetch it before %@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop hentet den ikke før %@."
+          }
+        }
+      }
+    },
+    "Loop fetches it on its next run (every 5 min), or at once if the push gets through.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop henter den ved neste runde (hvert 5. min), eller med en gang hvis pushen kommer fram."
+          }
+        }
+      }
+    },
+    "Loop received the command": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop mottok kommandoen"
+          }
+        }
+      }
+    },
+    "Loop saves the carbs and gives %@, the amount you chose. If someone gave insulin you haven't seen here, Loop gives no bolus. You are told when the bolus is given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop lagrer karboen og gir %@, som du valgte selv. Har noen gitt insulin du ikke har sett her, gir Loop ingen bolus. Du får beskjed når bolusen er gitt."
+          }
+        }
+      }
+    },
+    "Loop saves the carbs and never gives more than %@. If insulin has come since, Loop gives less. You are told when the bolus is given.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop lagrer karboen og gir aldri mer enn %@. Har det kommet insulin siden, gir Loop mindre. Du får beskjed når bolusen er gitt."
+          }
+        }
+      }
+    },
+    "Loop's prediction before the meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loops prognose før måltidet"
+          }
+        }
+      }
+    },
+    "Loop's recommendation from %@ plus %@ g ÷ %@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loops anbefaling fra kl. %1$@ pluss %2$@ g ÷ %3$@."
+          }
+        }
+      }
+    },
+    "Meal": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måltid"
+          }
+        }
+      }
+    },
+    "Meal bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måltidsbolus"
+          }
+        }
+      }
+    },
+    "Medium": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middels"
+          }
+        }
+      }
+    },
+    "No bolus needed": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen bolus trengtes"
+          }
+        }
+      }
+    },
+    "No bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen bolus."
+          }
+        }
+      }
+    },
+    "No bolus: Loop worked out %@ with the meal.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen bolus: Loop regnet seg fram til %@ med måltidet."
+          }
+        }
+      }
+    },
+    "No estimate: LoopFollow has no carb ratio from Loop yet. Type the bolus yourself.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke noe anslag: LoopFollow har ikke karbofaktoren fra Loop ennå. Skriv inn bolusen selv."
+          }
+        }
+      }
+    },
+    "No fresh recommendation from Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen fersk anbefaling fra Loop"
+          }
+        }
+      }
+    },
+    "Now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nå"
+          }
+        }
+      }
+    },
+    "Optional": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valgfritt"
+          }
+        }
+      }
+    },
+    "Other time…": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annen tid …"
+          }
+        }
+      }
+    },
+    "Own time: %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egen tid: %@"
+          }
+        }
+      }
+    },
+    "Peak %@ at %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topp %1$@ kl. %2$@"
+          }
+        }
+      }
+    },
+    "Prediction without bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prognose uten bolus"
+          }
+        }
+      }
+    },
+    "Recommended bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anbefalt bolus"
+          }
+        }
+      }
+    },
+    "Save and deliver": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagre og gi bolus"
+          }
+        }
+      }
+    },
+    "Save carbs": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagre karbo"
+          }
+        }
+      }
+    },
+    "Save without bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagre uten bolus"
+          }
+        }
+      }
+    },
+    "Sent": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt"
+          }
+        }
+      }
+    },
+    "Sent to Loop": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt til Loop"
+          }
+        }
+      }
+    },
+    "Slow": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sakte"
+          }
+        }
+      }
+    },
+    "Started %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startet %@"
+          }
+        }
+      }
+    },
+    "The next screen shows what Loop will give as a bolus for this meal. Nothing is sent until you tap «Save and deliver».": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neste skjerm viser hva Loop vil gi i bolus for dette måltidet. Ingenting sendes før du trykker «Lagre og gi bolus»."
+          }
+        }
+      }
+    },
+    "This Loop can't take a meal and its bolus as one command yet, so the carbs are sent on their own. Send the bolus afterwards from Bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne Loop-versjonen kan ikke ta måltid og bolus i én kommando ennå, så karboen sendes alene. Send bolusen etterpå fra Bolus."
+          }
+        }
+      }
+    },
+    "U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E"
+          }
+        }
+      }
+    },
+    "Withdrawn before Loop fetched it.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trukket tilbake før Loop hentet den."
+          }
+        }
+      }
+    },
+    "You approved up to %@. Loop worked out %@.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du godkjente maks %1$@. Loop regnet seg fram til %2$@."
+          }
+        }
+      }
+    },
+    "You can close this. The status is shown on Home, and you get a notification when the bolus is given or if Loop rejects it.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du kan lukke dette. Status vises på Hjem, og du får et varsel når bolusen er gitt eller hvis Loop avviser den."
+          }
+        }
+      }
+    },
+    "absorbed over %@": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "opptak over %@"
+          }
+        }
+      }
+    },
+    "falling": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "synker"
+          }
+        }
+      }
+    },
+    "falling fast": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "synker raskt"
+          }
+        }
+      }
+    },
+    "g": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "g"
+          }
+        }
+      }
+    },
+    "now": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nå"
+          }
+        }
+      }
+    },
+    "ordinary food": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vanlig mat"
+          }
+        }
+      }
+    },
+    "pizza, fat": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pizza, fett"
+          }
+        }
+      }
+    },
+    "rising": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stiger"
+          }
+        }
+      }
+    },
+    "rising fast": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stiger raskt"
+          }
+        }
+      }
+    },
+    "steady": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stabilt"
+          }
+        }
+      }
+    },
+    "sweets, juice": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "godteri, juice"
+          }
+        }
+      }
+    }
+  }
+}
