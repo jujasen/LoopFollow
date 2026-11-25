@@ -110,7 +110,7 @@ final class DoseGuard: ObservableObject {
     static func isOwn(_ dose: LoggedDose, commands: [QueuedRemoteCommand]) -> Bool {
         guard dose.source == .remote else { return false }
         return commands.contains { command in
-            guard let units = command.units, abs(units - dose.units) < 0.026 else { return false }
+            guard command.couldHaveGiven(units: dose.units) else { return false }
             switch command.status {
             case .rejected, .cancelled, .failed:
                 return false

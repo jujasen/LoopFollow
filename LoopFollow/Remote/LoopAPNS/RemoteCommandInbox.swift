@@ -51,9 +51,33 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
     /// Loop gave nothing because of these doses, which someone else gave and this bolus did not
     /// claim to know of (`DoseGuard`).
     var stoppedBy: [LoggedDose]?
+    /// A meal with bolus (`MealBolusCommand`): what was sent and what Loop said became of it.
+    /// `units` is then the most Loop may give.
+    var meal: MealBolusDetails?
+    /// When Loop was first seen to have taken it.
+    var receivedAt: Date?
 
     var id: String { commandId }
     var isBolus: Bool { units != nil }
+
+    /// A bolus of this size could be the one this command gave. A meal bolus can be smaller than
+    /// approved: Loop gives the smaller of its own recommendation and the approved amount.
+    func couldHaveGiven(units bolus: Double) -> Bool {
+        guard let units else { return false }
+        // Pumps round to 0.05 U (some to 0.025).
+        if let meal {
+            if let delivered = meal.deliveredUnits {
+                return delivered > 0 && abs(delivered - bolus) < 0.026
+            }
+            return bolus > 0 && bolus < units + 0.026
+        }
+        return abs(units - bolus) < 0.026
+    }
+
+    /// The carbs are in Loop: sending the meal again would count them twice.
+    var carbsSaved: Bool {
+        meal?.carbsSaved == true || (meal != nil && status == .done)
+    }
 
     /// How long after sending a bolus from here may still turn up in Nightscout: Loop takes a late push
     /// for up to five minutes and uploads on its next run.
@@ -70,10 +94,10 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
 
     /// The decoder tolerates commands saved before `dismissed` and `seenInNightscout` existed.
     enum CodingKeys: String, CodingKey {
-        case commandId, objectId, summary, units, sentAt, expiration, status, statusMessage, handledAt, dismissed, seenInNightscout, stoppedBy
+        case commandId, objectId, summary, units, sentAt, expiration, status, statusMessage, handledAt, dismissed, seenInNightscout, stoppedBy, meal, receivedAt
     }
 
-    init(commandId: String, objectId: String?, summary: String, units: Double?, sentAt: Date, expiration: Date, status: Status, statusMessage: String? = nil, handledAt: Date? = nil, dismissed: Bool = false, seenInNightscout: Date? = nil, stoppedBy: [LoggedDose]? = nil) {
+    init(commandId: String, objectId: String?, summary: String, units: Double?, sentAt: Date, expiration: Date, status: Status, statusMessage: String? = nil, handledAt: Date? = nil, dismissed: Bool = false, seenInNightscout: Date? = nil, stoppedBy: [LoggedDose]? = nil, meal: MealBolusDetails? = nil) {
         self.commandId = commandId
         self.objectId = objectId
         self.summary = summary
@@ -86,6 +110,7 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         self.dismissed = dismissed
         self.seenInNightscout = seenInNightscout
         self.stoppedBy = stoppedBy
+        self.meal = meal
     }
 
     init(from decoder: Decoder) throws {
@@ -102,6 +127,8 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         dismissed = try c.decodeIfPresent(Bool.self, forKey: .dismissed) ?? false
         seenInNightscout = try c.decodeIfPresent(Date.self, forKey: .seenInNightscout)
         stoppedBy = try c.decodeIfPresent([LoggedDose].self, forKey: .stoppedBy)
+        meal = try c.decodeIfPresent(MealBolusDetails.self, forKey: .meal)
+        receivedAt = try c.decodeIfPresent(Date.self, forKey: .receivedAt)
     }
 
     /// Loop's clock and ours may differ a little; wait this long past expiration before calling it lapsed.
@@ -125,10 +152,24 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         case noAnswer
         case pushWaiting
         case pushLapsed
+        /// A meal with bolus: Loop saved the carbs and worked out that no bolus was needed.
+        case savedWithoutBolus
+        /// A meal with bolus: Loop saved the carbs, but the bolus was not given.
+        case carbsSavedBolusFailed
     }
 
     func phase(now: Date) -> Phase {
         if seenInNightscout != nil { return .given }
+        if let meal {
+            switch status {
+            case .done where meal.deliveredUnits == 0:
+                return .savedWithoutBolus
+            case .failed, .rejected:
+                if meal.carbsSaved == true { return .carbsSavedBolusFailed }
+            default:
+                break
+            }
+        }
         switch status {
         case .pending:
             return now > expiration.addingTimeInterval(Self.clockMargin) ? .lapsed : .waiting
@@ -178,14 +219,14 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
     func isVisible(now: Date) -> Bool {
         guard !dismissed else { return false }
         switch phase(now: now) {
-        case .given, .cancelled:
+        case .given, .cancelled, .savedWithoutBolus:
             return now < (handledAt ?? sentAt).addingTimeInterval(20 * 60)
         default:
             return now < sentAt.addingTimeInterval(3 * 60 * 60)
         }
     }
 
-    mutating func apply(treatment: [String: Any]) {
+    mutating func apply(treatment: [String: Any], now: Date = Date()) {
         if let objectId = treatment["_id"] as? String {
             self.objectId = objectId
         }
@@ -200,6 +241,12 @@ struct QueuedRemoteCommand: Codable, Equatable, Identifiable {
         }
         if let handled = treatment["handledAt"] as? String, let date = NightscoutUtils.parseDate(handled) {
             handledAt = date
+        }
+        if receivedAt == nil, status != .pending, status != .cancelled, status != .pushOnly {
+            receivedAt = handledAt ?? now
+        }
+        if meal != nil, let details = treatment["statusDetails"] as? [String: Any] {
+            meal?.apply(statusDetails: details)
         }
         if let details = treatment["statusDetails"] as? [String: Any],
            details["reason"] as? String == DoseGuard.stoppedReason,
@@ -318,7 +365,7 @@ final class RemoteCommandInbox: ObservableObject {
     }
 
     /// Puts the command in Nightscout. Loop carries it out on its next run, or at once if the push gets through.
-    func enqueue(pushPayload: [String: Any], summary: String, units: Double?, now: Date = Date()) async throws -> QueuedRemoteCommand {
+    func enqueue(pushPayload: [String: Any], summary: String, units: Double?, meal: MealBolusDetails? = nil, now: Date = Date()) async throws -> QueuedRemoteCommand {
         guard isAvailable, let secret = Self.secret(fromQRCodeURL: Storage.shared.loopAPNSQrCodeURL.value) else {
             throw InboxError.notAvailable
         }
@@ -334,7 +381,8 @@ final class RemoteCommandInbox: ObservableObject {
             units: units,
             sentAt: now,
             expiration: now.addingTimeInterval(Self.lifetime),
-            status: .pending
+            status: .pending,
+            meal: meal
         )
         await MainActor.run {
             self.add(command)
@@ -456,7 +504,7 @@ final class RemoteCommandInbox: ObservableObject {
                   let index = commands.firstIndex(where: { $0.commandId == commandId })
             else { continue }
             let before = commands[index]
-            commands[index].apply(treatment: treatment)
+            commands[index].apply(treatment: treatment, now: now)
             if commands[index] != before {
                 changed = true
                 if before.phase(now: now) != commands[index].phase(now: now) {
@@ -483,14 +531,13 @@ final class RemoteCommandInbox: ObservableObject {
         var used = Set<Int>()
         var result: [String: Date] = [:]
         for command in commands.filter(\.canBeMatchedToNightscout).sorted(by: { $0.sentAt < $1.sentAt }) {
-            guard let units = command.units else { continue }
+            guard command.units != nil else { continue }
             let from = command.sentAt.addingTimeInterval(-QueuedRemoteCommand.clockMargin)
             let to = command.sentAt.addingTimeInterval(QueuedRemoteCommand.deliveryWindow)
             let candidate = boluses.indices
                 .filter { !used.contains($0) }
                 .filter { boluses[$0].date >= from && boluses[$0].date <= to }
-                // Pumps round to 0.05 U (some to 0.025).
-                .filter { abs(boluses[$0].units - units) < 0.026 }
+                .filter { command.couldHaveGiven(units: boluses[$0].units) }
                 .min { boluses[$0].date < boluses[$1].date }
             if let candidate {
                 used.insert(candidate)
@@ -610,6 +657,14 @@ enum RemoteCommandText {
     static func title(_ command: QueuedRemoteCommand, now: Date) -> String {
         let s = command.summary
         switch command.phase(now: now) {
+        case .given where command.meal?.deliveredUnits != nil:
+            // What Loop gave, which can be less than approved.
+            let meal = command.meal!
+            return String(format: String(localized: "✅ %@ given at %@", table: "RemoteCommandInbox", comment: "1: command, 2: time"), summary(mealCarbs: meal.carbs, units: meal.deliveredUnits ?? meal.approvedUnits), time(command.seenInNightscout ?? command.handledAt ?? now))
+        case .savedWithoutBolus:
+            return String(format: String(localized: "✅ Carbs %@ g saved, no bolus", table: "RemoteCommandInbox", comment: "1: grams"), grams(command.meal?.carbs ?? 0))
+        case .carbsSavedBolusFailed:
+            return String(localized: "⚠️ Carbs saved, bolus not given", table: "RemoteCommandInbox")
         case .waiting:
             return String(format: String(localized: "⏳ %@: waiting for Loop", table: "RemoteCommandInbox", comment: "1: e.g. Bolus 0.5 U"), s)
         case .giving:
@@ -639,6 +694,9 @@ enum RemoteCommandText {
 
     static func detail(_ command: QueuedRemoteCommand, now: Date) -> String {
         let message = command.statusMessage ?? ""
+        if let meal = command.meal, let detail = mealDetail(command, meal: meal, message: message, now: now) {
+            return detail
+        }
         switch command.phase(now: now) {
         case .waiting:
             return String(format: String(localized: "Sent at %@. Loop fetches it on its next run (every 5 min), or at once if the push gets through. It can be given until %@.", table: "RemoteCommandInbox", comment: "1: sent time, 2: expiration time"), time(command.sentAt), time(command.expiration))
@@ -665,13 +723,40 @@ enum RemoteCommandText {
             return String(format: String(localized: "This Loop can't answer, so LoopFollow looks for the bolus in Nightscout. Don't send again before %@.", table: "RemoteCommandInbox", comment: "1: expiration time"), time(command.expiration))
         case .pushLapsed:
             return String(format: String(localized: "Loop could take it until %@, and no bolus of that size has shown up since. Most likely it was not given; check the graph before sending again.", table: "RemoteCommandInbox", comment: "1: expiration time"), time(command.expiration))
+        case .savedWithoutBolus, .carbsSavedBolusFailed:
+            // Only for meals, told in `mealDetail`.
+            return message
+        }
+    }
+
+    /// What is different about a meal with bolus: the carbs may be in Loop even when the bolus is not.
+    private static func mealDetail(_ command: QueuedRemoteCommand, meal: MealBolusDetails, message: String, now: Date) -> String? {
+        switch command.phase(now: now) {
+        case .given:
+            guard let delivered = meal.deliveredUnits, delivered < meal.approvedUnits - 0.001 else { return nil }
+            return String(format: String(localized: "Sent at %@. You approved up to %@ U; Loop worked out %@ U with the meal.", table: "RemoteCommandInbox", comment: "1: sent time, 2: approved units, 3: given units"), time(command.sentAt), units(meal.approvedUnits), units(delivered))
+        case .savedWithoutBolus:
+            if let recommended = meal.recommendedUnits {
+                return String(format: String(localized: "Loop saved the carbs and worked out %@ U with the meal, so it gave no bolus.", table: "RemoteCommandInbox", comment: "1: Loop's recommendation"), units(recommended))
+            }
+            return String(localized: "Loop saved the carbs but gave no bolus.", table: "RemoteCommandInbox")
+        case .carbsSavedBolusFailed:
+            return String(format: String(localized: "Loop saved %@ g but did not give the bolus. Loop said: %@ Don't send the carbs again; give a bolus on its own if one is needed.", table: "RemoteCommandInbox", comment: "1: grams, 2: Loop's message"), grams(meal.carbs), message)
+        case .uncertain:
+            return String(format: String(localized: "The carbs are saved. The pump did not confirm the bolus (%@). Check the pump and the graph before giving more, and don't send the carbs again.", table: "RemoteCommandInbox", comment: "1: Loop's message"), message)
+        case .noAnswer:
+            return String(localized: "The carbs and the bolus may both have been given. Check the graph and the meals before sending anything again.", table: "RemoteCommandInbox")
+        case .failed, .rejected:
+            return String(format: String(localized: "Neither the carbs nor the bolus were saved. Loop said: %@ It is safe to send again.", table: "RemoteCommandInbox", comment: "1: Loop's message"), message)
+        default:
+            return nil
         }
     }
 
     /// Only the answers worth a notification.
     static func notification(_ command: QueuedRemoteCommand, now: Date) -> (title: String, body: String)? {
         switch command.phase(now: now) {
-        case .given, .failed, .rejected, .stopped, .uncertain, .lapsed, .noAnswer:
+        case .given, .failed, .rejected, .stopped, .uncertain, .lapsed, .noAnswer, .savedWithoutBolus, .carbsSavedBolusFailed:
             return (title(command, now: now), detail(command, now: now))
         default:
             return nil
@@ -680,5 +765,18 @@ enum RemoteCommandText {
 
     static func summary(bolusUnits units: Double) -> String {
         String(format: String(localized: "Bolus %@ U", table: "RemoteCommandInbox", comment: "1: units"), Localizer.formatToLocalizedString(units, maxFractionDigits: 2, minFractionDigits: 0))
+    }
+
+    /// «Måltid 45 g + 3,25 E».
+    static func summary(mealCarbs carbs: Double, units: Double) -> String {
+        String(format: String(localized: "Meal %@ g + %@ U", table: "RemoteCommandInbox", comment: "1: grams, 2: units"), grams(carbs), self.units(units))
+    }
+
+    static func grams(_ value: Double) -> String {
+        Localizer.formatToLocalizedString(value, maxFractionDigits: 1, minFractionDigits: 0)
+    }
+
+    static func units(_ value: Double) -> String {
+        Localizer.formatToLocalizedString(value, maxFractionDigits: 2, minFractionDigits: 2)
     }
 }

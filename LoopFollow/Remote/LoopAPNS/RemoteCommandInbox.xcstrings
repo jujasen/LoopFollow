@@ -232,6 +232,56 @@
         }
       }
     },
+    "Loop saved %@ g but did not give the bolus. Loop said: %@ Don't send the carbs again; give a bolus on its own if one is needed.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop lagret %1$@ g, men ga ikke bolusen. Loop sa: %2$@ Ikke send karboen på nytt; gi bolus alene hvis det trengs."
+          }
+        }
+      }
+    },
+    "Loop saved the carbs and worked out %@ U with the meal, so it gave no bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop lagret karboen og regnet seg fram til %@ E med måltidet, så den ga ingen bolus."
+          }
+        }
+      }
+    },
+    "Loop saved the carbs but gave no bolus.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loop lagret karboen, men ga ingen bolus."
+          }
+        }
+      }
+    },
+    "Meal %@ g + %@ U": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måltid %1$@ g + %2$@ E"
+          }
+        }
+      }
+    },
+    "Neither the carbs nor the bolus were saved. Loop said: %@ It is safe to send again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verken karbo eller bolus ble lagret. Loop sa: %@ Det er trygt å sende på nytt."
+          }
+        }
+      }
+    },
     "Nightscout did not take the command: %@": {
       "localizations": {
         "nb": {
@@ -352,6 +402,16 @@
         }
       }
     },
+    "Sent at %@. You approved up to %@ U; Loop worked out %@ U with the meal.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendt kl. %1$@. Du godkjente maks %2$@ E; Loop regnet seg fram til %3$@ E med måltidet."
+          }
+        }
+      }
+    },
     "Settings change": {
       "localizations": {
         "nb": {
@@ -378,6 +438,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bolusen venter på Loop i Nightscout. Loop henter den innen 5 minutter, eller med en gang hvis pushen kommer fram. Kortet på Hjem viser når den er gitt."
+          }
+        }
+      }
+    },
+    "The carbs and the bolus may both have been given. Check the graph and the meals before sending anything again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Både karbo og bolus kan være gitt. Sjekk grafen og måltidene før du sender noe på nytt."
+          }
+        }
+      }
+    },
+    "The carbs are saved. The pump did not confirm the bolus (%@). Check the pump and the graph before giving more, and don't send the carbs again.": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karboen er lagret. Pumpen bekreftet ikke bolusen (%@). Sjekk pumpen og grafen før du gir mer, og ikke send karboen på nytt."
           }
         }
       }
@@ -502,12 +582,32 @@
         }
       }
     },
+    "⚠️ Carbs saved, bolus not given": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ Karbo lagret, bolus ikke gitt"
+          }
+        }
+      }
+    },
     "✅ %@ given at %@": {
       "localizations": {
         "nb": {
           "stringUnit": {
             "state": "translated",
             "value": "✅ %1$@ gitt kl. %2$@"
+          }
+        }
+      }
+    },
+    "✅ Carbs %@ g saved, no bolus": {
+      "localizations": {
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ Karbo %@ g lagret, ingen bolus"
           }
         }
       }

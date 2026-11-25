@@ -493,24 +493,73 @@ class LoopAPNSService {
             return
         }
 
+        let push = PushTarget(deviceToken: deviceToken, bundleIdentifier: bundleIdentifier, keyId: keyId, apnsKey: apnsKey, teamId: teamId)
+        enqueueAndNudge(payload: payload, summary: summary.text, units: summary.units, meal: nil, push: push) { result in
+            switch result {
+            case .success: completion(true, nil)
+            case let .failure(error): completion(false, error.localizedDescription)
+            }
+        }
+    }
+
+    /// Puts the command in Nightscout's inbox, then pushes only its id so Loop looks at once.
+    /// Succeeds once Nightscout has it: Loop fetches it on its next run even if the push is lost.
+    private struct PushTarget {
+        let deviceToken: String
+        let bundleIdentifier: String
+        let keyId: String
+        let apnsKey: String
+        let teamId: String
+    }
+
+    private func enqueueAndNudge(payload: [String: Any], summary: String, units: Double?, meal: MealBolusDetails?, push: PushTarget, completion: @escaping (Result<QueuedRemoteCommand, Error>) -> Void) {
         Task {
             do {
-                let command = try await inbox.enqueue(pushPayload: payload, summary: summary.text, units: summary.units)
+                let command = try await RemoteCommandInbox.shared.enqueue(pushPayload: payload, summary: summary, units: units, meal: meal)
                 var nudge: [String: Any] = ["command-id": command.commandId]
                 if let alert = payload["alert"] {
                     nudge["alert"] = alert
                 }
-                self.postToAPNs(deviceToken: deviceToken, bundleIdentifier: bundleIdentifier, keyId: keyId, apnsKey: apnsKey, teamId: teamId, payload: nudge, expiration: command.expiration, collapseId: "loopfollow-remote-command") { success, message in
+                self.postToAPNs(deviceToken: push.deviceToken, bundleIdentifier: push.bundleIdentifier, keyId: push.keyId, apnsKey: push.apnsKey, teamId: push.teamId, payload: nudge, expiration: command.expiration, collapseId: "loopfollow-remote-command") { success, message in
                     if !success {
                         // Loop still fetches it on its next run.
                         LogManager.shared.log(category: .apns, message: "Push for queued command failed (Loop fetches it anyway): \(message ?? "unknown")")
                     }
-                    completion(true, nil)
+                    completion(.success(command))
                 }
             } catch {
                 LogManager.shared.log(category: .apns, message: "Could not queue remote command in Nightscout: \(error.localizedDescription)")
-                completion(false, error.localizedDescription)
+                completion(.failure(error))
             }
+        }
+    }
+
+    /// Saves a meal and boluses for it in one command (`MealBolusCommand`). Only through the
+    /// Nightscout inbox: Loop answers there, so the caregiver sees whether the carbs, the bolus or
+    /// both arrived. The completion runs on the main queue.
+    func sendMealBolus(_ request: MealBolusRequest, now: Date = Date(), completion: @escaping (Result<QueuedRemoteCommand, Error>) -> Void) {
+        let finish: (Result<QueuedRemoteCommand, Error>) -> Void = { result in
+            DispatchQueue.main.async { completion(result) }
+        }
+        guard validateSetup() else {
+            finish(.failure(LoopAPNSError.invalidConfiguration))
+            return
+        }
+        guard MealBolusCommand.isOffered else {
+            finish(.failure(RemoteCommandInbox.InboxError.notAvailable))
+            return
+        }
+        let payload = MealBolusCommand.payload(request, knownDosesUntil: DoseGuard.shared.knownDosesUntil(now: now), now: now)
+        let details = MealBolusDetails(request: request)
+        LogManager.shared.log(category: .apns, message: "Sending meal with bolus: \(request.carbs) g, up to \(details.approvedUnits) U, follows recommendation: \(request.followsRecommendation)")
+        let creds = effectiveCredentials()
+        let push = PushTarget(deviceToken: Storage.shared.deviceToken.value, bundleIdentifier: Storage.shared.bundleId.value, keyId: creds.keyId, apnsKey: creds.apnsKey, teamId: creds.teamId)
+        enqueueAndNudge(payload: payload, summary: RemoteCommandText.summary(mealCarbs: request.carbs, units: details.approvedUnits), units: details.approvedUnits, meal: details, push: push) { result in
+            if case .success = result {
+                // Counted as a bolus from here at once, so `RecommendedBolus` and the dose guard know of it.
+                QuickPickMealsManager.shared.recordMeal(carbs: request.carbs, bolus: details.approvedUnits, at: now)
+            }
+            finish(result)
         }
     }
 

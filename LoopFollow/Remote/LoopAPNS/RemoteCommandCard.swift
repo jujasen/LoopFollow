@@ -25,11 +25,11 @@ struct RemoteCommandCard: View {
 
     static func background(_ phase: QueuedRemoteCommand.Phase) -> Color {
         switch phase {
-        case .given:
+        case .given, .savedWithoutBolus:
             return Color.green.opacity(0.15)
         case .failed, .rejected, .lapsed, .cancelled, .pushLapsed:
             return Color.secondary.opacity(0.15)
-        case .uncertain, .noAnswer:
+        case .uncertain, .noAnswer, .carbsSavedBolusFailed:
             return Color.orange.opacity(0.25)
         case .stopped:
             return Color.red.opacity(0.25)
