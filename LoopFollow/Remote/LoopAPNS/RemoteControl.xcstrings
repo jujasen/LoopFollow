@@ -1,6 +1,107 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%1$@ · %2$@ left" : {
+      "comment" : "1: override name, 2: time left, e.g. 1 h 20 min",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@ igjen"
+          }
+        }
+      }
+    },
+    "%@ · on until stopped" : {
+      "comment" : "1: override name; an override without an end",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · på til den stoppes"
+          }
+        }
+      }
+    },
+    "Basal, carb ratio, sensitivity, target" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basal, karboratio, sensitivitet, mål"
+          }
+        }
+      }
+    },
+    "Bolus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus"
+          }
+        }
+      }
+    },
+    "Carbs and bolus in one command" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbo og bolus i én kommando"
+          }
+        }
+      }
+    },
+    "Change or delete carbs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endre eller slette karbo"
+          }
+        }
+      }
+    },
+    "Commands go as a push only" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommandoer går bare som push"
+          }
+        }
+      }
+    },
+    "Commands go via Nightscout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommandoer går via Nightscout"
+          }
+        }
+      }
+    },
+    "Correction without carbs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korreksjon uten karbo"
+          }
+        }
+      }
+    },
     "Done at %@" : {
       "comment" : "A command that is not a bolus was carried out; 1: time",
       "extractionState" : "manual",
@@ -37,6 +138,41 @@
         }
       }
     },
+    "Last run %1$@ (%2$@ ago) · %3$@" : {
+      "comment" : "1: time of Loop's last run, 2: how long ago, 3: what happens to commands",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siste runde %1$@ (for %2$@ siden) · %3$@"
+          }
+        }
+      }
+    },
+    "Last run %1$@ · %2$@" : {
+      "comment" : "1: time of Loop's last run, 2: how commands reach Loop",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siste runde %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "Loop is a little late" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop er litt sen"
+          }
+        }
+      }
+    },
     "Loop is giving it now" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,6 +184,28 @@
         }
       }
     },
+    "Loop is not responding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop svarer ikke"
+          }
+        }
+      }
+    },
+    "Loop is responding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop svarer"
+          }
+        }
+      }
+    },
     "Loop started but has not answered" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -55,6 +213,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop startet, men har ikke svart"
+          }
+        }
+      }
+    },
+    "Meal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Måltid"
           }
         }
       }
@@ -81,6 +250,40 @@
         }
       }
     },
+    "No commands in the last 24 hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen kommandoer siste døgn"
+          }
+        }
+      }
+    },
+    "No word from Loop yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen data fra Loop ennå"
+          }
+        }
+      }
+    },
+    "None active" : {
+      "comment" : "Override row when no override is on",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen aktiv"
+          }
+        }
+      }
+    },
     "Not given" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -88,6 +291,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ikke gitt"
+          }
+        }
+      }
+    },
+    "Override" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overstyring"
+          }
+        }
+      }
+    },
+    "Profiles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profiler"
+          }
+        }
+      }
+    },
+    "Recent Commands" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siste kommandoer"
           }
         }
       }
@@ -115,6 +351,18 @@
         }
       }
     },
+    "Remote" : {
+      "comment" : "Title of the remote control screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjernstyring"
+          }
+        }
+      }
+    },
     "Sent as a push" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -133,6 +381,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stoppet: noen andre hadde nettopp gitt en dose"
+          }
+        }
+      }
+    },
+    "Switch Loop's saved profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bytt mellom Loops lagrede profiler"
+          }
+        }
+      }
+    },
+    "Tap a command for Loop's full answer. The one-time code is added automatically and never shown." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trykk på en kommando for å se hele svaret fra Loop. Engangskoden legges ved automatisk og vises aldri."
+          }
+        }
+      }
+    },
+    "Therapy Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terapiinnstillinger"
           }
         }
       }
@@ -166,6 +447,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trukket tilbake"
+          }
+        }
+      }
+    },
+    "a push may wait until Loop is opened" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en push kan bli liggende til Loop åpnes"
+          }
+        }
+      }
+    },
+    "commands go as a push only" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kommandoer går bare som push"
+          }
+        }
+      }
+    },
+    "commands go via Nightscout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kommandoer går via Nightscout"
+          }
+        }
+      }
+    },
+    "commands wait until Loop runs again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kommandoer venter til Loop kjører igjen"
           }
         }
       }

@@ -31,4 +31,30 @@ struct RemoteControlTextTests {
         #expect(RemoteCommandOutcome.needsAttention(.uncertain))
         #expect(!RemoteCommandOutcome.needsAttention(.given))
     }
+
+    @Test("#loopStatus — whether Loop responds and how commands reach it")
+    func loopStatus() {
+        let at = { (date: Date) in date.formatted(date: .omitted, time: .shortened) }
+        let recent = Self.now.addingTimeInterval(-2 * 60)
+        #expect(LoopResponseStatus.title(.fresh) == "Loop is responding")
+        #expect(LoopResponseStatus.title(.stale) == "Loop is not responding")
+        #expect(LoopResponseStatus.detail(lastLoop: recent, now: Self.now, viaNightscout: true)
+            == "Last run \(at(recent)) · commands go via Nightscout")
+        let late = Self.now.addingTimeInterval(-28 * 60)
+        #expect(LoopResponseStatus.detail(lastLoop: late, now: Self.now, viaNightscout: true)
+            == "Last run \(at(late)) (28 min ago) · commands wait until Loop runs again")
+        #expect(LoopResponseStatus.detail(lastLoop: late, now: Self.now, viaNightscout: false)
+            == "Last run \(at(late)) (28 min ago) · a push may wait until Loop is opened")
+        #expect(LoopResponseStatus.detail(lastLoop: nil, now: Self.now, viaNightscout: false) == "Commands go as a push only")
+    }
+
+    @Test("#override — the active override and the time it has left")
+    func overrideSubtitle() {
+        let now = Self.now
+        #expect(OverrideStatusText.subtitle(name: nil, endAt: nil, now: now) == "None active")
+        #expect(OverrideStatusText.subtitle(name: "🧈 Fett og protein", endAt: now.timeIntervalSince1970 + 80 * 60, now: now)
+            == "🧈 Fett og protein · 1 h 20 min left")
+        #expect(OverrideStatusText.subtitle(name: "Syk", endAt: nil, now: now) == "Syk · on until stopped")
+        #expect(OverrideStatusText.subtitle(name: "Syk", endAt: now.timeIntervalSince1970 - 10, now: now) == "Syk")
+    }
 }
