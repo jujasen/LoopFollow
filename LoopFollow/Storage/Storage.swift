@@ -80,6 +80,8 @@ class Storage {
     var appearanceMode = StorageValue<AppearanceMode>(key: "appearanceMode", defaultValue: .dark)
     var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
     /// Show the home screen stats as a Time in Range band instead of the statistics box.
+    /// The old choice between the statistics box and the Time in Range band. Home now has one
+    /// statistics card, so this is no longer read; kept so the stored choice is not lost.
     var showTIRBand = StorageValue<Bool>(key: "showTIRBand", defaultValue: false)
     /// Period both home screen stats (statistics box and Time in Range band) cover:
     /// the last 24 hours, or today since midnight.
@@ -222,6 +224,8 @@ class Storage {
     var telemetryColdLaunchTimes = StorageValue<[Date]>(key: "telemetryColdLaunchTimes", defaultValue: [])
 
     var hideInfoTable = StorageValue<Bool>(key: "hideInfoTable", defaultValue: false)
+    /// Home shows the information table as a card of its own instead of behind a tap on the four numbers.
+    var infoTableOnHome = StorageValue<Bool>(key: "infoTableOnHome", defaultValue: false)
     var token = StorageValue<String>(key: "token", defaultValue: "")
     var units = StorageValue<String>(key: "units", defaultValue: "mg/dL")
     var hasConfiguredUnits = StorageValue<Bool>(key: "hasConfiguredUnits", defaultValue: false)

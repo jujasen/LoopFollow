@@ -3,22 +3,26 @@
 
 import SwiftUI
 
-/// The commands sent from here and what became of them, on the main screen.
+/// The commands sent from here and what became of them, on the main screen:
+/// one compact line each in a single card, until Loop has answered.
 struct RemoteCommandCard: View {
     @ObservedObject private var inbox = RemoteCommandInbox.shared
 
     var body: some View {
         // Redrawn every 15 seconds, so «waiting» turns into «never reached Loop» on time.
         TimelineView(.periodic(from: .now, by: 15)) { context in
-            let commands = inbox.visible(now: context.date)
+            let commands = Array(inbox.visible(now: context.date).prefix(3))
             if !commands.isEmpty {
-                VStack(spacing: 6) {
-                    ForEach(commands.prefix(3)) { command in
-                        RemoteCommandRow(command: command, now: context.date)
-                            .padding(10)
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Self.background(command.phase(now: context.date))))
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(commands.enumerated()), id: \.element.id) { index, command in
+                        if index > 0 {
+                            Divider().padding(.leading, 36)
+                        }
+                        RemoteCommandOutcomeRow(command: command, now: context.date, showsSentTime: false)
                     }
                 }
+                .homeCard(padding: 10)
+                .padding(.bottom, 8)
             }
         }
     }

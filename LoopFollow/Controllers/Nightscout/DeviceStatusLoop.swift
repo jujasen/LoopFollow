@@ -73,6 +73,9 @@ extension MainViewController {
             {
                 Observable.shared.predictionText.value = Localizer.toDisplayUnits(String(Int(round(lastPrediction))))
                 Observable.shared.predictionColor.value = .purple
+                let predictionStart = (predictdata["startDate"] as? String).flatMap(NightscoutUtils.parseDate)
+                    ?? Date(timeIntervalSince1970: lastLoopTime)
+                Observable.shared.loopPrediction.value = LoopPredictionCurve(start: predictionStart, valuesMgdl: prediction)
                 loopPredBGs = prediction
                 loopPredUpdatedTime = lastLoopTime
                 if previousLastLoopTime < lastLoopTime || predictionData.isEmpty {
@@ -103,6 +106,7 @@ extension MainViewController {
                     updatePredictionGraph()
                 }
             } else {
+                Observable.shared.loopPrediction.value = nil
                 loopPredBGs = nil
                 loopPredUpdatedTime = nil
                 predictionData.removeAll()

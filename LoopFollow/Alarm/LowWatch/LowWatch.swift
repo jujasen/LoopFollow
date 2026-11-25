@@ -190,9 +190,11 @@ enum LowWatchText {
     }
 }
 
-/// Loop's open low watch suggestion on the main screen.
+/// Loop's open low watch suggestion on the main screen, as a compact card
+/// like the others on Home. Tap it for who gives the carbs.
 struct LowWatchCard: View {
     @ObservedObject var store = LowWatchStore.shared
+    @State private var expanded = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -201,25 +203,33 @@ struct LowWatchCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(LowWatchText.title(grams: suggestion.grams))
                             .font(.subheadline.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                         if !suggestion.reason.isEmpty {
                             Text(suggestion.reason)
-                                .font(.caption)
+                                .font(.footnote)
+                                .lineLimit(expanded ? nil : 2)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        Text(LowWatchText.hint)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        if expanded {
+                            Text(LowWatchText.hint)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                     Spacer(minLength: 4)
                     Button(LowWatchText.decline) {
                         withAnimation { store.decline(suggestion) }
                     }
                     .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
-                .padding(10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.green.opacity(0.15)))
-                .padding(.horizontal, 8)
+                .homeCard(padding: 10)
+                .overlay(alignment: .leading) { HomeCardAccent(color: HomePalette.carbs) }
+                .contentShape(Rectangle())
+                .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() } }
+                .padding(.bottom, 8)
             }
         }
     }

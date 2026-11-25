@@ -92,5 +92,7 @@ extension MainViewController {
         statsDisplayModel.bandVeryHighPct = percentages.veryHigh
         statsDisplayModel.bandHasData = !values.isEmpty
         statsDisplayModel.bandPeriod = Storage.shared.statsSinceMidnight.value ? "today" : "last 24h"
+        statsDisplayModel.bandSinceMidnight = Storage.shared.statsSinceMidnight.value
+        statsDisplayModel.bandPeriodSeconds = max(0, Date().timeIntervalSince1970 - periodStart)
     }
 }

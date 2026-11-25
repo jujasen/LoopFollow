@@ -25,4 +25,16 @@ class StatsDisplayModel: ObservableObject {
     @Published var bandInRangePct: Double = 0
     @Published var bandHighPct: Double = 0
     @Published var bandVeryHighPct: Double = 0
+    /// How long the band's period is so far (24 h, or the time since midnight).
+    @Published var bandPeriodSeconds: Double = 24 * 3600
+    @Published var bandSinceMidnight: Bool = false
+
+    /// The plain-language summary Home shows.
+    var timeInRangeSummary: TimeInRangeSummary {
+        TimeInRangeSummary(
+            veryLow: bandVeryLowPct, low: bandLowPct, inRange: bandInRangePct,
+            high: bandHighPct, veryHigh: bandVeryHighPct,
+            periodSeconds: bandPeriodSeconds, sinceMidnight: bandSinceMidnight, hasData: bandHasData
+        )
+    }
 }
