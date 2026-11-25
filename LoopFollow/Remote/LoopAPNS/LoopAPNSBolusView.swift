@@ -13,7 +13,6 @@ struct LoopAPNSBolusView: View {
     @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
 
-    @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
     @ObservedObject private var inbox = RemoteCommandInbox.shared
     @ObservedObject private var doseGuard = DoseGuard.shared
     /// The doses from someone else the alert is asking about.
@@ -58,196 +57,116 @@ struct LoopAPNSBolusView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    // Doses someone else gave in the last half hour: on the phone with Loop, by the
-                    // evening watch or from another LoopFollow.
-                    // (The one-second timer below redraws this, so the minutes stay current.)
-                    let elsewhere = doseGuard.fromElsewhere(commands: inbox.commands)
-                    if !elsewhere.isEmpty {
-                        Section(
-                            header: Label(DoseGuardText.sectionTitle, systemImage: "exclamationmark.triangle.fill").foregroundColor(.red),
-                            footer: Text(DoseGuardText.sectionFooter)
-                        ) {
-                            ForEach(elsewhere, id: \.date) { dose in
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(DoseGuardText.sentence(dose))
-                                        .font(.callout.weight(.semibold))
-                                        .foregroundColor(.red)
-                                    Text(DoseGuardText.minutesAgo(dose.date, now: Date()))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                    }
-
-                    // What became of the last bolus sent from here
-                    if let last = inbox.visible().first(where: \.isBolus) {
-                        Section {
-                            RemoteCommandRow(command: last)
-                        }
-                    }
-
-                    // Recommended bolus section
-                    if let recommendedBolus = recommendedBolus, recommendedBolus > 0, let lastLoopTime = lastLoopTime {
-                        let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
-                        let minutesSinceCalculation = Int(timeSinceCalculation / 60)
-
-                        // Only show if calculation is less than 12 minutes old
-                        if minutesSinceCalculation < 12 {
-                            Section(header: Text("Recommended Bolus")) {
-                                Button(action: {
-                                    handleRecommendedBolusTap()
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("\(Localizer.formatToLocalizedString(recommendedBolus, maxFractionDigits: 2, minFractionDigits: 2))U")
-                                                .font(.headline)
-                                                .foregroundColor(.primary)
-                                            Text(minutesSinceCalculation == 1 ? String(localized: "Calculated 1 minute ago") : String(localized: "Calculated \(minutesSinceCalculation) minutes ago"))
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "arrow.up.circle.fill")
-                                            .foregroundColor(.blue)
-                                            .font(.title2)
-                                    }
-                                    .padding(.vertical, 8)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                    }
-
-                    if !quickPickBoluses.quickPickBoluses.isEmpty {
-                        Section(header: QuickPickSectionHeader(title: String(localized: "Quick-Pick Boluses"), infoText: QuickPickSectionHeader.bolusInfoText)) {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(quickPickBoluses.quickPickBoluses) { bolus in
-                                        Button {
-                                            insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: bolus.units)
-                                        } label: {
-                                            Text("\(InsulinFormatter.shared.string(bolus.units))U")
-                                                .font(.subheadline.weight(.medium))
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 8)
-                                                .background(Color.accentColor.opacity(0.15))
-                                                .foregroundColor(.accentColor)
-                                                .cornerRadius(8)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                            }
-                        }
-                    }
-
+            Form {
+                let chart = RemoteDoseContext.chartData()
+                if !chart.prediction.isEmpty {
                     Section {
-                        HKQuantityInputView(
-                            label: String(localized: "Insulin Amount"),
-                            quantity: $insulinAmount,
-                            unit: .internationalUnit(),
-                            maxLength: 5,
-                            minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.025),
-                            maxValue: Storage.shared.maxBolus.value,
-                            isFocused: $insulinFieldIsFocused,
-                            onValidationError: { message in
-                                alertMessage = message
-                                alertType = .error
-                                showAlert = true
-                            }
+                        PredictionMiniChart(
+                            title: String(localized: "Prediction without bolus", table: "MealBolus"),
+                            history: chart.history,
+                            prediction: chart.prediction
                         )
                     }
+                }
 
-                    // Warning section for recommended bolus age
-                    if let recommendedBolus = recommendedBolus, let lastLoopTime = lastLoopTime {
-                        let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
-                        let minutesSinceCalculation = Int(timeSinceCalculation / 60)
+                // Doses someone else gave in the last half hour: on the phone with Loop, by the
+                // evening watch or from another LoopFollow.
+                // (The one-second timer below redraws this, so the minutes stay current.)
+                DosesFromElsewhereSection(doses: doseGuard.fromElsewhere(commands: inbox.commands))
 
-                        // Only show warning if calculation is less than 12 minutes old
-                        if minutesSinceCalculation < 12 {
-                            Section {
-                                let warningColor: Color = minutesSinceCalculation >= 5 ? .red : .yellow
-
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: timeSinceCalculation)) ago.")
-                                        .font(.callout)
-                                        .foregroundColor(warningColor)
-                                        .multilineTextAlignment(.leading)
-                                }
-                            }
-                        }
-                    }
-
-                    // TOTP Blocking Warning Section
-                    if isTOTPBlocked && showTOTPWarning {
-                        Section {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundColor(.orange)
-                                    Text("TOTP Code Already Used")
-                                        .font(.headline)
-                                        .foregroundColor(.orange)
-                                }
-                                Text("This TOTP code has already been used for a command. Please wait for the next code to be generated before sending another command.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                    Section(header: Text("Security")) {
-                        VStack(alignment: .leading) {
-                            Text("Current OTP Code")
-                                .font(.headline)
-                            if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {
-                                HStack {
-                                    Text(otpCode)
-                                        .font(.system(.body, design: .monospaced))
-                                        .foregroundColor(.green)
-                                        .padding(.vertical, 4)
-                                        .padding(.horizontal, 8)
-                                        .background(Color.green.opacity(0.1))
-                                        .cornerRadius(4)
-                                    Text("(" + (otpTimeRemaining.map { String(localized: "\($0)s left", comment: "TOTP seconds remaining") } ?? "-") + ")")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            } else {
-                                Text("Invalid QR code URL")
-                                    .foregroundColor(.red)
-                            }
-                        }
+                // What became of the last bolus sent from here
+                if let last = inbox.visible().first(where: \.isBolus) {
+                    Section {
+                        RemoteCommandRow(command: last)
                     }
                 }
-                .safeAreaInset(edge: .bottom) {
-                    Button(action: sendInsulin) {
-                        if isLoading {
-                            HStack {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                Text("Sending...")
-                            }
-                            .frame(maxWidth: .infinity)
+
+                Section {
+                    DoseInfoRow(title: String(localized: "Glucose", table: "MealBolus")) {
+                        Text(RemoteDoseContext.glucoseText() ?? "–")
+                    }
+                    DoseInfoRow(title: String(localized: "Active insulin", table: "MealBolus")) {
+                        Text(RemoteDoseContext.insulinOnBoard.map(RemoteDoseContext.units) ?? "–")
+                    }
+                    DoseInfoRow(title: String(localized: "Last bolus", table: "MealBolus")) {
+                        if let last = RemoteDoseContext.lastBolus {
+                            Text(String(format: String(localized: "%@ at %@", table: "MealBolus", comment: "1: units, 2: time"), RemoteDoseContext.units(last.units), RemoteDoseContext.time(last.date)))
                         } else {
-                            Text("Send Insulin")
-                                .frame(maxWidth: .infinity)
+                            Text("–")
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(insulinAmount.doubleValue(for: .internationalUnit()) <= 0 || isLoading || isTOTPBlocked)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(.bar)
                 }
-                .navigationTitle("Insulin")
-                .navigationBarTitleDisplayMode(.inline)
+
+                Section {
+                    recommendedBolusRow
+
+                    BigAmountRow(
+                        label: String(localized: "Bolus", table: "MealBolus"),
+                        labelWeight: .semibold,
+                        quantity: $insulinAmount,
+                        unit: .internationalUnit(),
+                        unitText: String(localized: "U", table: "MealBolus", comment: "Insulin unit after the bolus field"),
+                        color: .systemOrange,
+                        maxLength: 5,
+                        minValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.025),
+                        maxValue: Storage.shared.maxBolus.value,
+                        isFocused: $insulinFieldIsFocused,
+                        onValidationError: { message in
+                            alertMessage = message
+                            alertType = .error
+                            showAlert = true
+                        }
+                    )
+                } footer: {
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Warning for the recommended bolus's age
+                        if recommendedBolus != nil, let lastLoopTime {
+                            let timeSinceCalculation = Date().timeIntervalSince1970 - lastLoopTime
+                            let minutesSinceCalculation = Int(timeSinceCalculation / 60)
+                            if minutesSinceCalculation < 12 {
+                                Text("WARNING: New treatments may have occurred since the last recommended bolus was calculated \(presentableMinutesFormat(timeInterval: timeSinceCalculation)) ago.")
+                                    .foregroundColor(minutesSinceCalculation >= 5 ? .red : .orange)
+                            }
+                        }
+                        DoseSafetyNote(text: safetyText)
+                    }
+                    .padding(.top, 6)
+                }
+
+                // TOTP Blocking Warning Section
+                if isTOTPBlocked && showTOTPWarning {
+                    TOTPBlockedSection()
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(action: sendInsulin) {
+                    if isLoading {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Sending...")
+                        }
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        Text("Deliver bolus", tableName: "MealBolus")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(insulinAmount.doubleValue(for: .internationalUnit()) <= 0 || isLoading || isTOTPBlocked)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(.bar)
+            }
+            .navigationTitle(Text("Bolus", tableName: "MealBolus"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel", table: "MealBolus")) {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
             }
 
             .onAppear {
@@ -258,10 +177,6 @@ struct LoopAPNSBolusView: View {
                     alertType = .error
                     showAlert = true
                 }
-
-                let step = Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit())
-                let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
-                quickPickBoluses.refresh(stepIncrement: max(0.001, step), maxBolus: maxBolus)
 
                 // Fresh treatments: a dose someone just gave on the phone with Loop must show here.
                 TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
@@ -378,6 +293,52 @@ struct LoopAPNSBolusView: View {
                 }
             }
         }
+        // Pushed from the remote screen, its bar would sit above this one with a second back button.
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    /// Loop's latest recommendation and how old it is; a tap puts it in the field.
+    @ViewBuilder
+    private var recommendedBolusRow: some View {
+        let fresh: (units: Double, minutes: Int, at: Date)? = {
+            guard let recommendedBolus, recommendedBolus > 0, let lastLoopTime else { return nil }
+            let minutes = Int((Date().timeIntervalSince1970 - lastLoopTime) / 60)
+            // Only offered while less than 12 minutes old
+            guard minutes < 12 else { return nil }
+            return (recommendedBolus, minutes, Date(timeIntervalSince1970: lastLoopTime))
+        }()
+        Button(action: handleRecommendedBolusTap) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Recommended bolus", tableName: "MealBolus")
+                        .foregroundColor(.primary)
+                    Group {
+                        if let fresh {
+                            Text(String(format: String(localized: "Loop calculated it at %@, %@ min ago", table: "MealBolus", comment: "1: time, 2: minutes"), RemoteDoseContext.time(fresh.at), "\(fresh.minutes)"))
+                        } else {
+                            Text("No fresh recommendation from Loop", tableName: "MealBolus")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+                Spacer()
+                Text(fresh.map { RemoteDoseContext.units($0.units) } ?? "–")
+                    .font(.headline)
+                    .foregroundColor(.accentColor)
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(fresh == nil)
+    }
+
+    /// What Loop does if someone else gives insulin before it gets this bolus (`DoseGuard`).
+    private var safetyText: String {
+        let known = doseGuard.knownDosesUntil(commands: inbox.commands)
+        if Date().timeIntervalSince(known) < 6 * 60 * 60 {
+            return String(format: String(localized: "If someone gives insulin after %@, Loop does not give this bolus, and you are told.", table: "MealBolus", comment: "1: time"), RemoteDoseContext.time(known))
+        }
+        return String(localized: "If someone gives insulin you haven't seen here, Loop does not give this bolus, and you are told.", table: "MealBolus")
     }
 
     private func loadRecommendedBolus() {
