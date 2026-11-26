@@ -102,7 +102,8 @@ struct HomeHUDCard: View {
             ? [unit, minAgoText.value].filter { !$0.isEmpty }.joined(separator: " · ")
             : unit
 
-        return VStack(alignment: .center, spacing: 2) {
+        // The big number's line has room under the digits; the age sits up against them.
+        return VStack(alignment: .center, spacing: -3) {
             HStack(alignment: .center, spacing: 10) {
                 Text(snapshot?.bgText ?? bgText.value)
                     .font(.system(size: 84, weight: .black))
@@ -125,7 +126,7 @@ struct HomeHUDCard: View {
                 .minimumScaleFactor(0.5)
             }
             Text(detail)
-                .font(.headline)
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

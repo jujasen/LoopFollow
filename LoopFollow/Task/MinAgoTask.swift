@@ -26,19 +26,10 @@ extension MainViewController {
         let now = Date()
         let secondsAgo = now.timeIntervalSince1970 - bgSeconds
 
-        let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .positional
-        formatter.zeroFormattingBehavior = .dropLeading
-
-        let shouldDisplaySeconds = secondsAgo >= 270 && secondsAgo < 720 // 4.5 to 12 minutes
-
-        if shouldDisplaySeconds {
-            formatter.allowedUnits = [.minute, .second]
-        } else {
-            formatter.allowedUnits = [.minute]
-        }
-
-        let formattedDuration = formatter.string(from: secondsAgo) ?? ""
+        // Julia (26 November 2026): always with seconds, «2:15 min ago», counting every second.
+        let shouldDisplaySeconds = true
+        let wholeSeconds = max(0, Int(secondsAgo))
+        let formattedDuration = "\(wholeSeconds / 60):" + String(format: "%02d", wholeSeconds % 60)
         let minAgoDisplayText = String(localized: "\(formattedDuration) min ago")
 
         // Update UI only if the display text has changed

@@ -206,7 +206,7 @@ struct DeviceStatusStrip: View {
                                        color: snapshot.reservoirLevel.color(normal: podTint))
                             .frame(width: 12, height: 16)
                         Text(text)
-                            .font(.subheadline.weight(.semibold).monospacedDigit())
+                            .font(.footnote.weight(.semibold).monospacedDigit())
                             .foregroundStyle(snapshot.reservoirLevel.color(normal: .primary))
                     }
                 )
@@ -234,10 +234,10 @@ private struct DeviceTile: View {
                     .frame(width: 24, height: 24)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                     Text(remainingText)
-                        .font(.headline.monospacedDigit())
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
                         .foregroundStyle(level == .normal ? Color.primary : barColor)
                 }
                 Spacer(minLength: 2)
