@@ -699,7 +699,7 @@ enum RemoteCommandText {
         }
         switch command.phase(now: now) {
         case .waiting:
-            return String(format: String(localized: "Sent at %@. Loop fetches it on its next run (every 5 min), or at once if the push gets through. It can be given until %@.", table: "RemoteCommandInbox", comment: "1: sent time, 2: expiration time"), time(command.sentAt), time(command.expiration))
+            return String(format: String(localized: "Sent at %@. Loop fetches it on its next run (every 5 min), at once if the push gets through, or as soon as someone opens Loop. It can be given until %@.", table: "RemoteCommandInbox", comment: "1: sent time, 2: expiration time"), time(command.sentAt), time(command.expiration))
         case .giving:
             return String(localized: "Don't send again: this one is being given.", table: "RemoteCommandInbox")
         case .given:

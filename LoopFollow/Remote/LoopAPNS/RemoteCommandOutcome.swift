@@ -159,6 +159,8 @@ struct RemoteCommandOutcomeRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 2)
                 }
+                GiveAnywayButton(command: command, now: now)
+                    .padding(.top, 4)
             }
             Spacer(minLength: 4)
             if showsSentTime {

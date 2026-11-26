@@ -64,6 +64,7 @@ struct MealSentSheet: View {
             }
 
             Section {
+                GiveAnywayButton(command: command, now: now)
                 if command.phase(now: now) == .waiting {
                     Button(role: .destructive) {
                         inbox.cancel(command)

@@ -161,6 +161,66 @@
         }
       }
     },
+    "Give" : {
+      "comment" : "Confirms giving a bolus anyway",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi"
+          }
+        }
+      }
+    },
+    "Give %@ U anyway" : {
+      "comment" : "Button on a bolus or meal Loop did not give; 1: units",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi %@ E likevel"
+          }
+        }
+      }
+    },
+    "Give %@ U anyway?" : {
+      "comment" : "1: units",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi %@ E likevel?"
+          }
+        }
+      }
+    },
+    "Give the rest, %@ U" : {
+      "comment" : "Button on a meal whose bolus Loop cut down; 1: units",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi resten, %@ E"
+          }
+        }
+      }
+    },
+    "Give the rest, %@ U?" : {
+      "comment" : "1: units",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi resten, %@ E?"
+          }
+        }
+      }
+    },
     "Given at %@" : {
       "comment" : "1: time",
       "extractionState" : "manual",
@@ -193,6 +253,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Siste runde %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "Loop gave less than you approved because its own calculation was lower. This gives the rest as a separate bolus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop ga mindre enn du godkjente fordi dens egen beregning var lavere. Dette gir resten som en egen bolus."
+          }
+        }
+      }
+    },
+    "Loop gives it even though it stopped it before. It never gives more than the maximum bolus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop gir den selv om den stoppet den i stad. Den gir aldri mer enn maks bolus."
           }
         }
       }
@@ -237,6 +319,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop svarer"
+          }
+        }
+      }
+    },
+    "Loop saves the meal and gives the bolus you approved, not its own lower suggestion. It never gives more than the maximum bolus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop lagrer måltidet og gir bolusen du godkjente, ikke sitt eget lavere forslag. Den gir aldri mer enn maks bolus."
           }
         }
       }
@@ -342,6 +435,17 @@
         }
       }
     },
+    "Not sent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke sendt"
+          }
+        }
+      }
+    },
     "Nothing saved" : {
       "comment" : "A meal with bolus: neither carbs nor bolus were saved",
       "extractionState" : "manual",
@@ -418,6 +522,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fjernstyring"
+          }
+        }
+      }
+    },
+    "Send %1$@ g and %2$@ U anyway?" : {
+      "comment" : "1: grams, 2: units",
+      "extractionState" : "manual",
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sende %1$@ g og %2$@ E likevel?"
           }
         }
       }

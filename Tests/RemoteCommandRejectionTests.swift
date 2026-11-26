@@ -33,7 +33,8 @@ struct RemoteCommandRejectionTests {
         #expect(rejection.error.hasPrefix("Error: Password sent at 2:13 has expired."))
         #expect(rejection.passwordExpired)
         let delay = try #require(rejection.delay)
-        #expect(delay == 142)
+        // 12:16:17.000 − 12:13:55.324, to the millisecond.
+        #expect(abs(delay - 141.676) < 0.001)
         // The late-push text, not Loop's raw error (the text itself depends on the language).
         #expect(!rejection.body.contains(rejection.error))
     }

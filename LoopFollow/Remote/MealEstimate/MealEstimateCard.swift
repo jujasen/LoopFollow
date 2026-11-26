@@ -382,11 +382,11 @@ struct MealEstimateCard: View {
         .padding(.trailing, 5)
         .frame(minHeight: 40)
         .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color(.systemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(isInputFocused ? AnyShapeStyle(MealEstimateStyle.gradient) : AnyShapeStyle(Color.primary.opacity(0.08)), lineWidth: isInputFocused ? 1.5 : 1)
         )
     }

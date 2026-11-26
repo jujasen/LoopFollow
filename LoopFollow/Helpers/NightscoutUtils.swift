@@ -326,11 +326,13 @@ class NightscoutUtils {
             mutableDate.removeSubrange(offsetRange)
         }
 
-        mutableDate = mutableDate.replacingOccurrences(
-            of: "\\.\\d+",
-            with: "",
-            options: .regularExpression
-        )
+        // The fraction is parsed apart and added back. Dropping it made a dose at 18:37:55.678 read
+        // as 18:37:55, so a bolus that claimed to know of that dose (`DoseGuard`) was stopped by Loop.
+        var fraction: TimeInterval = 0
+        if let range = mutableDate.range(of: "\\.\\d+", options: .regularExpression) {
+            fraction = TimeInterval("0" + mutableDate[range]) ?? 0
+            mutableDate.removeSubrange(range)
+        }
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -341,7 +343,7 @@ class NightscoutUtils {
         if result == nil {
             print("Unable to parse string: '\(mutableDate)'")
         }
-        return result
+        return result?.addingTimeInterval(fraction)
     }
 
     static func retrieveJWTToken() async throws -> String {
